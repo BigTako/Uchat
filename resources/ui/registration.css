@@ -1,0 +1,28 @@
+#sign_up {
+    background: yellow;
+}
+
+#registration_entry {
+    color: aqua;
+}
+
+#sign_up button {
+    color: green;
+}
+
+#reg_label {
+    color: brown;
+}
+
+#sign_up entry {
+    color: rgba(255, 255, 255, 1);
+    background: #1F202C;
+    border: 1px solid #2f3144;
+    border-radius: 4px;
+    outline: 0;
+    text-shadow: none;
+    box-shadow: none;
+    caret-color: rgba(255, 255, 255, 1);
+
+    transition: all 0.3s ease-out;
+}

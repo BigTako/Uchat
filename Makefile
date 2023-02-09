@@ -1,6 +1,8 @@
 NAME	=	uchat
 
-CFLG	=	-std=c11 $(addprefix -W, all extra pedantic) -g -I/usr/include/gtk-2.0 -I/usr/include/atk-1.0 
+CFLG	=	-std=c11 $(addprefix -W, all extra pedantic) -g -Wno-unused-command-line-argument -Wno-unused-variable \
+    -Wno-unused-function -Wno-unused-parameter
+CLIENT_COMPILE_GLOBAL = `pkg-config --cflags gtk+-3.0 pkg-config --libs gtk+-3.0`
 
 SRC_DIR	= src
 INC_DIR	= inc
@@ -19,10 +21,10 @@ all: clean install
 install: $(LMX_A) $(NAME)
 
 $(NAME): $(OBJ_FILES)
-	@clang $(CFLG) `pkg-config --cflags gtk+-2.0` `pkg-config --libs gtk+-2.0` $(OBJ_FILES) -L$(LMX_DIR) -lmx -o $@
+	@clang $(CFLG) $(OBJ_FILES) -L$(LMX_DIR) -lmx -o $@ $(CLIENT_COMPILE_GLOBAL)
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c $(INC_FILES)
-	@clang $(CFLG) `pkg-config --cflags gtk+-2.0` `pkg-config --libs gtk+-2.0` -c $< -o $@ -I$(INC_DIR) -I$(LMX_INC)
+	@clang $(CFLG) -c $< -o $@ -I$(INC_DIR) -I$(LMX_INC) $(CLIENT_COMPILE_GLOBAL)
 
 $(OBJ_FILES): | $(OBJ_DIR)
 
