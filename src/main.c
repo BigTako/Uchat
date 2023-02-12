@@ -1,20 +1,58 @@
 #include "../inc/uchat.h"
-#include <gtk/gtk.h>
 
-static void on_activate (GtkApplication *app) {
-  // Create a new window
-  GtkWidget *window = gtk_application_window_new (app);
-  // Create a new button
-  GtkWidget *button = gtk_button_new_with_label ("Hello, World!");
-  // When the button is clicked, close the window passed as an argument
-  g_signal_connect_swapped (button, "clicked", G_CALLBACK (gtk_window_close), window);
-  gtk_window_set_child (GTK_WINDOW (window), button);
-  gtk_window_present (GTK_WINDOW (window));
-}
+// static GtkWidget*
+// create_window (void)
+// {
+//         /* это виджет окна */
+//         GtkWidget *window;
+//         /* это тот волшебный объект, который сделает за нас окошко */
+//         GtkBuilder *builder;
+//         /* сюда будем складывать ошибки */
+//         GError* error = NULL;
 
-int main(int argc, char **argv) {
-    GtkApplication *app = gtk_application_new ("com.example.GtkApplication",
-                                            G_APPLICATION_FLAGS_NONE);
-    g_signal_connect (app, "activate", G_CALLBACK (on_activate), NULL);
-    return g_application_run (G_APPLICATION (app), argc, argv);
-}
+//         /* тут загружаем файл с интерфейсом */
+//         builder = gtk_builder_new ();
+//         if (!gtk_builder_add_from_file (builder, "test.glade", &error))
+//         {
+//                 /* загрузить файл не удалось */
+//                 g_critical ("Cannot load: %s", error->message);
+//                 g_error_free (error);
+//         }
+
+//         /* помните, мы подключали сигналы вручную? теперь это происходит автоматически! */
+//         gtk_builder_connect_signals (builder, NULL);
+
+//         /* получаем виджет окна, чтобы его показать */
+//         window = GTK_WIDGET(gtk_builder_get_object (builder, "window"));
+//         gtk_builder_connect_signals (builder, NULL);
+//         if (!window)
+//         {
+//                 /* что-то не так, наверное, ошиблись в имени */
+//                 g_critical ("Error getting wrong widget");
+//                 exit(-1);
+//         }
+//         g_object_unref (builder);
+
+//         return window;
+// }
+
+
+
+/* это главная функция нашего приложения, которая будет выполнена первой */
+// int
+// main (int argc, char *argv[])
+// {
+//         /* виджет окна */
+//         GtkWidget *window;
+
+//         /* запускаем GTK+ */
+//         gtk_init (&argc, &argv);
+
+//         /* вызываем нашу функцию для создания окна */
+//         window = create_window ();
+//         gtk_widget_show (window);
+
+//         /* передаём управление GTK+ */
+//         gtk_main ();
+//         return 0;
+// }
