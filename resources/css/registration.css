@@ -88,6 +88,7 @@
     background: #8947e4;
     border: none;
     color: #d0c7fe;
+    box-shadow: none;
 }
 
 #signup button:nth-child(8):active {

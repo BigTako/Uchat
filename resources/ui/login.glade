@@ -31,7 +31,7 @@
               <attribute name="font-desc" value="System-ui 10"/>
               <attribute name="style" value="normal"/>
               <attribute name="weight" value="bold"/>
-              <attribute name="scale" value="2"/>
+              <attribute name="scale" value="3"/>
             </attributes>
           </object>
           <packing>
