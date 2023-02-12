@@ -137,7 +137,7 @@ void create_account(void) {
     {
     case 0:
         //функция для создания аккаунта и входа в чат
-        mx_printstr("created account with data: ");
+        mx_printstr("create account with data: ");
         mx_printstr(username);
         mx_printchar('\t');
         mx_printstr(password);
