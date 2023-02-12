@@ -91,6 +91,8 @@ void log_in(void) {
     const char *username = gtk_entry_get_text(GTK_ENTRY(app->username_entry));
     const char *password = gtk_entry_get_text(GTK_ENTRY(app->password_entry));
 
+
+
     mx_printstr(username);
     mx_printstr("\t");
     mx_printstr(password);
@@ -99,4 +101,9 @@ void log_in(void) {
 
 void create_account(void) {
     mx_printstr("created acc\n");
+}
+
+int check_login_data_for_errors(const char *username, const char *password) {
+    //тут типо проверка на уникальность
+    if (username )
 }
