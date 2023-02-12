@@ -31,7 +31,7 @@
               <attribute name="font-desc" value="System-ui 10"/>
               <attribute name="style" value="normal"/>
               <attribute name="weight" value="bold"/>
-              <attribute name="scale" value="2"/>
+              <attribute name="scale" value="3"/>
             </attributes>
           </object>
           <packing>
@@ -125,7 +125,7 @@
           </packing>
         </child>
         <child>
-          <object class="GtkEntry" id="password_entry1">
+          <object class="GtkEntry" id="confirm_password_entry">
             <property name="name">password_entry1</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
