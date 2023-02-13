@@ -1,6 +1,6 @@
 NAME	=	uchat
 
-CFLG	=	-std=c11 $(addprefix -W, all extra pedantic) -g -lsqlite3
+CFLG	=	-std=c11 $(addprefix -W, all extra pedantic) -g -lsqlite3 -lcrypto -lssl
 
 SRC_DIR	= src
 INC_DIR	= inc

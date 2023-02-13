@@ -1,17 +1,14 @@
 #include "../inc/header.h"
 
-int execute_query(sqlite3 * db, char * query)
+char * execute_query(sqlite3 * db, char * query)
 {
 	char * err = NULL;
 	int rc = sqlite3_exec(db, (const char *)query, NULL, NULL, &err);
 	if (rc != SQLITE_OK)
 	{
-		mx_printerr(err);
-		mx_printerr("\n");
-		free(err);
-		return 1;
+		return err;
 	}
-	return 0;
+	return NULL;
 }
 
 t_list * get_db_data_list(sqlite3 * db, char * selection_query, int cols_count)
@@ -88,5 +85,35 @@ char * format_query(char * template, t_list * values)
 	snprintf(result, 10000, template, values_str);
 	free(values_str);
 	return result;
+}
+
+void clear_inner_list(void * ptr)
+{
+	t_list * list = ptr;
+	if(!list) return;
+	t_list * temp = list;
+	t_list * copy = temp;
+	while (temp)
+	{
+		copy = temp->next;
+		free(temp->data);
+		free(temp);
+		temp = copy;
+	}
+	list = temp;
+}
+
+void delete_table(void **** table)
+{
+	for (int i = 0; (*table)[i]; i++)
+	{
+		for (int j = 0; (*table)[i][j]; j++)
+		{
+			free((*table)[i][j]);
+		}
+		free((*table)[i]);	
+	}
+	free((*table));
+	*table = NULL;
 }
 

@@ -1,5 +1,5 @@
 #include "../inc/libmx.h"
-int mx_strcmp(const char *s1, const char *s2)
+unsigned long mx_strcmp(const unsigned char *s1, const unsigned char *s2)
 { 
 	int i = 0;
 	while (s1[i] != '\0'
