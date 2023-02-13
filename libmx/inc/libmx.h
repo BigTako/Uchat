@@ -60,6 +60,7 @@ int mx_atoi(const char* str, int * err);
 int mx_get_char_index(const char *str, char c);
 void mx_delstr_arr_arr(char *** arr1, char ***arr2, char *** arr3, char *** arr4);
 char * mx_strstr_front(const char *haystack, const char *needle);
+int char_count(char * str, char c);
 
 //LIST PACK
 typedef struct s_list {

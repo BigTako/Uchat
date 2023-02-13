@@ -18,7 +18,7 @@ SRC		= 	mx_count_substr.c mx_count_words.c mx_create_node.c \
 			mx_push_back.c mx_push_front.c mx_replace_substr.c mx_atoi.c mx_delstr_arr_arr.c \
 			mx_sort_list.c mx_sqrt.c mx_str_reverse.c mx_strcat.c mx_strcmp.c mx_strcpy.c mx_strdel.c \
 			mx_strdup.c mx_strjoin.c mx_strlen.c mx_strncmp.c mx_strncpy.c mx_strndup.c mx_strnew.c mx_strstr_front.c \
-			mx_strsplit.c mx_strstr.c mx_strtrim.c mx_swap_char.c mx_printerr.c mx_get_char_index.c list_utils.c
+			mx_strsplit.c mx_strstr.c mx_strtrim.c mx_swap_char.c mx_printerr.c mx_get_char_index.c list_utils.c char_count.c
 
 SRCS	=	$(addprefix $(SRCD)/, $(SRC))
 OBJS	=	$(addprefix $(OBJD)/, $(SRC:%.c=%.o))

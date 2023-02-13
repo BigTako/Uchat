@@ -1,103 +1,4 @@
 #include "../inc/header.h"
-#include <stdarg.h>
-#define QUERY_DELIM '@'
-
-
-typedef unsigned char * code;
-
-int sqlite_execute(sqlite3 * db, char * query)
-{
-	char * db_error = execute_query(db, query);
-	if (db_error)
-	{
-		printf("[ERROR] %s\n", db_error);
-		free(db_error);
-		return 1;
-	}
-	return 0;
-}
-
-char * to_sql_string(char * str)
-{
-	if (!str) return NULL;
-	char * result = mx_strnew(mx_strlen(str) + 2);
-	sprintf(result, "'%s'", str);
-	return result;
-}
-
-code sha256_string(char *string)
-{
-    code hash = malloc(65*sizeof(char));
-    unsigned char out[32];
-    SHA256_CTX sha256;
-    SHA256_Init(&sha256);
-    SHA256_Update(&sha256, string, strlen(string));
-    SHA256_Final(out, &sha256);
-    for (int i = 0; i < SHA256_DIGEST_LENGTH; i++) 
-	{
-        sprintf(hash + (i * 2), "%02x", out[i]);
-    }
-    return hash;
-}
-
-void create_account(sqlite3 * db, char * username, char * password)
-{
-	char query_buf[10000];
-	char * passwd_hash = sha256_string(password);
-	char * sql_str_password = to_sql_string(passwd_hash);
-	char * sql_str_username = to_sql_string(username);
-	sprintf(query_buf, "INSERT INTO %s(username, password) VALUES(%s, %s)", USERS_TN, sql_str_username, sql_str_password);
-	sqlite_execute(db, query_buf);
-	free(passwd_hash);
-	free(sql_str_username);
-	free(sql_str_password);
-}
-
-int login(code db_hash, code input_password)
-{
-	code input_pas_hash = sha256_string(input_password);
-	if (!strcmp(input_pas_hash, db_hash)) // alex hash password and input password hash are the same
-	{
-		free(input_pas_hash);
-		return 0;
-	}
-	else
-	{
-		free(input_pas_hash);
-		return 1;
-	}
-}
-
-int char_count(char * str, char c)
-{
-	int i = 0, count = 0;
-	for (; str[i]; i++)
-	{
-  		count += (str[i] == c);
-	}
-	return count;
-}
-
-code create_network_query(int count, ...)
-{
-	code query = mx_strnew(100000);
-    va_list ptr;
-    // Initializing argument to the
-    // list pointer
-    va_start(ptr, count);
-	char delim = QUERY_DELIM;
-    for (int i = 0; i < count; i++)
-	{
-		query = mx_strcat(query, va_arg(ptr, unsigned char *));
-		if (i != count - 1)
-		{
-			query = mx_strcat(query, "@");
-		}
-	}
-    // Ending argument list traversal
-	va_end(ptr);
-	return query;
-}
 
 void encode(char * code, sqlite3 * db)
 {
@@ -110,6 +11,9 @@ void encode(char * code, sqlite3 * db)
 		S@TEXT@TIME@CONVERSATION_ID - send message
 		C@NAME@USERNAME1@USERNAME2@... - create new chat 
 		F@USERNAME@CONVERSATION_ID - renew chat
+		B@MESSAGE_ID
+		D@MESSAGE_ID
+		E@USERNAME@CONVERSATION_ID
 	*/
 
 	void *** table = NULL;
@@ -122,100 +26,103 @@ void encode(char * code, sqlite3 * db)
 	switch(code_num)
 	{
 		case LOGIN: // loging
-			if (char_count(code, QUERY_DELIM) != 2)
+			if (!validate_query(code, 2, "Loging query is wrong, incorrent delimiter count!\n"))
 			{
-				printf("Loging query is wrong, incorrent delimiter count!\n");
-				mx_del_strarr(&parts);
-				return;
-			}
-			
-			sql_username_str = to_sql_string(parts[1]);
-			sprintf(query_buf, "SELECT password FROM %s WHERE username=%s", USERS_TN, sql_username_str);
-			free(sql_username_str);
+				sql_username_str = to_sql_string(parts[1]);
+				sprintf(query_buf, "SELECT password FROM %s WHERE username=%s", USERS_TN, sql_username_str);
+				free(sql_username_str);
+				table = get_db_data_vector(db, query_buf, 1);
 
-			table = get_db_data_vector(db, query_buf, 1);
-			if (!table || !(*table))
-			{
-				printf("[ERROR] Invalid username or password\n");
-			}
-			else
-			{
-				err = login(table[0][0], parts[2]);
-				if (!err)
+				if (!table || !(*table))
 				{
-					printf("[INFO] correct loging\n");
+					printf("[ERROR] Invalid username or password\n");
 				}
 				else
 				{
-					printf("[ERROR] Invalid username or password\n");		
+					err = login(table[0][0], parts[2]);
+					if (!err)
+					{
+						printf("[INFO] correct loging\n");
+					}
+					else
+					{
+						printf("[ERROR] Invalid username or password\n");		
+					}
 				}
+				delete_table(&table);
 			}
-			delete_table(&table);
 			break;		
 		case SIGNUP:
-			if (char_count(code, QUERY_DELIM) != 2)
+			if (!validate_query(code, 2, "SignUp query is wrong, incorrent delimiter count!\n"))
 			{
-				printf("SignUp query is wrong, incorrent delimiter count!\n");
-				mx_del_strarr(&parts);
-				return;
-			}
-			
-			
-			sql_username_str = to_sql_string(parts[1]);
-			sprintf(query_buf, "SELECT password FROM %s WHERE username=%s", USERS_TN, sql_username_str);
-			free(sql_username_str);
-			table = get_db_data_vector(db, query_buf, 1);
+				sql_username_str = to_sql_string(parts[1]);
+				sprintf(query_buf, "SELECT password FROM %s WHERE username=%s", USERS_TN, sql_username_str);
+				free(sql_username_str);
+				table = get_db_data_vector(db, query_buf, 1);
 
-			if (!table || !(*table))
-			{
-				create_account(db, parts[1], parts[2]);
-				printf("[INFO] Successfuly signed up\n");
+				if (!table || !(*table))
+				{
+					create_account(db, parts[1], parts[2]);
+					printf("[INFO] Successfuly signed up\n");
+				}
+				else
+				{
+					printf("[ERROR] Account with such username is already exists\n");
+				}
+				delete_table(&table);
 			}
-			else
-			{
-				printf("[ERROR] Account with such username is already exists\n");
-			}
-			delete_table(&table);
 			break;
 		case SEND_MESSAGE:
-			if (char_count(code, QUERY_DELIM) != 3)
+			if (!validate_query(code, 3, "Message sending query is wrong, incorrent delimiter count!\n"))
 			{
-				printf("Message sending query is wrong, incorrent delimiter count!\n");
-				mx_del_strarr(&parts);
-				return;
+				//parts[1] -- message text
+				//parts[2] -- sending time
+				//parts[3] -- conversation id
+				//handle a sending message to a specific conversation
 			}
-			//parts[1] -- message text
-			//parts[2] -- sending time
-			//parts[3] -- conversation id
-			//handle a sending message to a specific conversation
 			break;
 		case CREATE_CHAT:
-			if (char_count(code, QUERY_DELIM) != 3)
-			{
-				printf("Message sending query is wrong, incorrent delimiter count!\n");
-				mx_del_strarr(&parts);
-				return;
-			}
 			//parts[1] -- chat name
 			//parts[2] -- username of chat member1
 			//parts[3] -- username of chat member2
 			// ...
 			//parts[n] -- username of chat member (n - 1)
-			//handle a crejating new chat here(add users by ids to group_members table)
-
+			//handle a creating new chat here(add users by ids to group_members table)
 			break;
 		case RENEW_CHAT:
-			if (char_count(code, QUERY_DELIM) != 2)
+			if (!validate_query(code, 2, "Chat renewing query is wrong, incorrent delimiter count!\n"))
 			{
-				printf("Chat renewing query is wrong, incorrent delimiter count!\n");
-				mx_del_strarr(&parts);
-				return;
+				//parts[1] -- username, for which chat have to be renewed
+				//parts[2] -- id of chat 
+				//take all the messages unread from the chat by conversation id
 			}
-
-			//parts[1] -- username, for which chat have to be renewed
-			//parts[2] -- id of chat 
-			//take all the messages unread from the chat by conversation id
 			break;
+		case EDIT_MESSAGE:
+			if (!validate_query(code, 1, "Message edition query is wrong, incorrent delimiter count!\n"))
+			{
+				//parts[1] -- message_id in table messages to be updated content to
+				//send a request to db to UPDATE a content of message WHERE message_id=message_id
+				//then update the whole chat or just edit it in GUI
+			}
+			break;
+		case DELETE_MESSAGE:
+			if (!validate_query(code, 1, "Message deleting query is wrong, incorrent delimiter count!\n"))
+			{
+				//parts[1] -- message_id in table messages to be deleted
+				//send a request to db to DELETE record in table messages with corresponding message_id
+				//then update the whole chat or just delete it in GUI
+			}
+			break;
+		case EXIT_CONVERSATION:
+			if (!validate_query(code, 2, "Conversation exit query is wrong, incorrent delimiter count!\n"))
+			{
+				//parts[1] -- username of person wants to leave a convestion
+				//parts[2] -- id of conversation user want to leave
+				//send a request to database to DELETE a user with username from table group_members WHERE conversation_id=conversation_id
+				//then renew chat list
+			}
+			break;
+		
 	}
 	mx_del_strarr(&parts);
 }

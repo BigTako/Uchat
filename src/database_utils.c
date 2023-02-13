@@ -117,3 +117,22 @@ void delete_table(void **** table)
 	*table = NULL;
 }
 
+int sqlite_execute(sqlite3 * db, char * query)
+{
+	char * db_error = execute_query(db, query);
+	if (db_error)
+	{
+		printf("[ERROR] %s\n", db_error);
+		free(db_error);
+		return 1;
+	}
+	return 0;
+}
+
+char * to_sql_string(char * str)
+{
+	if (!str) return NULL;
+	char * result = mx_strnew(mx_strlen(str) + 2);
+	sprintf(result, "'%s'", str);
+	return result;
+}
