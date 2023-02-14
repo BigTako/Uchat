@@ -56,6 +56,7 @@ void create_account(sqlite3 * db, char * username, char * password);
 int login(code db_hash, code input_password);
 code create_network_query(int count, ...);
 int validate_query(char * code, int delims_count, char * err_message);
+void format_and_execute (sqlite3 * db, char * template, int count, ...);
 #endif
 
 

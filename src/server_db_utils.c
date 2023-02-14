@@ -41,7 +41,7 @@ code create_network_query(int count, ...)
 		query = mx_strcat(query, va_arg(ptr, unsigned char *));
 		if (i != count - 1)
 		{
-			query = mx_strcat(query, "@");
+			query = mx_strcat(query, &delim);
 		}
 	}
     // Ending argument list traversal
@@ -58,4 +58,16 @@ int validate_query(char * code, int delims_count, char * err_message)
 	}
 	return 0;
 }
+
+void format_and_execute (sqlite3 * db, char * template, int count, ...)
+{
+  char query_buf[10000];
+  va_list ptr;
+    va_start(ptr, count);
+  vsprintf(query_buf, template, ptr);
+  sqlite_execute(db, query_buf);
+    // Ending argument list traversal
+  va_end(ptr);
+}
+
 

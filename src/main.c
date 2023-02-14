@@ -122,7 +122,6 @@ void encode(char * code, sqlite3 * db)
 				//then renew chat list
 			}
 			break;
-		
 	}
 	mx_del_strarr(&parts);
 }
@@ -132,18 +131,27 @@ int main()
 	//check input data for signs '=', ';'
 	sqlite3 * db = NULL;
 	sqlite3_open("database.db", &db);
-	char query_buf[10000];
 	char username[10000];
 	char password[10000];
-	int cols_count = 3;
 	char action[2];
 
-	sprintf(query_buf, "CREATE TABLE IF NOT EXISTS %s(user_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, \
-														username TEXT NOT NULL UNIQUE, \
-														password TEXT NOT NULL)", USERS_TN);
-	
-	sqlite_execute(db, query_buf);
-	memset(query_buf, '\0', 10000);
+	format_and_execute(db, "CREATE TABLE IF NOT EXISTS %s(user_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, \
+                            username TEXT NOT NULL UNIQUE, \
+                            password TEXT NOT NULL)", 1, USERS_TN);
+
+	format_and_execute(db, "CREATE TABLE IF NOT EXISTS %s(message_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, \
+                            from_userid INTEGER NOT NULL, \
+                            message_text TEXT NOT NULL, \
+                            send_datetime TEXT NOT NULL, \
+                            conversation_id TEXT NOT NULL, \
+                            status TEXT NOT NULL DEFAULT 'unread')", 1, MESSAGES_TN);
+  
+  	//create table with group_members data
+  	format_and_execute(db, "CREATE TABLE IF NOT EXISTS %s(user_id INTEGER NOT NULL, \
+                            conversation_id TEXT NOT NULL, \
+                            conversation_name TEXT NOT NULL DEFAULT 'group', \
+                            joined_datetime TEXT NOT NULL, \
+                            left_datetime TEXT NOT NULL)", 1, GROUP_MEMBERS_TN);
 
 	printf("Enter action(L - login, R - signup): ");
 	scanf("%s", action);
