@@ -30,6 +30,8 @@ int main(int argc, char ** argv)
                             joined_datetime TEXT NOT NULL, \
                             left_datetime TEXT NOT NULL)", 1, GROUP_MEMBERS_TN);
 
+    format_and_execute(db, "INSERT INTO %s(username, password) VALUES('%s','%s')", 3, USERS_TN, "MAKS", "admin");
+
     /*GENERATION OF RSA KEYS*/
     EVP_PKEY * key = generate_key_pair();
     code privateKeyChar = PRIVKEY_to_str(key);

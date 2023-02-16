@@ -26,12 +26,35 @@ int main(int argc, char ** argv) {
     int cmdEXIT = 0;
     int status_addr;
     
-    t_send_param *param;
+    t_send_param *param = malloc(sizeof(t_send_param*));
     param->cmdEXIT = &cmdEXIT;
     param->socket = clientSocket;
 
-    printf("%d", login(param, "MAKS", "admin"));
+    char username[10000];
+	char password[10000];
+	char action[2];
+    int online = 0;
+
+    do
+    {
+        printf("Enter action(L - login, R - signup): ");
+	    scanf("%s", action);
+	
+	    printf("Enter username and password(space separated): ");
+	    scanf("%s %s", username, password);
+        switch(action[0])
+        {
+            case 'L':
+                online = login(param, username, password);
+                break;
+            case 'R':
+                online = signup(param, username, password);
+        }
+    }while(!online || online < 0);
+
+    
     close(clientSocket);
+    free(param);
     return 0;
 }
 

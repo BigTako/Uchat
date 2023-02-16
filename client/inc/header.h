@@ -19,7 +19,7 @@
 #include "../libraries/openssl/openssl/sha.h"
 #include "../libraries/libmx/inc/libmx.h"
 
-
+typedef unsigned char * code;
 #define QUERY_DELIM '@'
 
 #define LOGIN 'L'
@@ -43,5 +43,6 @@ typedef struct s_send_param
 } t_send_param;
 
 int login(t_send_param *param, char *name, char *password);
+int signup(t_send_param *param, char *name, char *password);
 
 #endif
