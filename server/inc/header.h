@@ -34,6 +34,7 @@
 #define USERS_TN "users"
 #define MESSAGES_TN "messages"
 #define GROUP_MEMBERS_TN "gropMembers"
+#define CONVERSATIONS_TN "conversations"
 #define DB_ROWS_MAX 10000
 
 #define MESSAGE_MAX_LEN 10000
@@ -77,5 +78,5 @@ char *userID_from_name(char *sql_username_str, sqlite3 *db);
 //SERVER UTILS
 void* client_thread(void* vparam);
 char *encode_login(char *code, t_thread_param *param, bool *online);
-void encode(char * code, t_thread_param *param, char *userID);
+void encode(char * code, t_thread_param *param, bool *online, char *userID);
 #endif

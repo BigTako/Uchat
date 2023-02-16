@@ -1,5 +1,14 @@
 #include "../inc/header.h"
 
+/*
+    S@TEXT@CONVERSATION_ID - send message
+	C@NAME@USERNAME1@USERNAME2@... - create new chat 
+	F@USERNAME@CONVERSATION_ID - renew chat
+	B@MESSAGE_ID
+	D@MESSAGE_ID
+	E@USERNAME@CONVERSATION_ID
+*/
+
 code create_network_query(int count, ...)
 {
 	code query = mx_strnew(100000);
@@ -21,37 +30,11 @@ code create_network_query(int count, ...)
 	return query;
 }
 
-int login(t_send_param *param, char *name, char *password) {
-    code r = create_network_query(3, "L", name, password);
-    if (send(param->socket, r, strlen(r) + 4, 0) <= 0) {
-        mx_strdel(&r);
+int send_server_request(t_send_param *param, code query)
+{
+    if (send(param->socket, query, strlen(query) + 1, 0) <= 0) {
         return -1;
     }
-    mx_strdel(&r);
-    char a[1];
-    if (recv(param->socket, a, 1, 0) <= 0) {
-        return -1;
-    }
-    switch (a[0])
-    {
-        case 'Y':
-            return 1;
-        case 'N':
-            return 0;
-        case 'C':
-            return -2;
-        default:
-            return -2;
-    }
-}
-
-int signup(t_send_param *param, char *name, char *password) {
-    code r = create_network_query(3, "R", name, password);
-    if (send(param->socket, r, strlen(r) + 4, 0) <= 0) {
-        mx_strdel(&r);
-        return -1;
-    }
-    mx_strdel(&r);
     char a[1];
     if (recv(param->socket, a, 1, 0) <= 0) {
         return -1;
@@ -69,8 +52,8 @@ int signup(t_send_param *param, char *name, char *password) {
     }
 }
 
-int start_chat()
-{
-    
-}
+
+
+
+
 

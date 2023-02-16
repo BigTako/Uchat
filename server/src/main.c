@@ -27,10 +27,7 @@ int main(int argc, char ** argv)
   	format_and_execute(db, "CREATE TABLE IF NOT EXISTS %s(user_id INTEGER NOT NULL, \
                             conversation_id TEXT NOT NULL, \
                             conversation_name TEXT NOT NULL DEFAULT 'group', \
-                            joined_datetime TEXT NOT NULL, \
-                            left_datetime TEXT NOT NULL)", 1, GROUP_MEMBERS_TN);
-
-    format_and_execute(db, "INSERT INTO %s(username, password) VALUES('%s','%s')", 3, USERS_TN, "MAKS", "admin");
+                            joined_datetime TEXT NOT NULL)", 1, GROUP_MEMBERS_TN);
 
     /*GENERATION OF RSA KEYS*/
     EVP_PKEY * key = generate_key_pair();

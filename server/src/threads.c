@@ -64,8 +64,8 @@ char *encode_login(char *code, t_thread_param *param, bool *online)
 					format_and_execute(param->db, db_query, 3, USERS_TN, parts[1], parts[2]);
 					printf("[INFO] Successfuly signed up\n");
 					userID = userID_from_name(parts[1], param->db);
-					if (send(param->socket, "Y", 1, 0) <= 0) *online = false;
 					*online = true;
+					if (send(param->socket, "Y", 1, 0) <= 0) *online = false;
 				}
 				else
 				{
@@ -82,7 +82,7 @@ char *encode_login(char *code, t_thread_param *param, bool *online)
 	return userID;
 }
 
-void encode(char * code, t_thread_param *param, char *userID)
+void encode(char * code, t_thread_param *param, bool *online, char *userID)
 {
 	if (!code || !param->db) return;
 	
@@ -90,18 +90,18 @@ void encode(char * code, t_thread_param *param, char *userID)
 		<---CODES--->
 		S@TEXT@TIME@CONVERSATION_ID - send message
 		C@NAME@USERNAME1@USERNAME2@... - create new chat 
-		F@USERNAME@CONVERSATION_ID - renew chat
+		F@CONVERSATION_ID - renew chat
 		B@MESSAGE_ID
 		D@MESSAGE_ID
 		E@USERNAME@CONVERSATION_ID
 	*/
 
-	//void *** table = NULL;
-	//char query_buf[1000];
+	void *** table = NULL;
+	char query_buf[1000];
 	char ** parts = mx_strsplit(code, QUERY_DELIM);
 	char code_num = parts[0][0];
 	//int err = 0;
-	//char * db_query = NULL;
+	char * db_query = NULL;
 
 	switch(code_num)
 	{
@@ -112,6 +112,19 @@ void encode(char * code, t_thread_param *param, char *userID)
 				//parts[2] -- sending time
 				//parts[3] -- conversation id
 				//handle a sending message to a specific conversation
+				/* <-MESSAGES->
+					message_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, \
+                    from_userid INTEGER NOT NULL, \
+                    message_text TEXT NOT NULL, \
+                    send_datetime TEXT NOT NULL, \
+                    conversation_id TEXT NOT NULL, \
+                    status TEXT NOT NULL DEFAULT 'unread'
+				*/
+				
+				//S@TEXT@TIME@CONVERSATION_ID
+				db_query = "INSERT INTO %s(from_userid, message_text, send_datetime, conversation_id) VALUES(%s, %s, %s, %s, %s)";
+				format_and_execute(param->db, db_query, MESSAGES_TN, userID, parts[1], parts[2], parts[3]);
+				send(param->socket, "Y", 1, 0);
 			}
 			break;
 		case CREATE_CHAT:
@@ -122,14 +135,12 @@ void encode(char * code, t_thread_param *param, char *userID)
 			//parts[n] -- username of chat member (n - 1)
 			//handle a creating new chat here(add users by ids to group_members table)
 			/*
-				CREATE TABLE IF NOT EXISTS %s(user_id INTEGER NOT NULL, \
-                conversation_id TEXT NOT NULL, \
-                conversation_name TEXT NOT NULL DEFAULT 'group', \
-                joined_datetime TEXT NOT NULL, \
-                left_datetime TEXT NOT NULL)", 1, GROUP_MEMBERS_TN
-			*/
-			//db_query = "INSERT INTO %s(conversation_name,joined_datetime,left_datetime) VALUES('%s','%s','%s')";
-			//format_and_execute(param->db, db_query, GROUP_MEMBERS_TN, parts[1], );
+				conversation_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL
+                name TEXT NOT NULL
+            */
+			//db_query = "INSERT INTO %s(conversation_name) VALUES(%s)";
+			//format_and_execute(param->db, db_query, CONVERSATIONS_TN, parts[1]);
+			send(param->socket, "Y", 1, 0);
 			break;
 		case RENEW_CHAT:
 			if (!validate_query(code, 2, "Chat renewing query is wrong, incorrent delimiter count!\n"))
@@ -147,7 +158,8 @@ void encode(char * code, t_thread_param *param, char *userID)
 				//then update the whole chat or just edit it in GUI
 				if (!validate_query(code, 1, "Message edition query is wrong, incorrent delimiter count!\n"))
 				{
-					format_and_execute(param->db, "UPDATE %s SET message_text='%s' WHERE message_id=%s", MESSAGES_TN, parts[2], parts[1]);
+					db_query = "UPDATE %s SET message_text='%s' WHERE message_id=%s";
+					format_and_execute(param->db, db_query, MESSAGES_TN, parts[2], parts[1]);
 				}
 			}
 			break;
@@ -157,7 +169,8 @@ void encode(char * code, t_thread_param *param, char *userID)
 				//parts[1] -- message_id in table messages to be deleted
 				//send a request to db to DELETE record in table messages with corresponding message_id
 				//then update the whole chat or just delete it in GUI
-				format_and_execute(param->db, "DELETE FROM %s WHERE message_id=%s", MESSAGES_TN, parts[1]);
+				db_query = "DELETE FROM %s WHERE message_id=%s";
+				format_and_execute(param->db, db_query, MESSAGES_TN, parts[1]);
 			}
 			break;
 		case EXIT_CONVERSATION:
@@ -203,7 +216,7 @@ void* client_thread(void* vparam)
             break;
         }
         printf(">>>Got a message from unknow client: %s\n", buffer);
-		encode(buffer, param, userID);
+		encode(buffer, param, &online, userID);
     }
     close(param->socket);
     free(param);

@@ -32,9 +32,9 @@ typedef unsigned char * code;
 #define EXIT_CONVERSATION 'E'
 
 #define DB_ROWS_MAX 10000
-
 #define MESSAGE_MAX_LEN 10000
 #define KEY_LENGHT 4096
+typedef unsigned char * code;
 
 typedef struct s_send_param
 {
@@ -42,7 +42,7 @@ typedef struct s_send_param
     int *cmdEXIT;
 } t_send_param;
 
-int login(t_send_param *param, char *name, char *password);
-int signup(t_send_param *param, char *name, char *password);
+code create_network_query(int count, ...);
+int send_server_request(t_send_param *param, code query);
 
 #endif
