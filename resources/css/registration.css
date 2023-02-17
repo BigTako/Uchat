@@ -19,6 +19,9 @@
 #login entry:focus {
     border: 2px solid #b7a6fb;
     border-radius: 13px;
+    outline-style: none;
+    box-shadow: none;
+    border-color: transparent;
 
 }
 

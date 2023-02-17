@@ -101,13 +101,15 @@ void log_in(void) {
     const char *username = gtk_entry_get_text(GTK_ENTRY(app->username_entry));
     const char *password = gtk_entry_get_text(GTK_ENTRY(app->password_entry));
 
+    app->username_t = username;
+
     int login_error = check_login_data_for_errors(username, password);
 
     switch (login_error)
     {
     case 0:
         //функция для логирования и входа в чат
-        mx_printstr("its okay");
+        open_main_window();
         break;
     case 1:
         open_error_window("Fields cannot be empty.");
@@ -119,6 +121,12 @@ void log_in(void) {
         open_error_window("Login error: Incorrect password or username.");
         break;
     }
+
+    
+
+    //strcpy(app->username, username);
+    //app->username = username;
+    //app->password = password;
 
     // mx_printstr(username);
     // mx_printstr("\t");

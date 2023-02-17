@@ -8,7 +8,7 @@
     <property name="title" translatable="yes">Abyss</property>
     <property name="resizable">False</property>
     <property name="window_position">center</property>
-    <!-- <property name="icon">Downloads/Telegram Desktop/icon3.png</property> -->
+    <property name="icon">../../resources/icons/desktop_icon.png</property>
     <property name="urgency_hint">True</property>
     <child type="titlebar">
       <placeholder/>
