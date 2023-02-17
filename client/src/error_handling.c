@@ -3,15 +3,15 @@
 char *fake_database_username[] = {
     "heisenberg",
     "a",
-    "bruh",
+    "b",
     "xd",
     "qwerty",
 };
 
 char *fake_database_password[] = {
     "123",
-    "qwerty",
-    "bruh",
+    "11",
+    "11",
     "12345abc",
     "xcvb",
 };

@@ -8,6 +8,11 @@
 void open_login_window(void);
 GtkWidget *open_signup_window(void);
 GtkWidget* show_login_form();
+GtkWidget *open_main_window(void);
+void show_settings(void);
+void create_chat();
+void send_message();
+void create_message();
 
 //error handling
 GtkWidget *open_error_window(char *error_message);
@@ -31,8 +36,21 @@ typedef struct app_s
     GtkWidget *error_label;
     GtkWidget *error_button;
 
+    GtkWidget *chat_window;
+    GtkWidget *chats_sidebar;
+    GtkWidget *username_label;
+    GtkWidget *user_icon;
+    GtkWidget *chat_icon;
+    GtkWidget *messages_container;
+    GtkWidget *chat_label_info;
+    GtkWidget *chat_list;
+    GtkWidget *chat_box;
+    GtkWidget *settings_box;
+    GtkWidget *chat_scroller;
+
     char *username;
     char *password;
+    const char *username_t;
 }              app_t;
 
 app_t *app_init();
