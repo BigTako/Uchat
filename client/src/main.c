@@ -1,4 +1,7 @@
 #include "../inc/header.h"
+#include <string.h>
+#include <stdlib.h>
+
 
 int main(int argc, char ** argv) {
     if (argc != 3)
@@ -96,7 +99,7 @@ int main(int argc, char ** argv) {
                 //free(server_query);
                 printf("Enter conversation_id and message(space separated): ");
 	            scanf("%s %[^\n]", conversation_id, message);
-                server_query = create_network_query(3, "S", message, "2023", conversation_id); // have to store a hash password
+                server_query = create_network_query(4, "S", message, mx_itoa((time(NULL))), conversation_id); // have to store a hash password
                 send_server_request(param, server_query);
                 free(server_query);
                 break;

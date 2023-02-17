@@ -11,22 +11,27 @@ int main(int argc, char ** argv)
     sqlite3 * db = NULL;
 	sqlite3_open("database.db", &db);
 	
-    format_and_execute(db, "CREATE TABLE IF NOT EXISTS %s(user_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, \
-                            username TEXT NOT NULL UNIQUE, \
+    format_and_execute(db, "CREATE TABLE IF NOT EXISTS %s(username TEXT NOT NULL UNIQUE, \
                             password TEXT NOT NULL)", 1, USERS_TN);
 
+    //creating table with conversations
+    format_and_execute(db, "CREATE TABLE IF NOT EXISTS %s(\
+                            conversation_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, \
+                            name TEXT NOT NULL)", 1, CONVERSATIONS_TN);
+
     //creating table with messages
-	format_and_execute(db, "CREATE TABLE IF NOT EXISTS %s(message_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, \
-                            from_userid INTEGER NOT NULL, \
+	format_and_execute(db, "CREATE TABLE IF NOT EXISTS %s(\
+                            message_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, \
+                            from_username TEXT NOT NULL, \
                             message_text TEXT NOT NULL, \
-                            send_datetime TEXT NOT NULL, \
+                            send_datetime INTEGER NOT NULL, \
                             conversation_id TEXT NOT NULL, \
                             status TEXT NOT NULL DEFAULT 'unread')", 1, MESSAGES_TN);
   
   	//create table with group_members data
-  	format_and_execute(db, "CREATE TABLE IF NOT EXISTS %s(user_id INTEGER NOT NULL, \
-                            conversation_id TEXT NOT NULL, \
-                            conversation_name TEXT NOT NULL DEFAULT 'group', \
+  	format_and_execute(db, "CREATE TABLE IF NOT EXISTS %s(\
+                            username TEXT NOT NULL, \
+                            conversation_id INTEGER NOT NULL, \
                             joined_datetime TEXT NOT NULL)", 1, GROUP_MEMBERS_TN);
 
     /*GENERATION OF RSA KEYS*/

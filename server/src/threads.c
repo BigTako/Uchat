@@ -16,7 +16,7 @@ char *encode_login(char *code, t_thread_param *param, bool *online)
 	char ** parts = mx_strsplit(code, QUERY_DELIM);
 	char code_num = parts[0][0];
 	int err = 0;
-	char *userID = NULL;
+	char *user = NULL;
 	char * db_query = NULL;
 	
 	switch(code_num)
@@ -37,7 +37,7 @@ char *encode_login(char *code, t_thread_param *param, bool *online)
 					if (!strcmp(table[0][0], parts[2]))
 					{
 						printf("[INFO] correct loging\n");
-						userID = userID_from_name(parts[1],param->db);
+						user = mx_strdup(parts[1]);
 						*online = true;
 						if (send(param->socket, "Y", 1, 0) <= 0) *online = false;
 					}
@@ -63,7 +63,7 @@ char *encode_login(char *code, t_thread_param *param, bool *online)
 					db_query = "INSERT INTO %s(username, password) VALUES('%s', '%s')";
 					format_and_execute(param->db, db_query, 3, USERS_TN, parts[1], parts[2]);
 					printf("[INFO] Successfuly signed up\n");
-					userID = userID_from_name(parts[1], param->db);
+					user = mx_strdup(parts[1]);
 					*online = true;
 					if (send(param->socket, "Y", 1, 0) <= 0) *online = false;
 				}
@@ -79,10 +79,10 @@ char *encode_login(char *code, t_thread_param *param, bool *online)
 			break;
 	}
 	mx_del_strarr(&parts);
-	return userID;
+	return user;
 }
 
-void encode(char * code, t_thread_param *param, bool *online, char *userID)
+void encode(char * code, t_thread_param *param, bool *online, char *user)
 {
 	if (!code || !param->db) return;
 	
@@ -113,17 +113,17 @@ void encode(char * code, t_thread_param *param, bool *online, char *userID)
 				//parts[3] -- conversation id
 				//handle a sending message to a specific conversation
 				/* <-MESSAGES->
-					message_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, \
-                    from_userid INTEGER NOT NULL, \
-                    message_text TEXT NOT NULL, \
-                    send_datetime TEXT NOT NULL, \
-                    conversation_id TEXT NOT NULL, \
-                    status TEXT NOT NULL DEFAULT 'unread'
+				message_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, \
+                            from_username TEXT NOT NULL, \
+                            message_text TEXT NOT NULL, \
+                            send_datetime TEXT NOT NULL, \
+                            conversation_id TEXT NOT NULL, \
+                            status TEXT NOT NULL DEFAULT 'unread')
 				*/
 				
 				//S@TEXT@TIME@CONVERSATION_ID
-				db_query = "INSERT INTO %s(from_userid, message_text, send_datetime, conversation_id) VALUES(%s, %s, %s, %s, %s)";
-				format_and_execute(param->db, db_query, MESSAGES_TN, userID, parts[1], parts[2], parts[3]);
+				db_query = "INSERT INTO %s(from_username, message_text, send_datetime, conversation_id, status) VALUES('%s', '%s', %s, %s, 'unread')";
+				format_and_execute(param->db, db_query, MESSAGES_TN, user, parts[1], parts[2], parts[3]);
 				send(param->socket, "Y", 1, 0);
 			}
 			break;
@@ -135,12 +135,24 @@ void encode(char * code, t_thread_param *param, bool *online, char *userID)
 			//parts[n] -- username of chat member (n - 1)
 			//handle a creating new chat here(add users by ids to group_members table)
 			/*
-				conversation_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL
-                name TEXT NOT NULL
-            */
-			//db_query = "INSERT INTO %s(conversation_name) VALUES(%s)";
-			//format_and_execute(param->db, db_query, CONVERSATIONS_TN, parts[1]);
-			send(param->socket, "Y", 1, 0);
+				CREATE TABLE IF NOT EXISTS %s(username TEXT NOT NULL, \
+                conversation_id TEXT NOT NULL, \
+                joined_datetime TEXT NOT NULL)", 1, GROUP_MEMBERS_TN
+			*/
+			//db_query = "INSERT INTO %s(conversation_name,joined_datetime,left_datetime) VALUES('%s','%s','%s')";
+			//format_and_execute(param->db, db_query, GROUP_MEMBERS_TN, parts[1], );
+			db_query = "INSERT INTO %s(name) VALUES('%s')";
+			format_and_execute(param->db, db_query, 2, CONVERSATIONS_TN, parts[1]);
+			db_query = "SELECT conversation_id FROM %s WHERE conversation_id=(SELECT max(conversation_id) FROM %s)";
+			table = get_db_data_table(param->db, db_query, 1, 2, CONVERSATIONS_TN, CONVERSATIONS_TN);
+			printf("table content %s\n", table[0][0]);
+			char *conversation_id = mx_strdup(table[0][0]);
+			int n = 2;
+			while((parts + 1)[n++] != NULL) {
+				db_query = "INSERT INTO %s(username, conversation_id, joined_datetime) VALUES('%s', %s, '%lu')";
+				format_and_execute(param->db, db_query, 4, GROUP_MEMBERS_TN, parts[n], conversation_id, (unsigned long)time(NULL));
+			}
+			if (send(param->socket, "Y", 1, 0) <= 0) *online = false;
 			break;
 		case RENEW_CHAT:
 			if (!validate_query(code, 2, "Chat renewing query is wrong, incorrent delimiter count!\n"))
@@ -158,8 +170,7 @@ void encode(char * code, t_thread_param *param, bool *online, char *userID)
 				//then update the whole chat or just edit it in GUI
 				if (!validate_query(code, 1, "Message edition query is wrong, incorrent delimiter count!\n"))
 				{
-					db_query = "UPDATE %s SET message_text='%s' WHERE message_id=%s";
-					format_and_execute(param->db, db_query, MESSAGES_TN, parts[2], parts[1]);
+					format_and_execute(param->db, "UPDATE %s SET message_text='%s' WHERE message_id=%s", MESSAGES_TN, parts[2], parts[1]);
 				}
 			}
 			break;
@@ -169,8 +180,7 @@ void encode(char * code, t_thread_param *param, bool *online, char *userID)
 				//parts[1] -- message_id in table messages to be deleted
 				//send a request to db to DELETE record in table messages with corresponding message_id
 				//then update the whole chat or just delete it in GUI
-				db_query = "DELETE FROM %s WHERE message_id=%s";
-				format_and_execute(param->db, db_query, MESSAGES_TN, parts[1]);
+				format_and_execute(param->db, "DELETE FROM %s WHERE message_id=%s", MESSAGES_TN, parts[1]);
 			}
 			break;
 		case EXIT_CONVERSATION:
@@ -193,9 +203,11 @@ void* client_thread(void* vparam)
     printf("---Start-recving-from-new-client---\n");
     bool online = true;
     bool logined = false;
-    char *userID = NULL;
+    char *user = NULL;
     char buffer[MESSAGE_MAX_LEN]; //!!!
-    while (userID == NULL) {
+    while (user == NULL) 
+	{
+		printf("i'm stuck in here\n");
         int status = recv(param->socket, buffer, MESSAGE_MAX_LEN, 0);
         if (status <= 0) {
             online = false;
@@ -203,12 +215,13 @@ void* client_thread(void* vparam)
         }
         printf(">>>Got a message from unknow client: %s\n", buffer);
         if(buffer[0] == LOGIN || buffer[0] == SIGNUP) {
-            userID = encode_login(buffer, param, &online);
+            user = encode_login(buffer, param, &online);
         } else {
             //send that u need to login first
         }
     }
     while (online) {
+		printf("no i'm stuck in here\n");
         int status = recv(param->socket, buffer, MESSAGE_MAX_LEN, 0);
         if (status <= 0) {
             online = false;
@@ -216,10 +229,12 @@ void* client_thread(void* vparam)
             break;
         }
         printf(">>>Got a message from unknow client: %s\n", buffer);
-		encode(buffer, param, &online, userID);
+		encode(buffer, param, &online, user);
     }
     close(param->socket);
     free(param);
     pthread_exit(0);
 }
+
+
 

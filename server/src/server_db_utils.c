@@ -62,10 +62,12 @@ int validate_query(char * code, int delims_count, char * err_message)
 
 void format_and_execute (sqlite3 * db, char * template, int count, ...)
 {
+	printf("in format execute function\n");
   char query_buf[10000];
   va_list ptr;
   va_start(ptr, count);
   vsprintf(query_buf, template, ptr);
+  printf("query: %s\n", query_buf);
   sqlite_execute(db, query_buf);
   // Ending argument list traversal
   va_end(ptr);
