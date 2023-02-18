@@ -1,4 +1,5 @@
 #include "../inc/header.h"
+#define MAX_MESSAGE_ID_QUERY "SELECT max(message_id) FROM %s"
 
 char *encode_login(char *code, t_thread_param *param, bool *online)
 {
@@ -95,13 +96,14 @@ void encode(char * code, t_thread_param *param, bool *online, char *user)
 		D@MESSAGE_ID
 		E@USERNAME@CONVERSATION_ID
 	*/
-
+	printf("Encode code string: %s\n", code);
 	void *** table = NULL;
 	char query_buf[1000];
 	char ** parts = mx_strsplit(code, QUERY_DELIM);
 	char code_num = parts[0][0];
 	//int err = 0;
 	char * db_query = NULL;
+	char * str_timestamp = NULL;
 
 	switch(code_num)
 	{
@@ -122,9 +124,11 @@ void encode(char * code, t_thread_param *param, bool *online, char *user)
 				*/
 				
 				//S@TEXT@TIME@CONVERSATION_ID
-				db_query = "INSERT INTO %s(from_username, message_text, send_datetime, conversation_id, status) VALUES('%s', '%s', %s, %s, 'unread')";
-				format_and_execute(param->db, db_query, MESSAGES_TN, user, parts[1], parts[2], parts[3]);
+				db_query = "INSERT INTO %s(from_username, message_text, send_datetime, conversation_id) VALUES('%s', '%s', %s, %s)";
+				str_timestamp = mx_itoa(time(NULL));
+				format_and_execute(param->db, db_query, 5, MESSAGES_TN, user, parts[1], str_timestamp , parts[3]);
 				send(param->socket, "Y", 1, 0);
+				free(str_timestamp);
 			}
 			break;
 		case CREATE_CHAT:
@@ -139,8 +143,6 @@ void encode(char * code, t_thread_param *param, bool *online, char *user)
                 conversation_id TEXT NOT NULL, \
                 joined_datetime TEXT NOT NULL)", 1, GROUP_MEMBERS_TN
 			*/
-			//db_query = "INSERT INTO %s(conversation_name,joined_datetime,left_datetime) VALUES('%s','%s','%s')";
-			//format_and_execute(param->db, db_query, GROUP_MEMBERS_TN, parts[1], );
 			db_query = "INSERT INTO %s(name) VALUES('%s')";
 			format_and_execute(param->db, db_query, 2, CONVERSATIONS_TN, parts[1]);
 			db_query = "SELECT conversation_id FROM %s WHERE conversation_id=(SELECT max(conversation_id) FROM %s)";
@@ -155,11 +157,35 @@ void encode(char * code, t_thread_param *param, bool *online, char *user)
 			if (send(param->socket, "Y", 1, 0) <= 0) *online = false;
 			break;
 		case RENEW_CHAT:
-			if (!validate_query(code, 2, "Chat renewing query is wrong, incorrent delimiter count!\n"))
+			if (!validate_query(code, 1, "Chat renewing query is wrong, incorrent delimiter count!\n"))
 			{
+				/*F@CONVERSATION_ID - renew chat
+				 	<-MESSAGES->
+					message_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, \
+                    from_username TEXT NOT NULL, \
+                    message_text TEXT NOT NULL, \
+                    send_datetime TEXT NOT NULL, \
+                    conversation_name TEXT NOT NULL, \
+                    status TEXT NOT NULL DEFAULT 'unread')
+				*/
 				//parts[1] -- username, for which chat have to be renewed
-				//parts[2] -- id of chat 
+				//parts[2] --  of chat 
 				//take all the messages unread from the chat by conversation id
+				db_query = "SELECT message_id, from_username, message_text, send_datetime, conversation_name, status(SELECT max(message_id) FROM (SELECT * FROM %s WHERE status == 'unread' AND conversation_id == %s)) AS max_id \
+							FROM %s \
+							WHERE (max_id - %d < 1 AND message_id <= max_id) OR \
+      						(max_id - %d > 1 AND message_id > max_id - %d AND message_id <= max_id)";
+				table = get_db_data_table(param->db, db_query, 4, 6, MESSAGES_TN, parts[1], MESSAGES_TN, LOAD_MESSAGE_COUNT, LOAD_MESSAGE_COUNT, LOAD_MESSAGE_COUNT);
+				for (int i = 0; table[i]; i++)
+				{
+					for (int j = 0; table[j]; j++)
+					{
+						printf("%s-", table[i][j]);
+					}	
+					printf("\n");
+				}
+				printf("Successfully renewed chat\n");
+				send(param->socket, "Y", 1, 0);
 			}
 			break;
 		case EDIT_MESSAGE:
@@ -192,7 +218,6 @@ void encode(char * code, t_thread_param *param, bool *online, char *user)
 				//then renew chat list
 			}
 			break;
-		
 	}
 	mx_del_strarr(&parts);
 }
@@ -207,8 +232,7 @@ void* client_thread(void* vparam)
     char buffer[MESSAGE_MAX_LEN]; //!!!
     while (user == NULL) 
 	{
-		printf("i'm stuck in here\n");
-        int status = recv(param->socket, buffer, MESSAGE_MAX_LEN, 0);
+		int status = recv(param->socket, buffer, MESSAGE_MAX_LEN, 0);
         if (status <= 0) {
             online = false;
             break;
@@ -219,10 +243,10 @@ void* client_thread(void* vparam)
         } else {
             //send that u need to login first
         }
+		memset(buffer, '\0', MESSAGE_MAX_LEN);
     }
     while (online) {
-		printf("no i'm stuck in here\n");
-        int status = recv(param->socket, buffer, MESSAGE_MAX_LEN, 0);
+		int status = recv(param->socket, buffer, MESSAGE_MAX_LEN, 0);
         if (status <= 0) {
             online = false;
             //OFLINE
@@ -230,6 +254,7 @@ void* client_thread(void* vparam)
         }
         printf(">>>Got a message from unknow client: %s\n", buffer);
 		encode(buffer, param, &online, user);
+		memset(buffer, '\0', MESSAGE_MAX_LEN);
     }
     close(param->socket);
     free(param);

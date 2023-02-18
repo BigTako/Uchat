@@ -51,15 +51,16 @@ void *** get_db_data_vector(sqlite3 * db, char * selection_query, int cols_count
 		table[row_indx] = malloc((cols_count+1)*sizeof(void *));
 		for (int i = 0; i < cols_count; i++)
 		{
-			data_type = sqlite3_column_type(stmt, i);
-			if (data_type == SQLITE_INTEGER)
+			//data_type = sqlite3_column_type(stmt, i);
+			table[row_indx][i] = mx_strdup(sqlite3_column_text(stmt, i));
+			/*if (data_type == SQLITE_INTEGER)
 			{
 				table[row_indx][i] = mx_itoa(sqlite3_column_int(stmt, i));
 			}
 			else if (data_type == SQLITE_TEXT)
 			{
 				table[row_indx][i] = mx_strdup(sqlite3_column_text(stmt, i));
-			}
+			}*/
 		}
 		table[row_indx][cols_count] = NULL;
 		row_indx++;

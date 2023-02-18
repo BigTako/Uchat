@@ -70,7 +70,7 @@ int main(int argc, char ** argv) {
         */
         printf("Enter action:\nS - send message\n\
                                C - create new chat\n\
-                               F - renew chat\n\
+                               A - renew chat\n\
                                B - edit message\n\
                                D - delete message\n\
                                E - exit conversation\n\
@@ -99,7 +99,7 @@ int main(int argc, char ** argv) {
                 //free(server_query);
                 printf("Enter conversation_id and message(space separated): ");
 	            scanf("%s %[^\n]", conversation_id, message);
-                server_query = create_network_query(4, "S", message, mx_itoa((time(NULL))), conversation_id); // have to store a hash password
+                server_query = create_network_query(4, action, message, mx_itoa((time(NULL))), conversation_id); // have to store a hash password
                 send_server_request(param, server_query);
                 free(server_query);
                 break;
@@ -107,14 +107,17 @@ int main(int argc, char ** argv) {
                 //C@NAME@USERNAME1@USERNAME2@... - create new chat
                 printf("Enter conversation_name and chat members(%c separated): ", QUERY_DELIM);
 	            scanf("%s %s", chat_name, chat_members);
-                server_query = create_network_query(3, "C", chat_name, chat_members); // have to store a hash password
+                server_query = create_network_query(3, action, chat_name, chat_members); // have to store a hash password
                 send_server_request(param, server_query);
                 free(server_query);
                 break;
             case RENEW_CHAT: //  renew chat
-                /*server_query = create_network_query(3, "R", username, password); // have to store a hash password
+                //F@CONVERSATION_ID
+                printf("Enter conversation ID: ");
+	            scanf("%s", chat_name);
+                server_query = create_network_query(2, action, chat_name); // have to store a hash password
                 send_server_request(param, server_query);
-                free(server_query);*/
+                free(server_query);
                 break;
             case EDIT_MESSAGE:
                 break;

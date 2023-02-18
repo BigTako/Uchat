@@ -25,7 +25,7 @@ int main(int argc, char ** argv)
                             from_username TEXT NOT NULL, \
                             message_text TEXT NOT NULL, \
                             send_datetime INTEGER NOT NULL, \
-                            conversation_id TEXT NOT NULL, \
+                            conversation_id INTEGER NOT NULL, \
                             status TEXT NOT NULL DEFAULT 'unread')", 1, MESSAGES_TN);
   
   	//create table with group_members data
