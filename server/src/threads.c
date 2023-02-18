@@ -1,4 +1,7 @@
 #include "../inc/header.h"
+#include <errno.h>
+#include <poll.h>
+
 #define MAX_MESSAGE_ID_QUERY "SELECT max(message_id) FROM %s"
 
 char *encode_login(char *code, t_thread_param *param, bool *online)
@@ -225,6 +228,7 @@ void encode(char * code, t_thread_param *param, bool *online, char *user)
 void* client_thread(void* vparam) 
 {
     t_thread_param *param = (t_thread_param*) vparam;
+	*param->count_of_threads++;
     printf("---Start-recving-from-new-client---\n");
     bool online = true;
     bool logined = false;
@@ -233,13 +237,22 @@ void* client_thread(void* vparam)
     while (user == NULL) 
 	{
 		int status = recv(param->socket, buffer, MESSAGE_MAX_LEN, 0);
+		while (status == -1 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
+			if(*param->cmdEXIT > 0) {
+				online = false;
+				break;
+			}
+			status = recv(param->socket, buffer, MESSAGE_MAX_LEN, 0);
+		}
         if (status <= 0) {
             online = false;
             break;
         }
         printf(">>>Got a message from unknow client: %s\n", buffer);
         if(buffer[0] == LOGIN || buffer[0] == SIGNUP) {
+			pthread_mutex_lock(param->mutex_R);
             user = encode_login(buffer, param, &online);
+			pthread_mutex_unlock(param->mutex_R);
         } else {
             //send that u need to login first
         }
@@ -247,17 +260,45 @@ void* client_thread(void* vparam)
     }
     while (online) {
 		int status = recv(param->socket, buffer, MESSAGE_MAX_LEN, 0);
+		while (status == -1 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
+			status = recv(param->socket, buffer, MESSAGE_MAX_LEN, 0);
+		}
         if (status <= 0) {
             online = false;
             //OFLINE
             break;
         }
         printf(">>>Got a message from unknow client: %s\n", buffer);
+		pthread_mutex_lock(param->mutex_R);
 		encode(buffer, param, &online, user);
+		pthread_mutex_unlock(param->mutex_R);
 		memset(buffer, '\0', MESSAGE_MAX_LEN);
     }
     close(param->socket);
+	int *count_of_threads = param->count_of_threads;
     free(param);
+	*count_of_threads--;
+    pthread_exit(0);
+}
+
+void* exit_thread(void* vparam) {
+	t_thread_param *param = (t_thread_param*) vparam;
+	*param->count_of_threads++;
+	printf("Print \"exit\" to terminal to exit)\n");
+	struct pollfd mypoll = { STDIN_FILENO, POLLIN|POLLPRI };
+    char string[10];
+	while(1) {
+		if( poll(&mypoll, 1, 10) ) {
+        	scanf(" %[^\n]s", string);
+        	if (mx_strcmp_ic(string, "exit")==0) {
+            	*(param->cmdEXIT) = 1;
+				break;
+        	}
+    	}
+	}
+	int *count_of_threads = param->count_of_threads;
+	free(param);
+	*count_of_threads--;
     pthread_exit(0);
 }
 

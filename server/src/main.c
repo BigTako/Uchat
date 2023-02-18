@@ -1,7 +1,9 @@
 #include "../inc/header.h"
+#include <errno.h>
 
 int main(int argc, char ** argv) 
 {
+    printf("PID %d\n", getpid());
     if (argc != 3)
     {
         printf("Usage: ./userver <server IP> <server port>\n");
@@ -81,11 +83,19 @@ int main(int argc, char ** argv)
     socklen_t addr_size;
 
     welcomeSocket = socket(PF_INET, SOCK_STREAM, 0);
+    if(fcntl(welcomeSocket, F_SETFL, fcntl(welcomeSocket, F_GETFL) | O_NONBLOCK) < 0) {
+        printf("ERROR cant Put welcomeSocket in non-blocking mode\n");
+    }
     serverAddr.sin_family = AF_INET;
     serverAddr.sin_port = htons(atoi(argv[2]));
     serverAddr.sin_addr.s_addr = inet_addr(argv[1]);
     memset(serverAddr.sin_zero, '\0', sizeof serverAddr.sin_zero);
-    bind(welcomeSocket, (struct sockaddr *) &serverAddr, sizeof(serverAddr));
+    int status_ = bind(welcomeSocket, (struct sockaddr *) &serverAddr, sizeof(serverAddr));
+    if(status_ < 0) {
+        printf("ERROR in bind %d\n", errno);
+        printf("====== \n");
+        exit(0);
+    }
 
     if (listen(welcomeSocket,5)==0)
     {
@@ -101,12 +111,38 @@ int main(int argc, char ** argv)
     pthread_mutex_t mutex_R;
 
     int cmdEXIT = 0;
+    int count_of_threads = 0;
+    //creating of exit_thread to correct exit
+    pthread_t e_thread;
+    t_thread_param* param = (t_thread_param*) malloc(sizeof(t_thread_param));
+    param->cmdEXIT = &cmdEXIT;
+    param->count_of_threads = &count_of_threads;
+    int status = pthread_create(&e_thread, NULL, exit_thread, param);
+    if (status != 0) {
+        printf("main error: can't create thread");
+        exit(1);
+    }
+
     while (cmdEXIT == 0) {
         int Client = accept(welcomeSocket, (struct sockaddr *) &serverStorage, &addr_size);
+        while (Client == -1 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
+			if(cmdEXIT > 0) {
+				break;
+			}
+			Client = accept(welcomeSocket, (struct sockaddr *) &serverStorage, &addr_size);
+		}
+        if (Client == -1) {
+            break;
+        }
+        // Put the socket in non-blocking mode:
+        if(fcntl(Client, F_SETFL, fcntl(Client, F_GETFL) | O_NONBLOCK) < 0) {
+            printf("ERROR cant Put the socket in non-blocking mode\n");
+        }
         pthread_t thread;
         t_thread_param* param = (t_thread_param*) malloc(sizeof(t_thread_param));
 
         param->cmdEXIT = &cmdEXIT;
+        param->count_of_threads = &count_of_threads;
         param->socket = Client;
         param->mutex_R = &mutex_R;
         param->db = db;
@@ -124,10 +160,12 @@ int main(int argc, char ** argv)
     //    printf("main error: can't join thread");
     //    exit(1);
     //}
-
+    while(count_of_threads > 0);
     free(privateKeyChar);
     free(publicKeyChar);
     sqlite3_close(db);
+    close(welcomeSocket);
+    printf("bye\n");
     return 0;
 }
 

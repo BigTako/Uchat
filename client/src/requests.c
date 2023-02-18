@@ -1,5 +1,5 @@
 #include "../inc/header.h"
-
+#include <errno.h>
 /*
     S@TEXT@CONVERSATION_ID - send message
 	C@NAME@USERNAME1@USERNAME2@... - create new chat 
@@ -33,6 +33,7 @@ code create_network_query(int count, ...)
 int send_server_request(t_send_param *param, code query)
 {
     if (send(param->socket, query, strlen(query) + 1, 0) <= 0) {
+        perror(errno);
         return -1;
     }
     char a[1];

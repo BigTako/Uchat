@@ -49,6 +49,7 @@ typedef struct s_thread_param
     int socket;
     int *cmdEXIT;
     pthread_mutex_t *mutex_R;
+    int *count_of_threads;
 } t_thread_param;
 
 //DATABASE UTILS
@@ -78,6 +79,7 @@ char *userID_from_name(char *sql_username_str, sqlite3 *db);
 
 //SERVER UTILS
 void* client_thread(void* vparam);
+void* exit_thread(void* vparam);
 char *encode_login(char *code, t_thread_param *param, bool *online);
 void encode(char * code, t_thread_param *param, bool *online, char *userID);
 #endif

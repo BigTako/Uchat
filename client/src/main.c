@@ -1,9 +1,10 @@
 #include "../inc/header.h"
 #include <string.h>
 #include <stdlib.h>
-
+#include <errno.h>
 
 int main(int argc, char ** argv) {
+    printf("PID %d\n", getpid());
     if (argc != 3)
     {
         mx_printerr("Usage: ./uclient <server IP> <server port>\n");
@@ -22,7 +23,12 @@ int main(int argc, char ** argv) {
     memset(serverAddr.sin_zero, '\0', sizeof serverAddr.sin_zero);
     addr_size = sizeof serverAddr;
 
-    connect(clientSocket, (struct sockaddr *) &serverAddr, addr_size);
+    int status = connect(clientSocket, (struct sockaddr *) &serverAddr, addr_size);
+    if (status < 0) {
+        printf("ERROR in connect %d\n", errno);
+        printf("====== \n");
+        exit(0);
+    }
 
     int cmdEXIT = 0;
     int status_addr;
@@ -38,21 +44,33 @@ int main(int argc, char ** argv) {
     char * server_query = NULL;
     do
     {
-        printf("Enter action(L - login, R - signup): ");
+        printf("Enter action(L - login, R - signup, E - exit): ");
 	    scanf("%s", action);
+        if (action[0] == 'E') {
+            cmdEXIT = 1;
+            break;
+        }
 	
 	    printf("Enter username and password(space separated): ");
 	    scanf("%s %s", username, password);
+
         switch(action[0])
         {
             case 'L':
                 server_query = create_network_query(3, "L", username, password); // have to store a hash password
+                printf("Enter action(L - login, R - signup): ");
                 online = send_server_request(param, server_query);
+                if (online < 0) {
+                    perror(errno);
+                }
                 free(server_query);
                 break;
             case 'R':
                 server_query = create_network_query(3, "R", username, password); // have to store a hash password
                 online = send_server_request(param, server_query);
+                if (online < 0) {
+                    perror(errno);
+                }
                 free(server_query);
                 break;
         }
@@ -60,6 +78,9 @@ int main(int argc, char ** argv) {
     
     do
     {
+        if(cmdEXIT > 0) {
+            break;
+        }
         /*
             S@TEXT@CONVERSATION_ID - send message
             C@NAME@USERNAME1@USERNAME2@... - create new chat 
@@ -68,7 +89,7 @@ int main(int argc, char ** argv) {
             D@MESSAGE_ID - delete message
             E@USERNAME@CONVERSATION_ID - exit conversation(delete myself from conversation)
         */
-        printf("Enter action:\nS - send message\n\
+        printf("Enter action(E - exit):\nS - send message\n\
                                C - create new chat\n\
                                A - renew chat\n\
                                B - edit message\n\
@@ -76,6 +97,10 @@ int main(int argc, char ** argv) {
                                E - exit conversation\n\
                                Q - leave app\n");
 	    scanf("%s", action);
+        if (action[0] == 'E') {
+            cmdEXIT = 1;
+            break;
+        }
 
         /*
             #define SEND_MESSAGE 'S'
@@ -128,6 +153,7 @@ int main(int argc, char ** argv) {
         }
     }while(action[0] != 'Q');
 
+    send(clientSocket, "X", 1, 0);
     close(clientSocket);
     free(param);
     return 0;
