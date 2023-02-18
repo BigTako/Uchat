@@ -22,18 +22,18 @@
             <property name="margin_left">10</property>
             <property name="margin_right">10</property>
             <property name="label" translatable="yes">Hello my dude</property>
-            <property name="justify">fill</property>
+            <property name="justify">left</property>
             <property name="wrap">True</property>
             <property name="selectable">True</property>
-            <property name="width_chars">40</property>
-            <property name="max_width_chars">40</property>
+            <property name="width_chars">10</property>
+            <property name="max_width_chars">10</property>
             <attributes>
               <attribute name="weight" value="book"/>
             </attributes>
           </object>
           <packing>
             <property name="expand">False</property>
-            <property name="fill">True</property>
+            <property name="fill">False</property>
             <property name="position">0</property>
           </packing>
         </child>
