@@ -70,13 +70,17 @@ GtkWidget *open_main_window(void) {
 void send_message() {
     // create_chat();
     const char *message = mx_strtrim(gtk_entry_get_text(GTK_ENTRY(app->chat_entry)));
-    create_message(message);
-    gtk_entry_set_text(GTK_ENTRY(app->chat_entry), "");
+    if (strlen(gtk_entry_get_text(GTK_ENTRY(app->chat_entry))) != 0) {
+        create_message(message);
+        gtk_entry_set_text(GTK_ENTRY(app->chat_entry), "");
+    }
 }
 
 bool change = true;
 
 void create_message(const char *m) {
+    //if (m == NULL) mx_printstr("hollow");
+
     GtkWidget *message, *icon, *username, *text, *datetime, *sticker;
     GtkBuilder *builder = gtk_builder_new ();
     GError* error = NULL;
@@ -84,7 +88,7 @@ void create_message(const char *m) {
     char *timestr = NULL;
     char *title = NULL;
 
-    if (!gtk_builder_add_from_file (builder, "../resources/ui/message_from_me.glade", &error)) {
+    if (!gtk_builder_add_from_file (builder, "../resources/ui/message_from_other.glade", &error)) {
         g_critical ("Couldn't load file: %s", window_path);
     }
 
