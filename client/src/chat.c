@@ -50,6 +50,8 @@ GtkWidget *open_main_window(void) {
 
     app->chat_scroller = GTK_WIDGET(gtk_builder_get_object(ui_builder, "chat_scroller"));
     gtk_widget_set_name(GTK_WIDGET(app->chat_scroller), "chat_scroller");
+
+    app->chat_entry = GTK_WIDGET(gtk_builder_get_object(ui_builder, "new_message_entry"));
     //mx_printstr(app->username_t);
     gtk_label_set_text(GTK_LABEL(app->username_label), app->username_t);
     //gtk_label_set_text(GTK_LABEL(app->chat_label_info), " ");
@@ -66,13 +68,15 @@ GtkWidget *open_main_window(void) {
 }
 
 void send_message() {
-    create_chat();
-    create_message();
+    // create_chat();
+    const char *message = mx_strtrim(gtk_entry_get_text(GTK_ENTRY(app->chat_entry)));
+    create_message(message);
+    gtk_entry_set_text(GTK_ENTRY(app->chat_entry), "");
 }
 
 bool change = true;
 
-void create_message() {
+void create_message(const char *m) {
     GtkWidget *message, *icon, *username, *text, *datetime, *sticker;
     GtkBuilder *builder = gtk_builder_new ();
     GError* error = NULL;
@@ -80,7 +84,11 @@ void create_message() {
     char *timestr = NULL;
     char *title = NULL;
 
-    if (change) {
+    if (!gtk_builder_add_from_file (builder, "../resources/ui/message_from_me.glade", &error)) {
+        g_critical ("Couldn't load file: %s", window_path);
+    }
+
+    /*if (change) {
         if (!gtk_builder_add_from_file (builder, "../resources/ui/message_from_me.glade", &error)) {
             g_critical ("Couldn't load file: %s", window_path);
         }
@@ -93,7 +101,7 @@ void create_message() {
         }
         change = true;
         mx_printint(change); 
-    }
+    }*/
 
     message = GTK_WIDGET (gtk_builder_get_object (builder, "message"));
     if (!message) {
@@ -109,7 +117,7 @@ void create_message() {
     // timestr[strlen(timestr) - 1] = '\0';
 
     if(username != NULL) gtk_label_set_text(GTK_LABEL(username), title);
-    gtk_label_set_text(GTK_LABEL(text), "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras massa risus, consectetur a lobortis ac, ullamcorper sed neque. Sed posuere elit sit amet lobortis vestibulum. Nam sed massa aliquam, bibendum arcu vitae, placerat nisl. Ut consectetur ligula nulla, a mattis ipsum rutrum in. Curabitur non cursus tellus. Praesent laoreet nisi sit amet lacus fringilla euismod. Integer et turpis vel augue tincidunt feugiat. Quisque vel nisi et lacus ornare vehicula ac vel ex. Donec egestas erat velit, vel mattis orci dapibus eu.");
+    gtk_label_set_text(GTK_LABEL(text), m);
     gtk_label_set_text(GTK_LABEL(datetime), "16:35");
     gtk_image_set_from_file(GTK_IMAGE(icon), icon_path);
 
