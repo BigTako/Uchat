@@ -119,6 +119,8 @@ int main(int argc, char ** argv) {
         char chat_name[1000];
         char chat_members[10000];
         char message_id[1000];
+        char query_buff[MESSAGE_MAX_LEN];
+        int num_of_messages;
 
         switch(action[0])
         {
@@ -146,7 +148,25 @@ int main(int argc, char ** argv) {
                 printf("Enter conversation ID: ");
 	            scanf("%s", chat_name);
                 server_query = create_query_delim_separated(2, action, chat_name); // have to store a hash password
-                send_server_request(param, server_query);
+                if (send(param->socket, server_query, strlen(server_query) + 1, 0) <= 0) online = false;
+                if (recv(param->socket, query_buff, MESSAGE_MAX_LEN, 0) <= 0) online = false;
+                printf("Recived: %s\n", query_buff);
+                if (query_buff[0] != 'W') printf("RECIVED ABOBA\n"); // recived something wrong there are error in clients code!
+                num_of_messages = atoi(query_buff + 2);
+                printf("Recived: %d\n", num_of_messages);
+                if (online == true) {
+                    if (send(param->socket, "Y", 1, 0) <= 0) online = false;
+                }
+                for (int a = 0; a < num_of_messages; a++) {
+                    if (online) {
+                        memset(query_buff, '\0', MESSAGE_MAX_LEN);
+                        if (recv(param->socket, query_buff, MESSAGE_MAX_LEN, 0) <= 0) online = false;
+                        if (online) {
+                            printf("%s\n", query_buff);
+                            if (send(param->socket, "Y", 1, 0) <= 0) online = false;
+                        }
+                    }
+                }
                 free(server_query);
                 break;
             case EDIT_MESSAGE:

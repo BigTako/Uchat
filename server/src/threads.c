@@ -2,7 +2,7 @@
 #include <errno.h>
 #include <poll.h>
 
-int null_str_arr_len(char ** arr)
+int null_str_arr_len(void ** arr)
 {
 	int i = 0;
 	for (; arr[i]; i++);
@@ -101,15 +101,17 @@ void encode(char * code, t_thread_param *param, bool *online, char *user)
 		<---CODES--->
 		S@TEXT@TIME@CONVERSATION_ID - send message
 		C@NAME@USERNAME1@USERNAME2@... - create new chat 
-		F@CONVERSATION_ID - renew chat
+		A@CONVERSATION_ID - renew chat
 		B@MESSAGE_ID
 		D@MESSAGE_ID
 		E@CONVERSATION_ID
+		X
 	*/
 	printf("Encode code string: %s\n", code);
 	void ** table = NULL;
 	char ** parts = mx_strsplit(code, QUERY_DELIM[0]);
 	char code_num = parts[0][0];
+	char query_buff[MESSAGE_MAX_LEN];
 	char * db_query = NULL;
 	char * str_timestamp = NULL;
 	char * new_members_str = NULL;
@@ -137,7 +139,7 @@ void encode(char * code, t_thread_param *param, bool *online, char *user)
 			}
 			break;
 		case CREATE_CHAT: //C@NAME@USERNAME1@USERNAME2@... - create new chat 
-			if (char_count(code, QUERY_DELIM[0]) < 2)
+			if (true) //!!!!!!!!!!!!!!!!!!!!!!!!!
 			{
 				members_int = null_str_arr_len(parts + 2) + 1;
 				//members_str = mx_strjoin(user, code + strlen(parts[0]) + strlen(parts[1]) + 2); // join entered members with username
@@ -175,17 +177,49 @@ void encode(char * code, t_thread_param *param, bool *online, char *user)
 			{
 				db_query = "SELECT * FROM %s WHERE conversation_id=%s ORDER BY message_id DESC";
 				table = get_db_data_table(param->db, db_query, 6, LOAD_MESSAGES_COUNT, 2, MESSAGES_TN, parts[1]);
-				for (int i = 0; table[i]; i++)
-				{
-					printf("Data: %s\n", table[i]);
-					//mx_del_strarr(&responce);
+				sprintf(query_buff, "%s%s%d", WAIT_FOR_CODE, QUERY_DELIM, null_str_arr_len(table));
+				if (send(param->socket, query_buff, strlen(query_buff) + 1, 0) <= 0) *online = false;
+				printf("Send: %s\n", query_buff);
+				memset(query_buff, '\0', MESSAGE_MAX_LEN);
+				if (*online == true) {
+					int status = recv(param->socket, query_buff, MESSAGE_MAX_LEN, 0);
+					while (status == -1 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
+						if(*param->cmdEXIT > 0) {
+							*online = false;
+							break;
+						}
+						status = recv(param->socket, query_buff, MESSAGE_MAX_LEN, 0);
+					}
+					if (status <= 0) *online = false;
+					printf("Recv: %s\n", query_buff);
+				}
+				if (query_buff[0] != 'Y') printf("RECIVED ABOBA\n"); // recived something wrong there are error in clients code!
+				for (int i = 0; table[i]; i++) {
+					memset(query_buff, '\0', MESSAGE_MAX_LEN);
+					if (*online == true) {
+						sprintf(query_buff, "%s%s%s", MESSAGE_CODE, QUERY_DELIM, table[i]);
+						if (send(param->socket, query_buff, strlen(query_buff) + 1, 0) <= 0) *online = false;
+						printf("Send: %s\n", query_buff);
+						memset(query_buff, '\0', MESSAGE_MAX_LEN);
+						if (*online == true) {
+							int status = recv(param->socket, query_buff, MESSAGE_MAX_LEN, 0);
+							while (status == -1 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
+								if(*param->cmdEXIT > 0) {
+									*online = false;
+									break;
+								}
+								status = recv(param->socket, query_buff, MESSAGE_MAX_LEN, 0);
+							}
+							if (status <= 0) *online = false;
+							printf("Recv: %s\n", query_buff);
+						}
+					}
 				}
 				delete_table(&table);
-				send(param->socket, "Y", 1, 0);
 			}
 			else
 			{
-				send(param->socket, "N", 1, 0);
+				printf("RECIVED ABOBA\n"); // recived something wrong there are error in clients code!
 			}
 			break;
 		case EDIT_MESSAGE:

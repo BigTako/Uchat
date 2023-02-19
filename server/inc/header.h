@@ -20,13 +20,17 @@
 //#include <poll.h>
 
 #define QUERY_DELIM "@"
-#define LOAD_MESSAGES_COUNT 3
+#define LOAD_MESSAGES_COUNT 20
 
 #define LOGIN 'L'
 #define SIGNUP 'R'
 #define SEND_MESSAGE 'S'
 #define CREATE_CHAT 'C'
+
 #define RENEW_CHAT 'A'
+#define WAIT_FOR_CODE "W"
+#define MESSAGE_CODE "M"
+
 #define EDIT_MESSAGE 'B'
 #define DELETE_MESSAGE 'D'
 #define EXIT_CONVERSATION 'E'
