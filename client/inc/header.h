@@ -42,7 +42,7 @@ typedef struct s_send_param
     int *cmdEXIT;
 } t_send_param;
 
-code create_network_query(int count, ...);
+code create_query_delim_separated(int count, ...);
 int send_server_request(t_send_param *param, code query);
 
 #endif

@@ -44,9 +44,9 @@ int main(int argc, char ** argv) {
     char * server_query = NULL;
     do
     {
-        printf("Enter action(L - login, R - signup, E - exit): ");
+        printf("Enter action(L - login, R - signup, Q - exit): ");
 	    scanf("%s", action);
-        if (action[0] == 'E') {
+        if (action[0] == 'Q') {
             cmdEXIT = 1;
             break;
         }
@@ -57,7 +57,7 @@ int main(int argc, char ** argv) {
         switch(action[0])
         {
             case 'L':
-                server_query = create_network_query(3, "L", username, password); // have to store a hash password
+                server_query = create_query_delim_separated(3, "L", username, password); // have to store a hash password
                 printf("Enter action(L - login, R - signup): ");
                 online = send_server_request(param, server_query);
                 if (online < 0) {
@@ -66,7 +66,7 @@ int main(int argc, char ** argv) {
                 free(server_query);
                 break;
             case 'R':
-                server_query = create_network_query(3, "R", username, password); // have to store a hash password
+                server_query = create_query_delim_separated(3, "R", username, password); // have to store a hash password
                 online = send_server_request(param, server_query);
                 if (online < 0) {
                     perror(errno);
@@ -87,17 +87,19 @@ int main(int argc, char ** argv) {
             F@USERNAME@CONVERSATION_ID - renew chat
             B@MESSAGE_ID - exit message
             D@MESSAGE_ID - delete message
-            E@USERNAME@CONVERSATION_ID - exit conversation(delete myself from conversation)
+            E@CONVERSATION_ID - exit conversation(delete myself from conversation)
         */
-        printf("Enter action(E - exit):\nS - send message\n\
-                               C - create new chat\n\
-                               A - renew chat\n\
-                               B - edit message\n\
-                               D - delete message\n\
-                               E - exit conversation\n\
-                               Q - leave app\n");
+        printf("S - send message\n\
+                C - create new chat\n\
+                A - renew chat\n\
+                B - edit message\n\
+                D - delete message\n\
+                E - exit conversation\n\
+                Q - leave app\n\
+                Enter action: ");
+
 	    scanf("%s", action);
-        if (action[0] == 'E') {
+        if (action[0] == 'Q') {
             cmdEXIT = 1;
             break;
         }
@@ -114,17 +116,18 @@ int main(int argc, char ** argv) {
         char conversation_id[1000];
         char chat_name[1000];
         char chat_members[10000];
-                
+        char message_id[1000];
+
         switch(action[0])
         {
             case SEND_MESSAGE: 
                 //S@TEXT@TIME@CONVERSATION_ID    
-                //server_query = create_network_query(3, "L", username, password); // have to store a hash password
+                //server_query = create_query_delim_separated(3, "L", username, password); // have to store a hash password
                 //send_server_request(param, server_query);
                 //free(server_query);
                 printf("Enter conversation_id and message(space separated): ");
 	            scanf("%s %[^\n]", conversation_id, message);
-                server_query = create_network_query(4, action, message, mx_itoa((time(NULL))), conversation_id); // have to store a hash password
+                server_query = create_query_delim_separated(4, action, message, mx_itoa((time(NULL))), conversation_id); // have to store a hash password
                 send_server_request(param, server_query);
                 free(server_query);
                 break;
@@ -132,7 +135,7 @@ int main(int argc, char ** argv) {
                 //C@NAME@USERNAME1@USERNAME2@... - create new chat
                 printf("Enter conversation_name and chat members(%c separated): ", QUERY_DELIM);
 	            scanf("%s %s", chat_name, chat_members);
-                server_query = create_network_query(3, action, chat_name, chat_members); // have to store a hash password
+                server_query = create_query_delim_separated(3, action, chat_name, chat_members); // have to store a hash password
                 send_server_request(param, server_query);
                 free(server_query);
                 break;
@@ -140,16 +143,31 @@ int main(int argc, char ** argv) {
                 //F@CONVERSATION_ID
                 printf("Enter conversation ID: ");
 	            scanf("%s", chat_name);
-                server_query = create_network_query(2, action, chat_name); // have to store a hash password
+                server_query = create_query_delim_separated(2, action, chat_name); // have to store a hash password
                 send_server_request(param, server_query);
                 free(server_query);
                 break;
             case EDIT_MESSAGE:
+                printf("Enter message ID and new content: ");
+	            scanf("%s %[^\n]", message_id, message);
+                server_query = create_query_delim_separated(3, action, message_id, message); // have to store a hash password
+                send_server_request(param, server_query);
+                free(server_query);
                 break;
             case DELETE_MESSAGE:
+                printf("Enter message ID: ");
+	            scanf("%s", message_id);
+                server_query = create_query_delim_separated(2, action, message_id); // have to store a hash password
+                send_server_request(param, server_query);
+                free(server_query);
                 break;
             case EXIT_CONVERSATION:
-                break; 
+                printf("Enter conversation ID: ");
+	            scanf("%s", conversation_id);
+                server_query = create_query_delim_separated(2, action, conversation_id); // have to store a hash password
+                send_server_request(param, server_query);
+                free(server_query);
+                break;
         }
     }while(action[0] != 'Q');
 

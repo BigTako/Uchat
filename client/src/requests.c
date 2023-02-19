@@ -9,7 +9,7 @@
 	E@USERNAME@CONVERSATION_ID
 */
 
-code create_network_query(int count, ...)
+code create_query_delim_separated(int count, ...)
 {
 	code query = mx_strnew(100000);
     va_list ptr;
