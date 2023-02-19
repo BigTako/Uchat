@@ -88,11 +88,11 @@ void create_message(const char *m) {
     char *timestr = NULL;
     char *title = NULL;
 
-    if (!gtk_builder_add_from_file (builder, "../resources/ui/message_from_other.glade", &error)) {
-        g_critical ("Couldn't load file: %s", window_path);
-    }
+    // if (!gtk_builder_add_from_file (builder, "../resources/ui/message_from_other.glade", &error)) {
+    //     g_critical ("Couldn't load file: %s", window_path);
+    // }
 
-    /*if (change) {
+    if (change) {
         if (!gtk_builder_add_from_file (builder, "../resources/ui/message_from_me.glade", &error)) {
             g_critical ("Couldn't load file: %s", window_path);
         }
@@ -105,7 +105,7 @@ void create_message(const char *m) {
         }
         change = true;
         mx_printint(change); 
-    }*/
+    }
 
     message = GTK_WIDGET (gtk_builder_get_object (builder, "message"));
     if (!message) {
@@ -120,13 +120,15 @@ void create_message(const char *m) {
     // timestr = ctime(&mes.datetime);
     // timestr[strlen(timestr) - 1] = '\0';
 
+    //gtk_widget_set_halign(text, GTK_ALIGN_START);
+
     if(username != NULL) gtk_label_set_text(GTK_LABEL(username), title);
     gtk_label_set_text(GTK_LABEL(text), m);
     gtk_label_set_text(GTK_LABEL(datetime), "16:35");
     gtk_image_set_from_file(GTK_IMAGE(icon), icon_path);
 
     gtk_box_pack_start(GTK_BOX(app->messages_container), message, false, true, 0);
-    g_object_unref (builder);
+    g_object_unref(builder);
 }
 
 void create_chat() {
