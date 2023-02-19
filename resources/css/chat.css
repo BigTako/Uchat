@@ -1,6 +1,7 @@
 #chat {
     background: #394141;
     color: #eef0f0;
+    font-family: sans-serif;
 }
 
 #chat button:nth-child(2) {
