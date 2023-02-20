@@ -39,30 +39,23 @@ t_list * get_db_data_list(sqlite3 * db, char * selection_query, int cols_count)
 	return table;
 }
 
-void *** get_db_data_vector(sqlite3 * db, char * selection_query, int cols_count)
+void ** get_db_data_vector(sqlite3 * db, char * selection_query, int cols_count, int rows_count)
 {
-	void *** table = malloc(((int)DB_ROWS_MAX)*sizeof(void**));
+	void ** table = malloc(((int)DB_ROWS_MAX)*sizeof(void*));
 	sqlite3_stmt * stmt;
 	sqlite3_prepare_v2(db, (const char *)selection_query, -1, &stmt, NULL);
-	int data_type;
 	int row_indx = 0;
-	while (sqlite3_step(stmt) != SQLITE_DONE)
+	while (sqlite3_step(stmt) != SQLITE_DONE && row_indx != rows_count)
 	{
-		table[row_indx] = malloc((cols_count+1)*sizeof(void *));
+		table[row_indx] = mx_strnew(100000);
 		for (int i = 0; i < cols_count; i++)
 		{
-			//data_type = sqlite3_column_type(stmt, i);
-			table[row_indx][i] = mx_strdup(sqlite3_column_text(stmt, i));
-			/*if (data_type == SQLITE_INTEGER)
+			table[row_indx] = strcat(table[row_indx], sqlite3_column_text(stmt, i));
+			if (i != cols_count - 1)
 			{
-				table[row_indx][i] = mx_itoa(sqlite3_column_int(stmt, i));
+				table[row_indx] = strcat(table[row_indx], QUERY_DELIM);
 			}
-			else if (data_type == SQLITE_TEXT)
-			{
-				table[row_indx][i] = mx_strdup(sqlite3_column_text(stmt, i));
-			}*/
 		}
-		table[row_indx][cols_count] = NULL;
 		row_indx++;
 	}
 	table[row_indx] = NULL;
@@ -104,14 +97,11 @@ void clear_inner_list(void * ptr)
 	list = temp;
 }
 
-void delete_table(void **** table)
+void delete_table(void *** table)
 {
+	if (!table) return;
 	for (int i = 0; (*table)[i]; i++)
 	{
-		for (int j = 0; (*table)[i][j]; j++)
-		{
-			free((*table)[i][j]);
-		}
 		free((*table)[i]);	
 	}
 	free((*table));

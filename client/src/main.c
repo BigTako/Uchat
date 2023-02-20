@@ -76,6 +76,8 @@ int main(int argc, char ** argv) {
         }
     }while(!online || online < 0);
     
+
+
     do
     {
         if(cmdEXIT > 0) {
@@ -133,9 +135,9 @@ int main(int argc, char ** argv) {
                 break;
             case CREATE_CHAT: // create chat
                 //C@NAME@USERNAME1@USERNAME2@... - create new chat
-                printf("Enter conversation_name and chat members(%c separated): ", QUERY_DELIM);
+                printf("Enter conversation_name and chat members(%suser1%suser2%suser3...): ", QUERY_DELIM , QUERY_DELIM, QUERY_DELIM);
 	            scanf("%s %s", chat_name, chat_members);
-                server_query = create_query_delim_separated(3, action, chat_name, chat_members); // have to store a hash password
+                server_query = create_query_delim_separated(3, action, chat_name, chat_members+1); // have to store a hash password
                 send_server_request(param, server_query);
                 free(server_query);
                 break;

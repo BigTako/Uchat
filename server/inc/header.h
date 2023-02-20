@@ -19,8 +19,8 @@
 #include "../libraries/libmx/inc/libmx.h"
 //#include <poll.h>
 
-#define QUERY_DELIM '@'
-#define LOAD_MESSAGE_COUNT 3
+#define QUERY_DELIM "@"
+#define LOAD_MESSAGES_COUNT 3
 
 #define LOGIN 'L'
 #define SIGNUP 'R'
@@ -30,7 +30,7 @@
 #define EDIT_MESSAGE 'B'
 #define DELETE_MESSAGE 'D'
 #define EXIT_CONVERSATION 'E'
-
+#define TAKE_CURRENT_CHATS 'F'
 
 #define USERS_TN "users"
 #define MESSAGES_TN "messages"
@@ -54,11 +54,11 @@ typedef struct s_thread_param
 
 //DATABASE UTILS
 void clear_inner_list(void * ptr);
-void delete_table(void **** table);
+void delete_table(void *** table);
 char * mx_strstr_front(const char *haystack, const char *needle);
 char * execute_query(sqlite3 * db, char * query);
 t_list * get_db_data_list(sqlite3 * db, char * selection_query, int cols_count);
-void *** get_db_data_vector(sqlite3 * db, char * selection_query, int cols_count);
+void ** get_db_data_vector(sqlite3 * db, char * selection_query, int cols_count, int rows_count);
 char * format_query(char * template, t_list * values);
 int sqlite_execute(sqlite3 * db, char * query);
 
@@ -71,10 +71,10 @@ code encipher(code rsaPublicKeyChar, char * message, int * emLen, int * ekLen_v,
 code decipher(code rsaPrivateKeyChar, code encryptedMessage, unsigned long emLen, code ek, code iv, int ekLen);
 
 //SERVER DATABASE RELATIONSHIP UTILS
-void *** get_db_data_table(sqlite3 * db, code template, int colums, int count, ...);
-code create_network_query(int count, ...);
+void ** get_db_data_table(sqlite3 * db, code template, int colums, int rows, int count, ...);
+code create_query_delim_separated(int count, ...);
 int validate_query(char * code, int delims_count, char * err_message);
-void format_and_execute (sqlite3 * db, char * template, int count, ...);
+int format_and_execute (sqlite3 * db, char * template, int count, ...);
 char *userID_from_name(char *sql_username_str, sqlite3 *db);
 
 //SERVER UTILS
@@ -83,3 +83,4 @@ void* exit_thread(void* vparam);
 char *encode_login(char *code, t_thread_param *param, bool *online);
 void encode(char * code, t_thread_param *param, bool *online, char *userID);
 #endif
+

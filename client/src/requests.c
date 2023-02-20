@@ -16,19 +16,18 @@ code create_query_delim_separated(int count, ...)
     // Initializing argument to the
     // list pointer
     va_start(ptr, count);
-	char delim = QUERY_DELIM;
     for (int i = 0; i < count; i++)
 	{
 		query = mx_strcat(query, va_arg(ptr, unsigned char *));
 		if (i != count - 1)
 		{
-			query = mx_strcat(query, &delim);
+			query = mx_strcat(query, QUERY_DELIM);
 		}
 	}
-    // Ending argument list traversal
 	va_end(ptr);
 	return query;
 }
+
 
 int send_server_request(t_send_param *param, code query)
 {

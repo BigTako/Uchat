@@ -20,7 +20,7 @@
 #include "../libraries/libmx/inc/libmx.h"
 
 typedef unsigned char * code;
-#define QUERY_DELIM '@'
+#define QUERY_DELIM "@"
 
 #define LOGIN 'L'
 #define SIGNUP 'R'
@@ -30,6 +30,7 @@ typedef unsigned char * code;
 #define EDIT_MESSAGE 'B'
 #define DELETE_MESSAGE 'D'
 #define EXIT_CONVERSATION 'E'
+#define TAKE_CURRENT_CHATS 'F'
 
 #define DB_ROWS_MAX 10000
 #define MESSAGE_MAX_LEN 10000
@@ -46,3 +47,4 @@ code create_query_delim_separated(int count, ...);
 int send_server_request(t_send_param *param, code query);
 
 #endif
+

@@ -2,7 +2,14 @@
 #include <errno.h>
 #include <poll.h>
 
-#define MAX_MESSAGE_ID_QUERY "SELECT max(message_id) FROM %s"
+int null_str_arr_len(char ** arr)
+{
+	int i = 0;
+	for (; arr[i]; i++);
+	return i;
+}
+
+
 
 char *encode_login(char *code, t_thread_param *param, bool *online)
 {
@@ -13,13 +20,11 @@ char *encode_login(char *code, t_thread_param *param, bool *online)
 		L@NAME@PASSWORD_HASH - login
 		R@NAME@PASSWORD_HASH - register
 	*/
-
+	printf("Login/signup query : %s\n", code);
 	void *** table = NULL;
 	char query_buf[1000];
-	char * sql_username_str = NULL;
-	char ** parts = mx_strsplit(code, QUERY_DELIM);
+	char ** parts = mx_strsplit(code, QUERY_DELIM[0]);
 	char code_num = parts[0][0];
-	int err = 0;
 	char *user = NULL;
 	char * db_query = NULL;
 	
@@ -28,8 +33,10 @@ char *encode_login(char *code, t_thread_param *param, bool *online)
 		case LOGIN: // loging
 			if (!validate_query(code, 2, "Loging query is wrong, incorrent delimiter count!\n"))
 			{
-				db_query = "SELECT password FROM %s WHERE username='%s'";
-				table = get_db_data_table(param->db, db_query, 1, 2, USERS_TN, parts[1]);
+				db_query = "SELECT password FROM %s WHERE username='%s%s'";
+				table = get_db_data_table(param->db, db_query, 1, DB_ROWS_MAX, 3, USERS_TN, QUERY_DELIM, parts[1]);
+
+				printf("got password: %s\n", table[0]);
 
 				if (!table || !(*table)) // NO SUCH USERNAME IN DATABASE
 				{
@@ -38,10 +45,10 @@ char *encode_login(char *code, t_thread_param *param, bool *online)
 				}
 				else
 				{
-					if (!strcmp(table[0][0], parts[2]))
+					if (!strcmp(table[0], parts[2]))
 					{
 						printf("[INFO] correct loging\n");
-						user = mx_strdup(parts[1]);
+						user = mx_strjoin(QUERY_DELIM, parts[1]);
 						*online = true;
 						if (send(param->socket, "Y", 1, 0) <= 0) *online = false;
 					}
@@ -59,15 +66,15 @@ char *encode_login(char *code, t_thread_param *param, bool *online)
 		case SIGNUP:
 			if (!validate_query(code, 2, "SignUp query is wrong, incorrent delimiter count!\n"))
 			{
-				db_query = "SELECT password FROM %s WHERE username='%s'";
-				table = get_db_data_table(param->db, db_query, 1, 2, USERS_TN, parts[1]);
+				db_query = "SELECT password FROM %s WHERE username='%s%s'";
+				table = get_db_data_table(param->db, db_query, 1, DB_ROWS_MAX, 3, USERS_TN, QUERY_DELIM, parts[1]);
 
 				if (!table || !(*table))
 				{
-					db_query = "INSERT INTO %s(username, password) VALUES('%s', '%s')";
-					format_and_execute(param->db, db_query, 3, USERS_TN, parts[1], parts[2]);
+					db_query = "INSERT INTO %s(username, password) VALUES('%s%s', '%s')";
+					format_and_execute(param->db, db_query, 4, USERS_TN, QUERY_DELIM, parts[1], parts[2]);
 					printf("[INFO] Successfuly signed up\n");
-					user = mx_strdup(parts[1]);
+					user = mx_strjoin(QUERY_DELIM, parts[1]);
 					*online = true;
 					if (send(param->socket, "Y", 1, 0) <= 0) *online = false;
 				}
@@ -97,128 +104,155 @@ void encode(char * code, t_thread_param *param, bool *online, char *user)
 		F@CONVERSATION_ID - renew chat
 		B@MESSAGE_ID
 		D@MESSAGE_ID
-		E@USERNAME@CONVERSATION_ID
+		E@CONVERSATION_ID
 	*/
 	printf("Encode code string: %s\n", code);
-	void *** table = NULL;
-	char query_buf[1000];
-	char ** parts = mx_strsplit(code, QUERY_DELIM);
+	void ** table = NULL;
+	char ** parts = mx_strsplit(code, QUERY_DELIM[0]);
 	char code_num = parts[0][0];
-	//int err = 0;
 	char * db_query = NULL;
 	char * str_timestamp = NULL;
-
+	char * new_members_str = NULL;
+	char * members_str = NULL;
+	int members_int = 0;
+	int executing_status = 0;
 	switch(code_num)
 	{
-		case SEND_MESSAGE:
+		case SEND_MESSAGE: //S@TEXT@TIME@CONVERSATION_ID - send message
 			if (!validate_query(code, 3, "Message sending query is wrong, incorrent delimiter count!\n"))
-			{
-				//parts[1] -- message text
-				//parts[2] -- sending time
-				//parts[3] -- conversation id
-				//handle a sending message to a specific conversation
-				/* <-MESSAGES->
-				message_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, \
-                            from_username TEXT NOT NULL, \
-                            message_text TEXT NOT NULL, \
-                            send_datetime TEXT NOT NULL, \
-                            conversation_id TEXT NOT NULL, \
-                            status TEXT NOT NULL DEFAULT 'unread')
-				*/
-				
-				//S@TEXT@TIME@CONVERSATION_ID
+      		{
 				db_query = "INSERT INTO %s(from_username, message_text, send_datetime, conversation_id) VALUES('%s', '%s', %s, %s)";
 				str_timestamp = mx_itoa(time(NULL));
-				format_and_execute(param->db, db_query, 5, MESSAGES_TN, user, parts[1], str_timestamp , parts[3]);
-				send(param->socket, "Y", 1, 0);
+				executing_status = format_and_execute(param->db, db_query, 5, MESSAGES_TN, user, parts[1], str_timestamp , parts[3]);
+				printf("Execution status = %d\n", executing_status);
 				free(str_timestamp);
+				if (executing_status != 0)
+				{
+					if (send(param->socket, "N", 1, 0) <= 0) *online = false;				
+				}
+				else
+				{
+					if (send(param->socket, "Y", 1, 0) <= 0) *online = false;
+				}
 			}
 			break;
-		case CREATE_CHAT:
-			//parts[1] -- chat name
-			//parts[2] -- username of chat member1
-			//parts[3] -- username of chat member2
-			// ...
-			//parts[n] -- username of chat member (n - 1)
-			//handle a creating new chat here(add users by ids to group_members table)
-			/*
-				CREATE TABLE IF NOT EXISTS %s(username TEXT NOT NULL, \
-                conversation_id TEXT NOT NULL, \
-                joined_datetime TEXT NOT NULL)", 1, GROUP_MEMBERS_TN
-			*/
-			db_query = "INSERT INTO %s(name) VALUES('%s')";
-			format_and_execute(param->db, db_query, 2, CONVERSATIONS_TN, parts[1]);
-			db_query = "SELECT conversation_id FROM %s WHERE conversation_id=(SELECT max(conversation_id) FROM %s)";
-			table = get_db_data_table(param->db, db_query, 1, 2, CONVERSATIONS_TN, CONVERSATIONS_TN);
-			printf("table content %s\n", table[0][0]);
-			char *conversation_id = mx_strdup(table[0][0]);
-			int n = 2;
-			while((parts + 1)[n++] != NULL) {
-				db_query = "INSERT INTO %s(username, conversation_id, joined_datetime) VALUES('%s', %s, '%lu')";
-				format_and_execute(param->db, db_query, 4, GROUP_MEMBERS_TN, parts[n], conversation_id, (unsigned long)time(NULL));
+		case CREATE_CHAT: //C@NAME@USERNAME1@USERNAME2@... - create new chat 
+			if (char_count(code, QUERY_DELIM[0]) < 2)
+			{
+				members_int = null_str_arr_len(parts + 2) + 1;
+				//members_str = mx_strjoin(user, code + strlen(parts[0]) + strlen(parts[1]) + 2); // join entered members with username
+				members_str = create_query_delim_separated(2, user, code + strlen(parts[0]) + strlen(parts[1]) + 2);
+				printf("Chat members: %s\n, count %d\n", members_str, members_int);
+				if (char_count(members_str, QUERY_DELIM[0]) == members_int)
+				{
+					db_query = "INSERT INTO %s(name, chat_members) VALUES('%s', '%s')";
+					format_and_execute(param->db, db_query, 3, CONVERSATIONS_TN, parts[1], members_str);  
+					if (executing_status != 0)
+					{
+						if (send(param->socket, "N", 1, 0) <= 0) *online = false;				
+					}
+					else
+					{
+						if (send(param->socket, "Y", 1, 0) <= 0) *online = false;
+					}
+					printf("[INFO] Successfuly created chat\n");
+				}
+				else
+				{
+					printf("[ERROR] Wrong chat members string\n");	
+					if (send(param->socket, "N", 1, 0) <= 0) *online = false;
+				}
 			}
-			if (send(param->socket, "Y", 1, 0) <= 0) *online = false;
+			else
+			{
+				printf("[ERROR] Wrong creating chat query\n");	
+				if (send(param->socket, "N", 1, 0) <= 0) *online = false;
+			}
+			free(members_str);
 			break;
 		case RENEW_CHAT:
 			if (!validate_query(code, 1, "Chat renewing query is wrong, incorrent delimiter count!\n"))
 			{
-				/*F@CONVERSATION_ID - renew chat
-				 	<-MESSAGES->
-					message_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, \
-                    from_username TEXT NOT NULL, \
-                    message_text TEXT NOT NULL, \
-                    send_datetime TEXT NOT NULL, \
-                    conversation_name TEXT NOT NULL, \
-                    status TEXT NOT NULL DEFAULT 'unread')
-				*/
-				//parts[1] -- username, for which chat have to be renewed
-				//parts[2] --  of chat 
-				//take all the messages unread from the chat by conversation id
-				db_query = "SELECT message_id, from_username, message_text, send_datetime, conversation_name, status(SELECT max(message_id) FROM (SELECT * FROM %s WHERE status == 'unread' AND conversation_id == %s)) AS max_id \
-							FROM %s \
-							WHERE (max_id - %d < 1 AND message_id <= max_id) OR \
-      						(max_id - %d > 1 AND message_id > max_id - %d AND message_id <= max_id)";
-				table = get_db_data_table(param->db, db_query, 4, 6, MESSAGES_TN, parts[1], MESSAGES_TN, LOAD_MESSAGE_COUNT, LOAD_MESSAGE_COUNT, LOAD_MESSAGE_COUNT);
+				db_query = "SELECT * FROM %s WHERE conversation_id=%s ORDER BY message_id DESC";
+				table = get_db_data_table(param->db, db_query, 6, LOAD_MESSAGES_COUNT, 2, MESSAGES_TN, parts[1]);
 				for (int i = 0; table[i]; i++)
 				{
-					for (int j = 0; table[j]; j++)
-					{
-						printf("%s-", table[i][j]);
-					}	
-					printf("\n");
+					printf("Data: %s\n", table[i]);
+					//mx_del_strarr(&responce);
 				}
-				printf("Successfully renewed chat\n");
+				delete_table(&table);
 				send(param->socket, "Y", 1, 0);
+			}
+			else
+			{
+				send(param->socket, "N", 1, 0);
 			}
 			break;
 		case EDIT_MESSAGE:
-			if (!validate_query(code, 1, "Message edition query is wrong, incorrent delimiter count!\n"))
+			 if (!validate_query(code, 2, "Message edition query is wrong, incorrent delimiter count!\n"))
 			{
-				//parts[1] -- message_id in table messages to be updated content to
-				//send a request to db to UPDATE a content of message WHERE message_id=message_id
-				//then update the whole chat or just edit it in GUI
-				if (!validate_query(code, 1, "Message edition query is wrong, incorrent delimiter count!\n"))
+				printf("Message id(%s), new message text(%s)\n", parts[1], parts[2]);
+				executing_status = format_and_execute(param->db, "UPDATE %s SET message_text='%s' WHERE message_id=%s", 3, MESSAGES_TN, parts[2], parts[1]);
+				if (executing_status != 0)
 				{
-					format_and_execute(param->db, "UPDATE %s SET message_text='%s' WHERE message_id=%s", MESSAGES_TN, parts[2], parts[1]);
+					if (send(param->socket, "N", 1, 0) <= 0) *online = false;				
 				}
+				else
+				{
+					if (send(param->socket, "Y", 1, 0) <= 0) *online = false;
+				}
+				printf("Execution status = %d\n", executing_status);
+				printf("[INFO] Successfuly edited message with id %s\n", parts[1]);
+				//send(param->socket, "Y", 1, 0);
 			}
 			break;
 		case DELETE_MESSAGE:
 			if (!validate_query(code, 1, "Message deleting query is wrong, incorrent delimiter count!\n"))
 			{
-				//parts[1] -- message_id in table messages to be deleted
-				//send a request to db to DELETE record in table messages with corresponding message_id
-				//then update the whole chat or just delete it in GUI
-				format_and_execute(param->db, "DELETE FROM %s WHERE message_id=%s", MESSAGES_TN, parts[1]);
+				executing_status = format_and_execute(param->db, "DELETE FROM %s WHERE message_id=%s", 2, MESSAGES_TN, parts[1]);
+				if (executing_status != 0)
+				{
+					if (send(param->socket, "N", 1, 0) <= 0) *online = false;				
+				}
+				else
+				{
+					if (send(param->socket, "Y", 1, 0) <= 0) *online = false;
+					printf("[INFO] Successfuly deleted message with id %s\n", parts[1]);
+				}
 			}
 			break;
 		case EXIT_CONVERSATION:
-			if (!validate_query(code, 2, "Conversation exit query is wrong, incorrent delimiter count!\n"))
+			 if (!validate_query(code, 1, "Conversation exit query is wrong, incorrent delimiter count!\n"))
 			{
-				//parts[1] -- username of person wants to leave a convestion
-				//parts[2] -- id of conversation user want to leave
-				//send a request to database to DELETE a user with username from table group_members WHERE conversation_id=conversation_id
-				//then renew chat list
+				db_query = "SELECT chat_members FROM %s WHERE conversation_id=%s";
+				table = get_db_data_table(param->db, db_query, 1, DB_ROWS_MAX, 2, CONVERSATIONS_TN, parts[1]);
+				if (!table || !*table)
+				{
+					printf("[ERROR] Data not found\n");
+				}
+				else
+				{
+					printf("Members of chat with conv. ID(%s): %s\n", parts[1], table[0]);
+					if (strstr(table[0], user)) // founded occurence @username
+					{
+						new_members_str = mx_replace_substr(table[0], user, "");
+						printf("New members of chat are: %s\n", new_members_str);
+						db_query = "UPDATE %s SET chat_members='%s' WHERE conversation_id=%s";
+						executing_status = format_and_execute(param->db, db_query, 3, CONVERSATIONS_TN, new_members_str, parts[1]);
+						if (executing_status != 0)
+						{
+							printf("[ERROR] error while executing or formating query\n");
+							if (send(param->socket, "N", 1, 0) <= 0) *online = false;				
+						}
+						else
+						{
+							printf("[INFO] Successfuly leaved chat with id %s\n", parts[1]);
+							if (send(param->socket, "Y", 1, 0) <= 0) *online = false;
+						}
+					}
+					free(new_members_str);
+				}
+				delete_table(&table);
 			}
 			break;
 	}
@@ -231,7 +265,6 @@ void* client_thread(void* vparam)
 	*param->count_of_threads++;
     printf("---Start-recving-from-new-client---\n");
     bool online = true;
-    bool logined = false;
     char *user = NULL;
     char buffer[MESSAGE_MAX_LEN]; //!!!
     while (user == NULL) 
@@ -258,6 +291,7 @@ void* client_thread(void* vparam)
         }
 		memset(buffer, '\0', MESSAGE_MAX_LEN);
     }
+	printf("got a username: %s\n", user);
     while (online) {
 		int status = recv(param->socket, buffer, MESSAGE_MAX_LEN, 0);
 		while (status == -1 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
@@ -274,6 +308,7 @@ void* client_thread(void* vparam)
 		pthread_mutex_unlock(param->mutex_R);
 		memset(buffer, '\0', MESSAGE_MAX_LEN);
     }
+	free(user);
     close(param->socket);
 	int *count_of_threads = param->count_of_threads;
     free(param);

@@ -19,7 +19,8 @@ int main(int argc, char ** argv)
     //creating table with conversations
     format_and_execute(db, "CREATE TABLE IF NOT EXISTS %s(\
                             conversation_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, \
-                            name TEXT NOT NULL)", 1, CONVERSATIONS_TN);
+                            name TEXT NOT NULL,\
+                            chat_members TEXT NOT NULL)", 1, CONVERSATIONS_TN);
 
     //creating table with messages
 	format_and_execute(db, "CREATE TABLE IF NOT EXISTS %s(\
@@ -29,12 +30,6 @@ int main(int argc, char ** argv)
                             send_datetime INTEGER NOT NULL, \
                             conversation_id INTEGER NOT NULL, \
                             status TEXT NOT NULL DEFAULT 'unread')", 1, MESSAGES_TN);
-  
-  	//create table with group_members data
-  	format_and_execute(db, "CREATE TABLE IF NOT EXISTS %s(\
-                            username TEXT NOT NULL, \
-                            conversation_id INTEGER NOT NULL, \
-                            joined_datetime TEXT NOT NULL)", 1, GROUP_MEMBERS_TN);
 
     /*GENERATION OF RSA KEYS*/
     EVP_PKEY * key = generate_key_pair();
