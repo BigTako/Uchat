@@ -70,14 +70,6 @@
     border-top: 2px solid #414b4b; 
 }
 
-/* #chat #chat_scroller {
-    background: green;
-    border: 0;
-    border-top: 1px solid #2f3144;
-    border-bottom: 1px solid #2f3144;
-    box-shadow: inset 0px 4px 4px rgba(0, 0, 0, 0.25);
-} */
-
 #chat #chats_sidebar {
     background: #394141;
     border-right: 1px solid #5d6c6b;
@@ -96,8 +88,72 @@
     border-radius: 20px 20px 20px 20px;
 }
 
+#chat #messages_container #message_sender {
+    color: #eef0f0;
+}
+
+#chat #messages_container #message_text {
+    color: #d9dede;
+}
+
 #chat #messages_container > box > box > label:nth-child(1) {
     color: rgb(236, 235, 235);
+}
+
+#chat #chats_sidebar > box > entry {
+    background: #4c5858;
+    color: rgb(236, 235, 235);
+    transition: all 0.3s;
+}
+
+#chat #chats_sidebar > box > entry:focus {
+    color: rgb(197, 197, 197);
+}
+
+#chat #chat_info > box > button {
+    opacity: 0.6;
+    transition: all 0.3s;
+    outline-style: none;
+    box-shadow: none;
+    border-color: transparent;
+}
+
+#chat #chat_info > box > button:hover {
+    opacity: 0.8;
+    outline-style: none;
+    box-shadow: none;
+    border-color: transparent;
+}
+
+#chat #chat_info > box > button:active {
+    opacity: 0.5;
+}
+
+#chat #chat_list > * {
+    border-bottom: 2px solid #5d6c6b;
+    transition: all 0.3s;
+}
+
+#chat #chat_list > *:hover {
+    background: #4c5858;
+    border-radius: 2px;
+}
+
+#chat #chat_list > *:selected {
+    background: #5d6c6b;
+    transition: all 0.3s ease-in-out;
+}
+
+#chat #chat_list > * label:first-child {
+    color: #eef0f0;
+}
+
+#chat #chat_list > * label:nth-child(2) {
+    color: #d9dede;
+}
+
+#chat #chat_list > * label:nth-child(3) {
+    color: #d9dede;
 }
 
 /* #chat viewport {

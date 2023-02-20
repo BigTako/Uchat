@@ -121,17 +121,6 @@ void log_in(void) {
         open_error_window("Login error: Incorrect password or username.");
         break;
     }
-
-    
-
-    //strcpy(app->username, username);
-    //app->username = username;
-    //app->password = password;
-
-    // mx_printstr(username);
-    // mx_printstr("\t");
-    // mx_printstr(password);
-    // mx_printstr("\n");
 }
 
 void create_account(void) {

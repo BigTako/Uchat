@@ -1,28 +1,29 @@
 #error {
-    background: #62359e;
+    background: #394141;
+    font-family: sans-serif;
 }
 
 #error label {
-    color: #e4e0ff;
+    color: #eef0f0;
     font-size: 16px;
 }
 
 #error button {
-    background: #9464f0;
-    color: #e4e0ff;
+    background: #8f9e9d;
+    color: #eef0f0;
     border: none;
     border-radius: 15px;
 }
 
 #error button:hover {
-    background: #8947e4;
+    background: #738483;
     border: none;
-    color: #d0c7fe;
+    color: #d9dede;
     box-shadow: none;
 }
 
 #error button:active {
-    background: #7839c9;
+    background: #5d6c6b;
     border: none;
-    color: #d0c7fe;
+    color: #d9dede;
 }

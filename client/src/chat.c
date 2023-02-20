@@ -30,6 +30,9 @@ GtkWidget *open_main_window(void) {
     app->chats_sidebar = GTK_WIDGET(gtk_builder_get_object(ui_builder, "chats_sidebar"));
     gtk_widget_set_name(GTK_WIDGET(app->chats_sidebar), "chats_sidebar");
 
+    app->chat_info = GTK_WIDGET(gtk_builder_get_object(ui_builder, "chat_info"));
+    gtk_widget_set_name(GTK_WIDGET(app->chat_info), "chat_info");
+
     GtkWidget *settings_button = GTK_WIDGET(gtk_builder_get_object(ui_builder, "settings_button"));
     gtk_widget_set_name(GTK_WIDGET(settings_button), "settings_button");
 
@@ -52,8 +55,14 @@ GtkWidget *open_main_window(void) {
     gtk_widget_set_name(GTK_WIDGET(app->chat_scroller), "chat_scroller");
 
     app->chat_entry = GTK_WIDGET(gtk_builder_get_object(ui_builder, "new_message_entry"));
+    app->find_user_entry = GTK_WIDGET(gtk_builder_get_object(ui_builder, "user_search_bar"));
     //mx_printstr(app->username_t);
-    gtk_label_set_text(GTK_LABEL(app->username_label), app->username_t);
+
+    g_signal_connect(window, "key_press_event", G_CALLBACK (enter_keypress), NULL);
+
+    //gtk_label_set_text(GTK_LABEL(app->username_label), app->username_t);
+
+
     //gtk_label_set_text(GTK_LABEL(app->chat_label_info), " ");
     //gtk_widget_hide(app->chat_icon);
 
@@ -65,113 +74,4 @@ GtkWidget *open_main_window(void) {
     g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
 
     return window;
-}
-
-void send_message() {
-    // create_chat();
-    const char *message = mx_strtrim(gtk_entry_get_text(GTK_ENTRY(app->chat_entry)));
-    if (strlen(gtk_entry_get_text(GTK_ENTRY(app->chat_entry))) != 0) {
-        create_message(message);
-        gtk_entry_set_text(GTK_ENTRY(app->chat_entry), "");
-    }
-}
-
-bool change = true;
-
-void create_message(const char *m) {
-    //if (m == NULL) mx_printstr("hollow");
-
-    GtkWidget *message, *icon, *username, *text, *datetime, *sticker;
-    GtkBuilder *builder = gtk_builder_new ();
-    GError* error = NULL;
-    char *window_path = NULL, *icon_path = "../resources/icons/user_icon.png";
-    char *timestr = NULL;
-    char *title = NULL;
-
-    // if (!gtk_builder_add_from_file (builder, "../resources/ui/message_from_other.glade", &error)) {
-    //     g_critical ("Couldn't load file: %s", window_path);
-    // }
-
-    if (change) {
-        if (!gtk_builder_add_from_file (builder, "../resources/ui/message_from_me.glade", &error)) {
-            g_critical ("Couldn't load file: %s", window_path);
-        }
-        change = false;
-        mx_printint(change);
-    }
-    else {
-        if (!gtk_builder_add_from_file (builder, "../resources/ui/message_from_other.glade", &error)) {
-            g_critical ("Couldn't load file: %s", window_path);
-        }
-        change = true;
-        mx_printint(change); 
-    }
-
-    message = GTK_WIDGET (gtk_builder_get_object (builder, "message"));
-    if (!message) {
-        g_critical ("Window widget error");
-    }
-
-    icon = GTK_WIDGET(gtk_builder_get_object(builder, "message_icon"));
-    username = GTK_WIDGET(gtk_builder_get_object(builder, "message_username"));
-    text = GTK_WIDGET(gtk_builder_get_object(builder, "message_text"));
-    datetime = GTK_WIDGET(gtk_builder_get_object(builder, "message_datetime"));
-
-    // timestr = ctime(&mes.datetime);
-    // timestr[strlen(timestr) - 1] = '\0';
-
-    //gtk_widget_set_halign(text, GTK_ALIGN_START);
-
-    if(username != NULL) gtk_label_set_text(GTK_LABEL(username), title);
-    gtk_label_set_text(GTK_LABEL(text), m);
-    gtk_label_set_text(GTK_LABEL(datetime), "16:35");
-    gtk_image_set_from_file(GTK_IMAGE(icon), icon_path);
-
-    gtk_box_pack_start(GTK_BOX(app->messages_container), message, false, true, 0);
-    g_object_unref(builder);
-}
-
-void create_chat() {
-    //короче добавляются чаты в лист, но я хз конешно как переключать их
-
-    GtkWidget *chat, *icon, *title, *status;
-    GtkBuilder *builder = gtk_builder_new ();
-    GError* error = NULL;
-
-    //asprintf(&icon_path, "resource/img/chat_icon/chat_icon_%d.png", c.chat_icon);
-
-    if (!gtk_builder_add_from_file (builder, "../resources/ui/chat_list.glade", &error)) {
-        g_critical ("Couldn't load file: message_other.ui");
-    }
-
-    chat = GTK_WIDGET (gtk_builder_get_object (builder, "chat"));
-    if (!chat) {
-        g_critical ("Window widget error");
-    }
-
-    icon = GTK_WIDGET(gtk_builder_get_object(builder, "chat_icon"));
-    title = GTK_WIDGET(gtk_builder_get_object(builder, "chat_title"));
-    status = GTK_WIDGET(gtk_builder_get_object(builder, "chat_status"));
-
-    gtk_image_set_from_file(GTK_IMAGE(icon), "../../resources/icons/user_icon.png");
-    gtk_label_set_text(GTK_LABEL(title), "hei");
-    gtk_label_set_text(GTK_LABEL(status), "i am the danger skyler");
-
-    //gtk_widget_set_name(chat, itoa(c.chat_icon));
-
-    gtk_list_box_insert(GTK_LIST_BOX(app->chat_list), chat, -1);
-        
-    g_object_unref(builder);
-}
-
-void show_settings(void) {
-    gtk_widget_hide(app->chat_box);
-    gtk_widget_hide(app->chats_sidebar);
-    gtk_widget_show(app->settings_box);
-}
-
-void back_to_chat(void) {
-    gtk_widget_show(app->chat_box);
-    gtk_widget_show(app->chats_sidebar);
-    gtk_widget_hide(app->settings_box);
 }
