@@ -1,23 +1,23 @@
 #login {
-    background: #1d112f;
+    background: #394141;
     font-size: 15px;
-    color: #e4e0ff;
+    color: #eef0f0;
 }
 
 #login label {
-    color: #e4e0ff;
+    color: #eef0f0;
 }
 
 #login entry {
-    color: #e4e0ff;
-    background: #7839c9;
+    background: #4c5858;
+    color: #eef0f0;
     border: 0px;
     border-radius: 15px;
     transition: all 0.3s;
 }
 
 #login entry:focus {
-    border: 2px solid #b7a6fb;
+    border: 2px solid #d9dede;
     border-radius: 13px;
     outline-style: none;
     box-shadow: none;
@@ -26,89 +26,75 @@
 }
 
 #login button:nth-child(6) {
-    background: #9464f0;
-    color: #e4e0ff;
+    background: #8f9e9d;
+    color: #eef0f0;
     border: none;
     border-radius: 15px;
 }
 
 #login button:nth-child(6):hover {
-    background: #8947e4;
+    background: #738483;
     border: none;
-    color: #d0c7fe;
+    color: #d9dede;
     box-shadow: none;
 }
 
 #login button:nth-child(6):active {
-    background: #7839c9;
+    background: #5d6c6b;
     border: none;
-    color: #d0c7fe;
+    color: #d9dede;
 }
 
 #login button:nth-child(7) {
-    color: #e4e0ff;
-}
-
-#login button:nth-child(7):hover {
-    color: #b7a6fb;
-}
-
-#login button:nth-child(7):active {
-    color: #a282f7;
+    color: #eef0f0;
 }
 
 #signup {
-    background: #1d112f;
+    background: #394141;
     font-size: 15px;
-    color: #e4e0ff;
+    color: #eef0f0;
 }
 
 #signup label {
-    color: #e4e0ff;
+    color: #eef0f0;
 }
 
 #signup entry {
-    color: #e4e0ff;
-    background: #7839c9;
+    color: #eef0f0;
+    background: #4c5858;
     border: 0px;
     border-radius: 15px;
     transition: all 0.3s;
 }
 
 #signup entry:focus {
-    border: 2px solid #b7a6fb;
+    border: 2px solid #d9dede;
     border-radius: 13px;
+    outline-style: none;
+    box-shadow: none;
+    border-color: transparent;
 }
 
 #signup button:nth-child(8) {
-    background: #9464f0;
-    color: #e4e0ff;
+    background: #8f9e9d;
+    color: #eef0f0;
     border: none;
     border-radius: 15px;
 }
 
 #signup button:nth-child(8):hover {
-    background: #8947e4;
+    background: #738483;
     border: none;
     color: #d0c7fe;
     box-shadow: none;
 }
 
 #signup button:nth-child(8):active {
-    background: #7839c9;
+    background: #5d6c6b;
     border: none;
     color: #d0c7fe;
-    box-shadow: none;
 }
 
 #signup button:nth-child(9) {
-    color: #e4e0ff;
-}
-
-#signup button:nth-child(9):hover {
-    color: #b7a6fb;
-}
-
-#signup button:nth-child(9):active {
-    color: #a282f7;
+    color: #eef0f0;
 }

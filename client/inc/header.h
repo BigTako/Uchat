@@ -5,14 +5,20 @@
 #include <gtk/gtk.h>
 #include <string.h>
 
+//action functions
+void show_settings(void);
+void create_chat();
+void send_message();
+void create_message(const char *m, bool is_user);
+void find_user();
+gboolean enter_keypress(GtkWidget *widget, GdkEventKey *event, gpointer data);
+void scroll();
+
+//window functions
 void open_login_window(void);
 GtkWidget *open_signup_window(void);
 GtkWidget* show_login_form();
 GtkWidget *open_main_window(void);
-void show_settings(void);
-void create_chat();
-void send_message();
-void create_message(const char *m);
 
 //error handling
 GtkWidget *open_error_window(char *error_message);
@@ -38,6 +44,7 @@ typedef struct app_s
 
     GtkWidget *chat_window;
     GtkWidget *chat_entry;
+    GtkWidget *find_user_entry;
     GtkWidget *chats_sidebar;
     GtkWidget *username_label;
     GtkWidget *user_icon;
@@ -48,6 +55,7 @@ typedef struct app_s
     GtkWidget *chat_box;
     GtkWidget *settings_box;
     GtkWidget *chat_scroller;
+    GtkWidget *chat_info;
 
     char *username;
     char *password;
