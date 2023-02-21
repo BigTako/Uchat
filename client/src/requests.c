@@ -8,6 +8,19 @@
 	D@MESSAGE_ID
 	E@USERNAME@CONVERSATION_ID
 */
+int connect_to_server(t_send_param *param) {
+    struct sockaddr_in serverAddr;
+    socklen_t addr_size;
+
+    param->socket = socket(PF_INET, SOCK_STREAM, 0);
+    serverAddr.sin_family = AF_INET;
+    serverAddr.sin_port = htons(param->server_port);
+    serverAddr.sin_addr.s_addr = inet_addr(param->server_IP);
+    memset(serverAddr.sin_zero, '\0', sizeof serverAddr.sin_zero);
+    addr_size = sizeof serverAddr;
+
+    return connect(param->socket, (struct sockaddr *) &serverAddr, addr_size);
+}
 
 code create_query_delim_separated(int count, ...)
 {

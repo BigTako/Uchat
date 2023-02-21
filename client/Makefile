@@ -2,6 +2,7 @@ CC = clang
 # CFLAGS = -std=gnu11 -pthread -g 
 # -Wall -Wextra -Werror -Wpedantic
 CFLAGS = -std=c11 -Wall -Wextra -Wpedantic -pthread -g
+CLIENT_COMPILE_GLOBAL = `pkg-config --cflags gtk+-3.0 pkg-config --libs gtk+-3.0`
 
 OBJDIR = obj
 SRCDIR = src
@@ -25,9 +26,9 @@ all: uninstall $(UCHAT)
 
 $(UCHAT):
 	mkdir $(OBJDIR)
-	$(CC) $(CFLAGS) -c $(SRC)
+	$(CC) $(CFLAGS) -c $(SRC) $(CLIENT_COMPILE_GLOBAL)
 	mv *.o $(OBJDIR)
-	$(CC) $(CFLAGS) -o $(UCHAT) $(OBJS) $(LIB_FLAGS)
+	$(CC) $(CFLAGS) -o $(UCHAT) $(OBJS) $(LIB_FLAGS) $(CLIENT_COMPILE_GLOBAL)
 
 clean:
 	rm -f $(OBJS)

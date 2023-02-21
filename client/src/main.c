@@ -3,6 +3,9 @@
 #include <stdlib.h>
 #include <errno.h>
 
+app_t *app;
+t_send_param *param;
+
 int main(int argc, char ** argv) {
     printf("PID %d\n", getpid());
     if (argc != 3)
@@ -10,34 +13,31 @@ int main(int argc, char ** argv) {
         mx_printerr("Usage: ./uclient <server IP> <server port>\n");
         return 0;
     }
-
-    int clientSocket;
-    char buffer[1024];
-    struct sockaddr_in serverAddr;
-    socklen_t addr_size;
-
-    clientSocket = socket(PF_INET, SOCK_STREAM, 0);
-    serverAddr.sin_family = AF_INET;
-    serverAddr.sin_port = htons(atoi(argv[2]));
-    serverAddr.sin_addr.s_addr = inet_addr(argv[1]);
-    memset(serverAddr.sin_zero, '\0', sizeof serverAddr.sin_zero);
-    addr_size = sizeof serverAddr;
-
-    int status = connect(clientSocket, (struct sockaddr *) &serverAddr, addr_size);
-    if (status < 0) {
-        printf("ERROR in connect %d\n", errno);
-        printf("====== \n");
-        exit(0);
-    }
-
+    //char buffer[1024];
     int cmdEXIT = 0;
-    int status_addr;
-    
-    t_send_param *param = malloc(sizeof(t_send_param*));
-    param->cmdEXIT = &cmdEXIT;
-    param->socket = clientSocket;
+    //int status_addr;
 
-    char username[10000];
+    app = app_init();
+    
+    param = malloc(sizeof(t_send_param*));
+    param->server_IP = argv[1];
+    param->server_port = atoi(argv[2]);
+    param->cmdEXIT = &cmdEXIT;
+    printf("Connecting");
+    while (connect_to_server(param) < 0);
+    printf("\nSUCCES\n");
+
+    gtk_init(&argc, &argv);
+
+    //open_main_window();
+    show_login_form();
+
+    gtk_main();
+
+
+
+
+    /*char username[10000];
 	char password[10000];
 	char action[2];
     int online = 0;
@@ -58,7 +58,6 @@ int main(int argc, char ** argv) {
         {
             case 'L':
                 server_query = create_query_delim_separated(3, "L", username, password); // have to store a hash password
-                printf("Enter action(L - login, R - signup): ");
                 online = send_server_request(param, server_query);
                 if (online < 0) {
                     perror(errno);
@@ -83,14 +82,14 @@ int main(int argc, char ** argv) {
         if(cmdEXIT > 0) {
             break;
         }
-        /*
-            S@TEXT@CONVERSATION_ID - send message
-            C@NAME@USERNAME1@USERNAME2@... - create new chat 
-            F@USERNAME@CONVERSATION_ID - renew chat
-            B@MESSAGE_ID - exit message
-            D@MESSAGE_ID - delete message
-            E@CONVERSATION_ID - exit conversation(delete myself from conversation)
-        */
+        
+        //    S@TEXT@CONVERSATION_ID - send message
+        //    C@NAME@USERNAME1@USERNAME2@... - create new chat 
+        //    F@USERNAME@CONVERSATION_ID - renew chat
+        //    B@MESSAGE_ID - exit message
+        //    D@MESSAGE_ID - delete message
+        //    E@CONVERSATION_ID - exit conversation(delete myself from conversation)
+        
         printf("S - send message\n\
                 C - create new chat\n\
                 A - renew chat\n\
@@ -106,14 +105,14 @@ int main(int argc, char ** argv) {
             break;
         }
 
-        /*
-            #define SEND_MESSAGE 'S'
-            #define CREATE_CHAT 'C'
-            #define RENEW_CHAT 'A'
-            #define EDIT_MESSAGE 'B'
-            #define DELETE_MESSAGE 'D'
-            #define EXIT_CONVERSATION 'E'
-        */
+        
+        //    #define SEND_MESSAGE 'S'
+        //    #define CREATE_CHAT 'C'
+        //    #define RENEW_CHAT 'A'
+        //    #define EDIT_MESSAGE 'B'
+        //    #define DELETE_MESSAGE 'D'
+        //    #define EXIT_CONVERSATION 'E'
+        
         char message[10000];
         char conversation_id[1000];
         char chat_name[1000];
@@ -195,10 +194,7 @@ int main(int argc, char ** argv) {
 
     send(clientSocket, "X", 1, 0);
     close(clientSocket);
-    free(param);
+    free(param);*/
     return 0;
 }
-
-
-
 

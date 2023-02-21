@@ -74,7 +74,6 @@ char *encode_login(char *code, t_thread_param *param, bool *online)
 					db_query = "INSERT INTO %s(username, password) VALUES('%s%s', '%s')";
 					format_and_execute(param->db, db_query, 4, USERS_TN, QUERY_DELIM, parts[1], parts[2]);
 					printf("[INFO] Successfuly signed up\n");
-					user = mx_strjoin(QUERY_DELIM, parts[1]);
 					*online = true;
 					if (send(param->socket, "Y", 1, 0) <= 0) *online = false;
 				}
