@@ -1,5 +1,19 @@
 #include "../inc/header.h"
 
+app_t *app_init() {
+	app_t *app = NULL;
+ 
+	// allocate memory for app struct
+	app = (app_t *) malloc(sizeof(app_t));
+	if (app == NULL) return NULL;
+	memset(app, 0, sizeof(app_t));
+	
+    app->username = NULL;
+    app->password = NULL;
+
+	return app;
+}
+
 gboolean enter_keypress(GtkWidget *widget, GdkEventKey *event, gpointer data) {
     if (event->keyval == GDK_KEY_Return) {
         if (gtk_widget_has_focus(app->chat_entry)) send_message();
@@ -32,8 +46,8 @@ void send_message() {
         if (change) create_message(message, true);
         else create_message(message, false);
         gtk_entry_set_text(GTK_ENTRY(app->chat_entry), "");
+        scroll();
     }
-    scroll();
 }
 
 
@@ -83,12 +97,24 @@ void create_message(const char *m, bool is_user) {
         datetime = GTK_WIDGET(gtk_builder_get_object(builder, "message_time"));
     }
 
+    //берет текущее время, но его нужно будет хранить в базе данных чтоб потом правильно отображать время прошлых сообщений
+    time_t current_time;
+    struct tm *time_info;
+    char time_string[9]; // HH:MM\0
+
+    time(&current_time);
+    time_info = localtime(&current_time);
+
+    strftime(time_string, sizeof(time_string), "%H:%M", time_info);
+
     gtk_widget_set_name(GTK_WIDGET(text), "message_text");
 
-    if(!is_user) gtk_label_set_text(GTK_LABEL(username), title);
+    if(!is_user) {
+        gtk_label_set_text(GTK_LABEL(username), title);
+        gtk_image_set_from_file(GTK_IMAGE(icon), icon_path);
+    } 
     gtk_label_set_text(GTK_LABEL(text), m);
-    gtk_label_set_text(GTK_LABEL(datetime), "16:35");
-    if (!is_user) gtk_image_set_from_file(GTK_IMAGE(icon), icon_path);
+    gtk_label_set_text(GTK_LABEL(datetime), time_string);
 
     gtk_box_pack_start(GTK_BOX(app->messages_container), message, false, true, 0);
     g_object_unref(builder);

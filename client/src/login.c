@@ -1,19 +1,5 @@
 #include "../inc/header.h"
 
-app_t *app_init() {
-	app_t *app = NULL;
- 
-	// allocate memory for app struct
-	app = (app_t *) malloc(sizeof(app_t));
-	if (app == NULL) return NULL;
-	memset(app, 0, sizeof(app_t));
-	
-    app->username = NULL;
-    app->password = NULL;
-
-	return app;
-}
-
 void open_login_window(void) {
     gtk_widget_hide(app->signup_window);
     show_login_form();

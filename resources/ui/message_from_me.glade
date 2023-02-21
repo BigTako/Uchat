@@ -8,7 +8,7 @@
     <property name="orientation">vertical</property>
     <property name="margin_top">15</property>
     <property name="margin_bottom">15</property>
-    <property name="margin_right">15</property>
+    <property name="margin_right">20</property>
     <property name="margin_left">50</property>
     <child>
       <object class="GtkBox">
