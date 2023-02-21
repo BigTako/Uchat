@@ -12,8 +12,8 @@ int main(int argc, char * argv[]) {
     
     gtk_init(&argc, &argv);
 
-    open_main_window();
-    //show_login_form();
+    //open_main_window();
+    show_login_form();
 
     gtk_main();
 
