@@ -1,6 +1,8 @@
 #include "../inc/header.h"
 
-GtkWidget *open_main_window(void) {
+GtkWidget *open_main_window(void) 
+{
+
     gtk_widget_hide(app->login_window);
     GtkWidget *window;
     GtkBuilder * ui_builder;
@@ -62,10 +64,57 @@ GtkWidget *open_main_window(void) {
 
     //gtk_label_set_text(GTK_LABEL(app->username_label), app->username_t);
 
-
     //gtk_label_set_text(GTK_LABEL(app->chat_label_info), " ");
     //gtk_widget_hide(app->chat_icon);
 
+    //GET ALL CURRENT CONVERSATIONS
+    char action = TAKE_CURRENT_CHATS;
+    char * server_query = NULL;
+    char responce_buff[MESSAGE_MAX_LEN];
+    int num_of_chats = 0;
+    bool online = true;
+    char ** chat_info_parts = NULL;
+    int members_rest_len = 0;
+    //char ** chat_info = NULL;
+    server_query = create_query_delim_separated(2, "F", "alex"); // have to store a hash password
+    printf("Working with user (%s) (%s)\n", "alex", "sheesh");
+    if (send(param->socket, server_query, strlen(server_query) + 1, 0) <= 0) online = false;
+    if (recv(param->socket, responce_buff, MESSAGE_MAX_LEN, 0) <= 0) online = false;
+    printf("Recived: %s\n", responce_buff);
+    if (responce_buff[0] != 'W') printf("RECIVED ABOBA (%d)\n", responce_buff[0]); // recived something wrong there are error in clients code!
+    num_of_chats = atoi(responce_buff + 2);
+    printf("Recived: %d\n", num_of_chats);
+    if (online == true) 
+    {
+        if (send(param->socket, "Y", 1, 0) <= 0) online = false;
+    }
+    if (num_of_chats == 0)
+    {
+        printf("[INFO] No chats to receive\n");
+    }
+    else
+    {
+        for (int a = 0; a < num_of_chats; a++) 
+        {
+            if (online) 
+            {
+
+                memset(responce_buff, '\0', strlen(responce_buff));
+                if (recv(param->socket, responce_buff, MESSAGE_MAX_LEN, 0) <= 0) online = false;
+                if (online) 
+                {
+                    chat_info_parts = mx_strsplit(responce_buff, QUERY_DELIM[0]);                    
+                    members_rest_len = strlen(chat_info_parts[0]) + strlen(chat_info_parts[1]) + strlen(chat_info_parts[2]) + 3;
+                    create_chat(chat_info_parts[1], chat_info_parts[2] , responce_buff + members_rest_len);
+                    if (send(param->socket, "Y", 1, 0) <= 0) online = false;
+                    mx_del_strarr(&chat_info_parts);
+                }
+            }
+        }
+        printf("[INFO] Successfuly received %d packages\n", num_of_chats);
+    }
+    free(server_query);
+    //GET ALL CURRENT CONVERSATIONS
 
     gtk_builder_connect_signals(ui_builder, NULL);
 

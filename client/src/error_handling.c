@@ -52,6 +52,7 @@ GtkWidget *open_error_window(char *error_message) {
     return window;
 }
 
+
 int check_login_data_for_errors(const char *username, const char *password) {
     //empty fields
     if (strcmp(username, "\0") == 0 
@@ -62,22 +63,18 @@ int check_login_data_for_errors(const char *username, const char *password) {
     if (contains_wrong_char(username) || contains_wrong_char(password)) {
         return 2;
     }
-
-    // for (int i = 0; i < 5; i++) {
-    //     if (strcmp(fake_database_username[i], username) == 0) {
-    //         return 3;
-    //     }
-    // }
-
     //if user dont exist
-    for (int i = 0; i < 5; i++) {
-        if (strcmp(fake_database_username[i], username) == 0 
-            && strcmp(fake_database_password[i], password) == 0) {
-            return 0;
-        }
+    char * server_query = create_query_delim_separated(3, "L", username, password); // have to store a hash password
+    int online = send_server_request(param, server_query);
+    
+    free(server_query);
+    if (online < 0) {
+        return 4;
     }
-
-    return 3;
+    if (online == 0) {
+        return 3;
+    }
+    return 0;
 }
 
 int check_signup_data_for_errors(const char *username, const char *password, const char *c_password) {
@@ -89,12 +86,20 @@ int check_signup_data_for_errors(const char *username, const char *password, con
     if (contains_wrong_char(username) || contains_wrong_char(password) || contains_wrong_char(c_password)) {
         return 2;
     }
-    for (int i = 0; i < 5; i++) {
-        if (strcmp(username, fake_database_username[i]) == 0) {
-            return 3;
-        }
-    }
     if (strcmp(password, c_password) != 0) return 4;
+
+    char * server_query = create_query_delim_separated(3, "R", username, password); // have to store a hash password
+    int online = send_server_request(param, server_query);
+    //if (online < 0) {
+    //    perror(errno);
+    //}
+    free(server_query);
+    if (online < 0) {
+        return 5;
+    }
+    if (online == 0) {
+        return 3;
+    }
     return 0;
 }
 

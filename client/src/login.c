@@ -106,7 +106,51 @@ void log_in(void) {
     case 3:
         open_error_window("Login error: Incorrect password or username.");
         break;
+    case 4:
+        open_error_window("Login error: Cant connect to the server.");
+        break;
     }
+
+    /* char action = TAKE_CURRENT_CHATS;
+    char * server_query = NULL;
+    char responce_buff[MESSAGE_MAX_LEN];
+    int num_of_chats = 0;
+    bool online = true;
+
+    server_query = create_query_delim_separated(2, "F", "alex"); // have to store a hash password
+    printf("Working with user (%s) (%s)\n", "alex", "sheesh");
+    if (send(param->socket, server_query, strlen(server_query) + 1, 0) <= 0) online = false;
+    if (recv(param->socket, responce_buff, MESSAGE_MAX_LEN, 0) <= 0) online = false;
+    printf("Recived: %s\n", responce_buff);
+    if (responce_buff[0] != 'W') printf("RECIVED ABOBA (%d)\n", responce_buff[0]); // recived something wrong there are error in clients code!
+    num_of_chats = atoi(responce_buff + 2);
+    printf("Recived: %d\n", num_of_chats);
+    if (online == true) 
+    {
+        if (send(param->socket, "Y", 1, 0) <= 0) online = false;
+    }
+    if (num_of_chats == 0)
+    {
+        printf("[INFO] No chats to receive\n");
+    }
+    else
+    {
+        for (int a = 0; a < num_of_chats; a++) 
+        {
+            if (online) 
+            {
+                memset(responce_buff, '\0', MESSAGE_MAX_LEN);
+                if (recv(param->socket, responce_buff, MESSAGE_MAX_LEN, 0) <= 0) online = false;
+                if (online) 
+                {
+                    //printf("%s\n", responce_buff);
+                    if (send(param->socket, "Y", 1, 0) <= 0) online = false;
+                }
+            }
+        }
+        printf("[INFO] Successfuly received %d packages\n", num_of_chats);
+    }
+    free(server_query);*/
 }
 
 void create_account(void) {
@@ -139,6 +183,10 @@ void create_account(void) {
     case 4:
         open_error_window("Signup error: The passwords must match.");
         break;
+    case 5:
+        open_error_window("Register error: Cant connect to the server.");
+        break;
     }
+
 
 }

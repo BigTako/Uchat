@@ -1,6 +1,7 @@
 #include "../inc/header.h"
 
-app_t *app_init() {
+app_t *app_init() 
+{
 	app_t *app = NULL;
  
 	// allocate memory for app struct
@@ -43,13 +44,12 @@ void send_message() {
     const char *message = gtk_entry_get_text(GTK_ENTRY(app->chat_entry));
     //тут нужно сделать проверку на пробелы и обрезать сообщение от них, но я хз как потому что типы разные
     if (strlen(gtk_entry_get_text(GTK_ENTRY(app->chat_entry))) != 0) {
-        if (change) create_message(message, true);
+        if (change) create_message(message, true); 
         else create_message(message, false);
         gtk_entry_set_text(GTK_ENTRY(app->chat_entry), "");
         scroll();
     }
 }
-
 
 
 void create_message(const char *m, bool is_user) {
@@ -120,7 +120,8 @@ void create_message(const char *m, bool is_user) {
     g_object_unref(builder);
 }
 
-void create_chat() {
+void create_chat(char * chat_id, char * chat_name, char * chat_members) 
+{
     //короче добавляются чаты в лист, но я хз конешно как переключать их
     GtkWidget *chat, *icon, *title, *status;
     GtkBuilder *builder = gtk_builder_new ();
@@ -139,9 +140,11 @@ void create_chat() {
     title = GTK_WIDGET(gtk_builder_get_object(builder, "chat_title"));
     status = GTK_WIDGET(gtk_builder_get_object(builder, "chat_status"));
 
+    char query_buff[1000];
+    sprintf(query_buff,"My id is %s, members are %s", chat_id, chat_members);
     gtk_image_set_from_file(GTK_IMAGE(icon), "../resources/icons/message_icon.png");
-    gtk_label_set_text(GTK_LABEL(title), "Heisenberg");
-    gtk_label_set_text(GTK_LABEL(status), "Never gonna give you up");
+    gtk_label_set_text(GTK_LABEL(title), chat_name);
+    gtk_label_set_text(GTK_LABEL(status), query_buff);
 
     //gtk_widget_set_name(chat, itoa(c.chat_icon));
 

@@ -12,19 +12,23 @@ INC_FILES = $(wildcard $(INC_DIR)/*.h)
 SRC_FILES = $(wildcard $(SRC_DIR)/*.c)
 OBJ_FILES = $(addprefix $(OBJ_DIR)/, $(notdir $(SRC_FILES:%.c=%.o)))
 
-LMX_DIR	= ../libs/libmx
+LMX_DIR	= libs/libmx
 LMX_A:=	$(LMX_DIR)/libmx.a
 LMX_INC:= $(LMX_DIR)/inc
+
+SSL_DIR = libraries/openssl
+SSL_FILES:= local_lib/lib
+SSL_INC_FILES:= $(SSL_DIR)
 
 all: clean install 
 
 install: $(LMX_A) $(NAME)
 
 $(NAME): $(OBJ_FILES)
-	@clang $(CFLG) $(OBJ_FILES) -L$(LMX_DIR) -lmx -o $@ $(CLIENT_COMPILE_GLOBAL)
+	@clang $(CFLG) $(OBJ_FILES) -L$(LMX_DIR) -lmx -o $@ $(CLIENT_COMPILE_GLOBAL) $(LIB_FLAGS)
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c $(INC_FILES)
-	@clang $(CFLG) -c $< -o $@ -I$(INC_DIR) -I$(LMX_INC) $(CLIENT_COMPILE_GLOBAL)
+	@clang $(CFLG) -c $< -o  $@ -I$(INC_DIR) -I$(LMX_INC) $(CLIENT_COMPILE_GLOBAL) $(LIB_FLAGS)
 
 $(OBJ_FILES): | $(OBJ_DIR)
 
