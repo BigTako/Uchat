@@ -1,5 +1,15 @@
 #include "../inc/header.h"
 
+int count_placeholders(char * str, char c)
+{
+	int i = 0, count = 0;
+	for (; str[i]; i++)
+	{
+  		count += (str[i] == c && mx_isalpha(str[i + 1]));
+	}
+	return count;
+}
+
 char * execute_query(sqlite3 * db, char * query)
 {
 	char * err = NULL;
@@ -119,6 +129,7 @@ int sqlite_execute(sqlite3 * db, char * query)
 	}
 	return 0;
 }
+
 
 
 

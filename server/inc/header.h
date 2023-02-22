@@ -11,6 +11,9 @@
 #include <string.h>
 #include <arpa/inet.h>
 #include <pthread.h>
+#include <errno.h>
+#include <poll.h>
+
 #include "../libraries/openssl/openssl/rsa.h"
 #include "../libraries/openssl/openssl/evp.h"
 #include "../libraries/openssl/openssl/pem.h"
@@ -46,6 +49,7 @@
 #define KEY_LENGHT 4096
 
 typedef unsigned char * code;
+#define HOLDERS(string) (count_placeholders(string, '%'))
 
 typedef struct s_thread_param
 {
@@ -57,6 +61,7 @@ typedef struct s_thread_param
 } t_thread_param;
 
 //DATABASE UTILS
+int count_placeholders(char * str, char c);
 void clear_inner_list(void * ptr);
 void delete_table(void *** table);
 char * mx_strstr_front(const char *haystack, const char *needle);
@@ -75,10 +80,10 @@ code encipher(code rsaPublicKeyChar, char * message, int * emLen, int * ekLen_v,
 code decipher(code rsaPrivateKeyChar, code encryptedMessage, unsigned long emLen, code ek, code iv, int ekLen);
 
 //SERVER DATABASE RELATIONSHIP UTILS
-void ** get_db_data_table(sqlite3 * db, code template, int colums, int rows, int count, ...);
+void ** get_db_data_table(sqlite3 * db, char * template, int colums, int rows, ...);
 code create_query_delim_separated(int count, ...);
 int validate_query(char * code, int delims_count, char * err_message);
-int format_and_execute (sqlite3 * db, char * template, int count, ...);
+int format_and_execute (sqlite3 * db, char * template, ...);
 char *userID_from_name(char *sql_username_str, sqlite3 *db);
 
 //SERVER UTILS
@@ -86,5 +91,6 @@ void* client_thread(void* vparam);
 void* exit_thread(void* vparam);
 char *encode_login(char *code, t_thread_param *param, bool *online);
 void encode(char * code, t_thread_param *param, bool *online, char *userID);
+
 #endif
 

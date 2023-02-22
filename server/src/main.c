@@ -14,13 +14,13 @@ int main(int argc, char ** argv)
 	sqlite3_open("database.db", &db);
 	
     format_and_execute(db, "CREATE TABLE IF NOT EXISTS %s(username TEXT NOT NULL UNIQUE, \
-                            password TEXT NOT NULL)", 1, USERS_TN);
+                            password TEXT NOT NULL)", USERS_TN);
 
     //creating table with conversations
     format_and_execute(db, "CREATE TABLE IF NOT EXISTS %s(\
                             conversation_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, \
                             name TEXT NOT NULL,\
-                            chat_members TEXT NOT NULL)", 1, CONVERSATIONS_TN);
+                            chat_members TEXT NOT NULL)", CONVERSATIONS_TN);
 
     //creating table with messages
 	format_and_execute(db, "CREATE TABLE IF NOT EXISTS %s(\
@@ -29,49 +29,14 @@ int main(int argc, char ** argv)
                             message_text TEXT NOT NULL, \
                             send_datetime INTEGER NOT NULL, \
                             conversation_id INTEGER NOT NULL, \
-                            status TEXT NOT NULL DEFAULT 'unread')", 1, MESSAGES_TN);
+                            status TEXT NOT NULL DEFAULT 'unread')", MESSAGES_TN);
 
     /*GENERATION OF RSA KEYS*/
     EVP_PKEY * key = generate_key_pair();
     code privateKeyChar = PRIVKEY_to_str(key);
     code publicKeyChar = PUBKEY_to_str(key);
     EVP_PKEY_free(key);
-    // data reveived from client
-    /*
-		<---CODES--->
-		S@TEXT@TIME@CONVERSATION_ID - send message
-		C@NAME@USERNAME1@USERNAME2@... - create new chat 
-		F@USERNAME@CONVERSATION_ID - renew chat
-		B@MESSAGE_ID
-		D@MESSAGE_ID
-		E@USERNAME@CONVERSATION_ID
-	*/
 
-
-
-    /*ВСТАВКА
-	char buf[10000];
-	int charcheck = sprintf(buf, "INSERT INTO messages VALUES(%d, %d, %s, %s, %s)", 1, 2, "'message'", "'2022'", "'asdfsdfsdfa'");
-	execute_query(db, buf);
-	printf("Query: %s\n", buf);*/
-
-    /*ВИБІРКА
-	int cols_count = 5;
-	void *** table = get_db_data_vector(db, "SELECT * FROM messages WHERE message_id>5", cols_count);
-	char * sheesh = NULL;
-	int id = 0;
-	for (int i = 0; table[i]; i++)
-	{
-		for (int j = 0; table[i][j]; j++)
-		{
-			sheesh = table[i][j];
-			printf("%s", sheesh);
-			if (table[i][j + 1]) printf("-");
-		}	
-		printf("\n");
-	}
-    delete_table(&table);
-*/
     int welcomeSocket;
     struct sockaddr_in serverAddr;
     struct sockaddr_storage serverStorage;

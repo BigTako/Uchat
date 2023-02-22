@@ -38,7 +38,7 @@ typedef unsigned char * code;
 #define MESSAGE_CODE "M"
 
 #define DB_ROWS_MAX 10000
-#define MESSAGE_MAX_LEN 10000
+#define MESSAGE_MAX_LEN 4096
 #define KEY_LENGHT 4096
 typedef unsigned char * code;
 
