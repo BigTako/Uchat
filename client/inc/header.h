@@ -60,6 +60,7 @@ void create_message(const char *m, bool is_user);
 void find_user();
 gboolean enter_keypress(GtkWidget *widget, GdkEventKey *event, gpointer data);
 void scroll();
+void change_chat(GtkListBox* self, GtkListBoxRow* row, gpointer data);
 
 //window functions
 void open_login_window(void);

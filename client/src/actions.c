@@ -37,6 +37,16 @@ void find_user() {
     mx_printstr(username);
 }
 
+void change_chat(GtkListBox* self, GtkListBoxRow* row, gpointer data) {
+    //const char *name = gtk_widget_get_name(GTK_WIDGET(row));
+    mx_printstr("changed chat\n");
+    // app->chat_id = atoi(name);
+    // change_chat(app->chat_id);
+    // reshow_old_messages(app->chat_id);
+    // g_print("Chat changed: %d\n", app->chat_id);
+    // call_show_chat();
+}
+
 bool change = true;
 
 void send_message() {

@@ -60,7 +60,7 @@ GtkWidget *open_main_window(void)
     app->find_user_entry = GTK_WIDGET(gtk_builder_get_object(ui_builder, "user_search_bar"));
     //mx_printstr(app->username_t);
 
-    g_signal_connect(window, "key_press_event", G_CALLBACK (enter_keypress), NULL);
+    
 
     //gtk_label_set_text(GTK_LABEL(app->username_label), app->username_t);
 
@@ -120,6 +120,9 @@ GtkWidget *open_main_window(void)
 
     gtk_widget_show(window);
 
+    //signals
+    g_signal_connect(window, "key_press_event", G_CALLBACK (enter_keypress), NULL);
+    g_signal_connect(G_OBJECT(app->chat_list), "row-selected", G_CALLBACK(change_chat), "1");
     g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
 
     return window;
