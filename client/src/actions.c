@@ -33,7 +33,55 @@ void scroll() {
 
 void find_user() {
     //переписать под нормальный поиск)
+    //user1 searches user2 in the searching panel
+    //user1 gets user2 username
     const char *username = gtk_entry_get_text(GTK_ENTRY(app->find_user_entry));
+    char request_buff[4096];
+    char responce_buff[4096];
+    char ** info_parts = NULL;
+    //user1 makes a request to server(C@NAME@USERNAME1@USERNAME2@... - create new chat) with task to create a chat
+    sprintf(request_buff, "%c%s?%s%s", CREATE_CHAT, QUERY_DELIM, QUERY_DELIM, username);
+    // ? sign is putted to identify that name of chat have to be equal to username of user2(or to user1 if the user2 account)
+    printf("server query: %s\n", request_buff);
+        
+    if (send(param->socket, request_buff, strlen(request_buff) + 1, 0) <= 0) {
+        perror(errno);
+    }
+    if (recv(param->socket, responce_buff, 4096, 0) <= 0) {
+        printf("[ERROR] Something went wrong while creating a chat with user %s\n", username);
+    }
+    else
+    {
+        switch (responce_buff[0])
+        {
+            case MESSAGE_CODE[0]:
+                info_parts = mx_strsplit(responce_buff, QUERY_DELIM[0]);
+                printf("Got a server responce: %s\n", responce_buff);
+                create_chat(info_parts[1], "?", info_parts + 2);
+                printf("[INFO] Chat successfuly created\n", username);
+                mx_del_strarr(&info_parts);
+                break;
+            case 'N':
+                open_error_window(responce_buff + 2);
+                //printf("[ERROR] %s\n", );
+                break;       
+        }
+    }
+
+    /*if (send_server_request(param, request_buff) != 1)
+    {
+        printf("[ERROR] Something went wrong while creating a chat with user %s\n", username);
+    }
+    else
+    {
+        printf("[INFO] Chat successfuly created\n", username);
+        create_chat("89", "mychat", "@alex@sheesh");
+    }*/
+    //server receives a request
+    // if count of QUERY_DELIM in "members" part of request == 1(create dialog), then we have to check if this chat is already exists
+    // if it does send a message to client, to make him know this
+    // if it doesn't create it and send a client information about this chat (M@chat_id@chat_name@chat_members)
+
     mx_printstr(username);
 }
 
@@ -130,7 +178,7 @@ void create_message(const char *m, bool is_user) {
     g_object_unref(builder);
 }
 
-void create_chat(char * chat_id, char * chat_name, char * chat_members) 
+void create_chat(char * chat_id, char * chat_name, char ** chat_members) 
 {
     //короче добавляются чаты в лист, но я хз конешно как переключать их
     GtkWidget *chat, *icon, *title, *status;
@@ -151,9 +199,19 @@ void create_chat(char * chat_id, char * chat_name, char * chat_members)
     status = GTK_WIDGET(gtk_builder_get_object(builder, "chat_status"));
 
     char query_buff[1000];
-    sprintf(query_buff,"My id is %s, members are %s", chat_id, chat_members);
+    sprintf(query_buff,"My id is %s", chat_id);
     gtk_image_set_from_file(GTK_IMAGE(icon), "../resources/icons/message_icon.png");
-    gtk_label_set_text(GTK_LABEL(title), chat_name);
+    if (!strcmp(chat_name, "?"))
+    {
+        if (!strcmp(app->username_t, chat_members[0]))
+            gtk_label_set_text(GTK_LABEL(title), chat_members[1]);    
+        else
+            gtk_label_set_text(GTK_LABEL(title), chat_members[0]);
+    }
+    else
+    {
+        gtk_label_set_text(GTK_LABEL(title), chat_name);
+    }
     gtk_label_set_text(GTK_LABEL(status), query_buff);
 
     //gtk_widget_set_name(chat, itoa(c.chat_icon));

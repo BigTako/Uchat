@@ -13,7 +13,8 @@ int main(int argc, char ** argv)
     sqlite3 * db = NULL;
 	sqlite3_open("database.db", &db);
 	
-    format_and_execute(db, "CREATE TABLE IF NOT EXISTS %s(username TEXT NOT NULL UNIQUE, \
+    format_and_execute(db, "CREATE TABLE IF NOT EXISTS %s(\
+                            username TEXT NOT NULL UNIQUE, \
                             password TEXT NOT NULL)", USERS_TN);
 
     //creating table with conversations
