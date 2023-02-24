@@ -63,12 +63,29 @@ GtkWidget *open_main_window(void)
     
 
     //gtk_label_set_text(GTK_LABEL(app->username_label), app->username_t);
-
+    //gtk_entry_set_text(GTK_ENTRY(app->username_label), app->username);
+    gtk_label_set_text(GTK_LABEL(app->username_label), app->username_t);
     //gtk_label_set_text(GTK_LABEL(app->chat_label_info), " ");
     //gtk_widget_hide(app->chat_icon);
 
     //GET ALL CURRENT CONVERSATIONS
-    char action = TAKE_CURRENT_CHATS;
+    get_and_show_user_chats(TAKE_CURRENT_CHATS);
+    //GET ALL CURRENT CONVERSATIONS
+
+    gtk_builder_connect_signals(ui_builder, NULL);
+
+    gtk_widget_show(window);
+
+    //signals
+    g_signal_connect(window, "key_press_event", G_CALLBACK (enter_keypress), NULL);
+    g_signal_connect(G_OBJECT(app->chat_list), "row-selected", G_CALLBACK(change_chat), "1");
+    g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
+
+    return window;
+}
+
+void get_and_show_user_chats(char action)
+{
     char * server_query = NULL;
     char responce_buff[MESSAGE_MAX_LEN];
     int num_of_chats = 0;
@@ -76,8 +93,9 @@ GtkWidget *open_main_window(void)
     char ** chat_info_parts = NULL;
     int members_rest_len = 0;
     //char ** chat_info = NULL;
-    server_query = create_query_delim_separated(2, "F", "alex"); // have to store a hash password
-    printf("Working with user (%s) (%s)\n", "alex", "sheesh");
+
+    server_query = create_query_delim_separated(2, &action, app->username_t); // have to store a hash password
+    //printf("Working with user (%s) (%s)\n", app->username, app->password);
     if (send(param->socket, server_query, strlen(server_query) + 1, 0) <= 0) online = false;
     if (recv(param->socket, responce_buff, MESSAGE_MAX_LEN, 0) <= 0) online = false;
     printf("Recived: %s\n", responce_buff);
@@ -104,8 +122,7 @@ GtkWidget *open_main_window(void)
                 if (online) 
                 {
                     chat_info_parts = mx_strsplit(responce_buff, QUERY_DELIM[0]);                    
-                    members_rest_len = strlen(chat_info_parts[0]) + strlen(chat_info_parts[1]) + strlen(chat_info_parts[2]) + 3;
-                    create_chat(chat_info_parts[1], chat_info_parts[2] , responce_buff + members_rest_len);
+                    create_chat(chat_info_parts[1], chat_info_parts[2] , chat_info_parts + 3);
                     if (send(param->socket, "Y", 1, 0) <= 0) online = false;
                     mx_del_strarr(&chat_info_parts);
                 }
@@ -114,16 +131,4 @@ GtkWidget *open_main_window(void)
         printf("[INFO] Successfuly received %d packages\n", num_of_chats);
     }
     free(server_query);
-    //GET ALL CURRENT CONVERSATIONS
-
-    gtk_builder_connect_signals(ui_builder, NULL);
-
-    gtk_widget_show(window);
-
-    //signals
-    g_signal_connect(window, "key_press_event", G_CALLBACK (enter_keypress), NULL);
-    g_signal_connect(G_OBJECT(app->chat_list), "row-selected", G_CALLBACK(change_chat), "1");
-    g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
-
-    return window;
 }

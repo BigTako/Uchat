@@ -158,6 +158,8 @@ void encode(char * code, t_thread_param *param, bool *online, char *user)
 	int members_int = 0;
 	int executing_status = 0;
 	int count_of_chats = 0;
+	int newchat_id = 0;
+	char * another_user = NULL;
 	switch(code_num)
 	{
 		case SEND_MESSAGE: //S@TEXT@TIME@CONVERSATION_ID - send message
@@ -179,14 +181,18 @@ void encode(char * code, t_thread_param *param, bool *online, char *user)
 			}
 			break;
 		case CREATE_CHAT: //C@NAME@USERNAME1@USERNAME2@... - create new chat 
+			/*
+				parts[0] - action
+				parts[1] - chat name
+				parts[2]...parts[n] - members
+			*/
+
 			members_int = mx_null_arr_len(parts + 2) + 1;
 			members_str = create_query_delim_separated(2, user, code + strlen(parts[0]) + strlen(parts[1]) + 2);
 				
 			printf("Chat members: %s\n, count %d\n", members_str, members_int);
 			if (char_count(members_str, QUERY_DELIM[0]) == members_int)
 			{
-				db_query = "INSERT INTO %s(name, chat_members) VALUES('%s', '%s')";
-				executing_status = format_and_execute(param->db, db_query, CONVERSATIONS_TN, parts[1], members_str);  
 				if (executing_status != 0)
 				{
 					if (send(param->socket, "N", 1, 0) <= 0) *online = false;				

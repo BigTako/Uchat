@@ -54,12 +54,21 @@ void ** get_db_data_vector(sqlite3 * db, char * selection_query, int cols_count,
 	void ** table = malloc(((int)DB_ROWS_MAX)*sizeof(void*));
 	sqlite3_stmt * stmt;
 	sqlite3_prepare_v2(db, (const char *)selection_query, -1, &stmt, NULL);
+
+	printf("1\n");
 	int row_indx = 0;
 	while (sqlite3_step(stmt) != SQLITE_DONE && row_indx != rows_count)
 	{
+		printf("able to find something\n");
 		table[row_indx] = mx_strnew(100000);
 		for (int i = 0; i < cols_count; i++)
 		{
+			if (!sqlite3_column_text(stmt, i))
+			{
+				table[row_indx + 1] = NULL;
+				delete_table(&table);
+				return NULL;			
+			}
 			table[row_indx] = strcat(table[row_indx], sqlite3_column_text(stmt, i));
 			if (i != cols_count - 1)
 			{

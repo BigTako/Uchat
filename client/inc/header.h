@@ -54,13 +54,14 @@ typedef struct s_send_param
 
 //action functions
 void show_settings(void);
-void create_chat();
 void send_message();
 void create_message(const char *m, bool is_user);
 void find_user();
 gboolean enter_keypress(GtkWidget *widget, GdkEventKey *event, gpointer data);
 void scroll();
 void change_chat(GtkListBox* self, GtkListBoxRow* row, gpointer data);
+
+static gboolean button_press_cb(GtkWidget *widget, GdkEventButton *event, gpointer data);
 
 //window functions
 void open_login_window(void);
@@ -75,7 +76,10 @@ int check_login_data_for_errors(const char *username, const char *password);
 int check_signup_data_for_errors(const char *username, const char *password, const char *c_password);
 
 //working with chats
-void create_chat(char * chat_id, char * chat_name, char * chat_members);
+void create_chat(char * chat_id, char * chat_name, char ** chat_members);
+
+gboolean my_message_menu(GtkWidget *widget, GdkEventButton *event, gpointer data);
+void other_message_menu();
 
 typedef struct app_s
 {

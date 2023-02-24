@@ -77,26 +77,52 @@
 
 #chat #chat_list {
     background: #414b4b;
-    
     border-right: 1px solid #414b4b;
 }
 
-#chat #messages_container > box > box {
+#chat #messages_container > button {
+    background: #414b4b;
+    outline-style: none;
+    box-shadow: none;
+    border-color: transparent;
+    /* transition: all 10000s ease; */
+}
+
+#chat #messages_container > button:hover {
+    color: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+    -gtk-icon-shadow: none;
+    border-color: transparent;
+    outline-style: none;
+    box-shadow: none;
+    -gtk-button-images: 0;
+    -gtk-button-inner-border: 0;
+}
+
+#chat #messages_container > button > box > box {
     background: #5e6e6d;
     padding: 15px;
-    box-shadow: 0px 10px 15px 2px rgba(0,0,0,0.65);
+    box-shadow: 0px 10px 10px 2px rgba(0,0,0,0.65);
     border-radius: 20px 20px 20px 20px;
 }
 
-#chat #messages_container #message_sender {
+#chat #messages_container > button > #message_sender {
     color: #eef0f0;
 }
 
-#chat #messages_container #message_text {
+#chat #messages_container > button > #message_text {
     color: #d9dede;
 }
 
-#chat #messages_container > box > box > label:nth-child(1) {
+#chat #messages_container > button > box > box > label:last-child {
+    color: #d9dede;
+}
+
+#chat #messages_container > button > box > box > label:nth-child(1) {
+    color: rgb(236, 235, 235);
+}
+#chat #messages_container > button > box > box > label:nth-child(2) {
     color: rgb(236, 235, 235);
 }
 
