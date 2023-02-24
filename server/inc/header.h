@@ -38,6 +38,7 @@
 #define DELETE_MESSAGE 'D'
 #define EXIT_CONVERSATION 'E'
 #define TAKE_CURRENT_CHATS 'F'
+#define GET_NEW_MESSAGES 'G'
 
 #define USERS_TN "users"
 #define MESSAGES_TN "messages"

@@ -265,6 +265,22 @@ void encode(char * code, t_thread_param *param, bool *online, char *user)
 				delete_table(&table);
 			}
 			break;
+		case GET_NEW_MESSAGES:
+			//M@message_id@from_username@message_text@send_datetime@conversation_id
+			db_query = "SELECT %s.message_id, %s.from_username, %s.message_text, %s.send_datetime, conversation_id \
+						FROM %s \
+						INNER JOIN %s \
+						ON conversation_id = %s.conversation_id \
+						WHERE %s.from_username != '%s' AND chat_members LIKE '%%%s%%' AND %s.status == 'unread'";
+			
+			table = get_db_data_table(param->db, db_query, 5,  MESSAGES_TN, MESSAGES_TN, MESSAGES_TN, MESSAGES_TN, CONVERSATIONS_TN,
+	        MESSAGES_TN, MESSAGES_TN, MESSAGES_TN, user, user, MESSAGES_TN);
+			online = s_to_c_info_exchange(param, table);
+			delete_table(&table);
+			//we want to get all messages where WE ARE NOT SENDER, status is unread 
+			//but we want to get 
+
+			break;
 		case TAKE_CURRENT_CHATS:
 			//parts[1] - username member of conversation
 			db_query = "SELECT * FROM %s WHERE chat_members LIKE '%%%s%s%%'"; // SELECT * FROM CONVERSATIONS_TN WHERE chat_members LIKE '%username%';
@@ -378,12 +394,18 @@ void* client_thread(void* vparam)
 		memset(buffer, '\0', MESSAGE_MAX_LEN);
     }
 	printf("got a username: %s\n", user);
-    while (online) {
+    while (online) 
+	{
 		int status = recv(param->socket, buffer, MESSAGE_MAX_LEN, 0);
-		while (status == -1 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
+		printf("trying to get status\n");
+		while (status == -1 && (errno == EAGAIN || errno == EWOULDBLOCK)) 
+		{
+			printf("...\n");
+			errno = 0;
 			status = recv(param->socket, buffer, MESSAGE_MAX_LEN, 0);
 		}
-        if (status <= 0) {
+        if (status <= 0) 
+		{
             online = false;
             //OFLINE
             break;

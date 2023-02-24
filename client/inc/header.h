@@ -33,6 +33,7 @@ typedef unsigned char * code;
 #define DELETE_MESSAGE 'D'
 #define EXIT_CONVERSATION 'E'
 #define TAKE_CURRENT_CHATS 'F'
+#define GET_NEW_MESSAGES 'G'
 
 #define WAIT_FOR_CODE "W"
 #define MESSAGE_CODE "M"
@@ -75,6 +76,7 @@ int check_signup_data_for_errors(const char *username, const char *password, con
 
 //working with chats
 void create_chat(char * chat_id, char * chat_name, char ** chat_members);
+void collect_new_messages();
 
 typedef struct app_s
 {

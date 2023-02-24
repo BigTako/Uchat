@@ -119,6 +119,7 @@ GtkWidget *open_main_window(void)
 
     //GET ALL CURRENT CONVERSATIONS
     get_and_show_user_chats(TAKE_CURRENT_CHATS);
+    collect_new_messages(); 
     //GET ALL CURRENT CONVERSATIONS
 
     gtk_builder_connect_signals(ui_builder, NULL);

@@ -15,8 +15,66 @@ app_t *app_init()
 	return app;
 }
 
+void collect_new_messages()
+{
+    char responce_buff[MESSAGE_MAX_LEN + 100];
+    char action = GET_NEW_MESSAGES;
+    int count_of_messages = 0;
+    bool online = true;
+    char ** message_info_parts = NULL;
+    printf("in collect messages\n");
+    if (send(param->socket, "G", 2, 0) <= 0)  // send a request to server for new messages
+    {
+        online = false;
+        perror(errno);
+    }
+    if (recv(param->socket, responce_buff, 1000, 0) <= 0) // receive a repsonce with count of messages
+    {
+        online = false;
+        printf("[ERROR] Something went wrong while GET MESSAGES request handling\n");
+    }
+    if (send(param->socket, "Y", 2, 0) <= 0)  // send a responce to server with info that count is received
+    {
+        online = false;
+        perror(errno);
+    }
+    switch(responce_buff[0])
+    {
+        case WAIT_FOR_CODE[0]:
+            printf("Ready to recieve %s messages\n", responce_buff + 2);
+            count_of_messages = atoi(responce_buff + 2);
+            memset(responce_buff, '\0', strlen(responce_buff));
+
+            for (int a = 0; a < count_of_messages; a++) 
+            {
+                if (online) 
+                {
+
+                    memset(responce_buff, '\0', strlen(responce_buff));
+                    if (recv(param->socket, responce_buff, MESSAGE_MAX_LEN, 0) <= 0) online = false;
+                    if (online) 
+                    {
+                        //M@message_id@from_username@message_text@send_datetime@conversation_id
+                        //message_info_parts = mx_strsplit(responce_buff, QUERY_DELIM[0]);
+                        //create_message(message_info_parts[3], 0);
+                        printf("Received message: %s\n", responce_buff);
+                        if (send(param->socket, "Y", 2, 0) <= 0) online = false;
+                        //mx_del_strarr(&message_info_parts);
+                    }
+                }
+	        }
+            
+            printf("[INFO] Successfuly received %d packages\n", count_of_messages);
+            break;
+        case 'N':
+            printf("[INFO] No messages to receive\n");
+            break;
+    }
+}
+
 gboolean enter_keypress(GtkWidget *widget, GdkEventKey *event, gpointer data) {
-    if (event->keyval == GDK_KEY_Return) {
+    if (event->keyval == GDK_KEY_Return) 
+    {
         if (gtk_widget_has_focus(app->chat_entry)) send_message();
         if (gtk_widget_has_focus(app->find_user_entry)) find_user();
         return TRUE;
@@ -68,20 +126,6 @@ void find_user() {
         }
     }
 
-    /*if (send_server_request(param, request_buff) != 1)
-    {
-        printf("[ERROR] Something went wrong while creating a chat with user %s\n", username);
-    }
-    else
-    {
-        printf("[INFO] Chat successfuly created\n", username);
-        create_chat("89", "mychat", "@alex@sheesh");
-    }*/
-    //server receives a request
-    // if count of QUERY_DELIM in "members" part of request == 1(create dialog), then we have to check if this chat is already exists
-    // if it does send a message to client, to make him know this
-    // if it doesn't create it and send a client information about this chat (M@chat_id@chat_name@chat_members)
-
     mx_printstr(username);
 }
 
@@ -99,9 +143,34 @@ bool change = true;
 
 void send_message() {
     //create_chat();
+    //first user types a message in input field and presses enter key
+    //then we can get a content of inputed message
     const char *message = gtk_entry_get_text(GTK_ENTRY(app->chat_entry));
-    //тут нужно сделать проверку на пробелы и обрезать сообщение от них, но я хз как потому что типы разные
-    if (strlen(gtk_entry_get_text(GTK_ENTRY(app->chat_entry))) != 0) {
+    //when we'he got a content, message information can be transfered to database
+    //S@TEXT@TIME@CONVERSATION_ID - send message
+    char * chat_id = "1";
+    char action[2] = {SEND_MESSAGE, '\0'};
+    
+    char * server_query = create_query_delim_separated(4, action, message, mx_itoa((time(NULL))), chat_id);
+    char responce_buff[1000];
+    printf("Created server query: %s\n", server_query);
+    
+    if (send(param->socket, server_query, strlen(server_query) + 1, 0) <= 0) 
+    {
+        perror(errno);
+    }
+
+    if (recv(param->socket, responce_buff, 4096, 0) <= 0 || responce_buff[0] != 'Y') 
+    {
+        printf("[ERROR] Something went wrong while inserting message to db\n");
+    }
+    else
+    {
+        printf("[INFO]] Successfuly inserted message to databse\n");
+    }
+    
+    if (strlen(gtk_entry_get_text(GTK_ENTRY(app->chat_entry))) != 0) 
+    {
         if (change) create_message(message, true); 
         else create_message(message, false);
         gtk_entry_set_text(GTK_ENTRY(app->chat_entry), "");
@@ -176,6 +245,7 @@ void create_message(const char *m, bool is_user) {
 
     gtk_box_pack_start(GTK_BOX(app->messages_container), message, false, true, 0);
     g_object_unref(builder);
+     
 }
 
 void create_chat(char * chat_id, char * chat_name, char ** chat_members) 
