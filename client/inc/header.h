@@ -12,6 +12,7 @@
 #include <arpa/inet.h>
 #include <pthread.h>
 #include <poll.h>
+#include <errno.h>
 #include <gtk/gtk.h>
 
 #include "../libs/openssl/rsa.h"
@@ -49,6 +50,7 @@ typedef struct s_send_param
 	int socket;
     char *server_IP;
     char *server_port;
+    pthread_mutex_t *mutex_R;
     int * cmdEXIT;
 } t_send_param;
 

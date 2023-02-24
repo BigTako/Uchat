@@ -22,6 +22,7 @@ void collect_new_messages()
     int count_of_messages = 0;
     bool online = true;
     char ** message_info_parts = NULL;
+    pthread_mutex_lock(param->mutex_R);
     printf("in collect messages\n");
     if (send(param->socket, "G", 2, 0) <= 0)  // send a request to server for new messages
     {
@@ -70,6 +71,7 @@ void collect_new_messages()
             printf("[INFO] No messages to receive\n");
             break;
     }
+    pthread_mutex_unlock(param->mutex_R);
 }
 
 gboolean enter_keypress(GtkWidget *widget, GdkEventKey *event, gpointer data) {
@@ -100,6 +102,7 @@ void find_user() {
     //user1 makes a request to server(C@NAME@USERNAME1@USERNAME2@... - create new chat) with task to create a chat
     sprintf(request_buff, "%c%s?%s%s", CREATE_CHAT, QUERY_DELIM, QUERY_DELIM, username);
     // ? sign is putted to identify that name of chat have to be equal to username of user2(or to user1 if the user2 account)
+    pthread_mutex_lock(param->mutex_R);
     printf("server query: %s\n", request_buff);
         
     if (send(param->socket, request_buff, strlen(request_buff) + 1, 0) <= 0) {
@@ -125,7 +128,7 @@ void find_user() {
                 break;       
         }
     }
-
+    pthread_mutex_unlock(param->mutex_R);
     mx_printstr(username);
 }
 
@@ -154,7 +157,7 @@ void send_message() {
     char * server_query = create_query_delim_separated(4, action, message, mx_itoa((time(NULL))), chat_id);
     char responce_buff[1000];
     printf("Created server query: %s\n", server_query);
-    
+    pthread_mutex_lock(param->mutex_R);
     if (send(param->socket, server_query, strlen(server_query) + 1, 0) <= 0) 
     {
         perror(errno);
@@ -168,7 +171,7 @@ void send_message() {
     {
         printf("[INFO]] Successfuly inserted message to databse\n");
     }
-    
+    pthread_mutex_unlock(param->mutex_R);
     if (strlen(gtk_entry_get_text(GTK_ENTRY(app->chat_entry))) != 0) 
     {
         if (change) create_message(message, true); 

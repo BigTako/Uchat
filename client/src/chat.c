@@ -12,6 +12,7 @@ void get_and_show_user_chats(char action)
     
     server_query = create_query_delim_separated(2, &action, app->username_t); // have to store a hash password
     //printf("Working with user (%s) (%s)\n", app->username, app->password);
+    pthread_mutex_lock(param->mutex_R);
     if (send(param->socket, server_query, strlen(server_query) + 1, 0) <= 0) online = false;
     if (recv(param->socket, responce_buff, MESSAGE_MAX_LEN, 0) <= 0) online = false;
     printf("Recived: %s\n", responce_buff);
@@ -46,6 +47,7 @@ void get_and_show_user_chats(char action)
         }
         printf("[INFO] Successfuly received %d packages\n", num_of_chats);
     }
+    pthread_mutex_unlock(param->mutex_R);
     free(server_query);
 }
 

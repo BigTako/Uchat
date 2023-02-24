@@ -1,5 +1,4 @@
 #include "../inc/header.h"
-#include <errno.h>
 /*
     S@TEXT@CONVERSATION_ID - send message
 	C@NAME@USERNAME1@USERNAME2@... - create new chat 
@@ -43,14 +42,18 @@ code create_query_delim_separated(int count, ...)
 
 int send_server_request(t_send_param *param, code query)
 {
+    pthread_mutex_lock(param->mutex_R);
     if (send(param->socket, query, strlen(query) + 1, 0) <= 0) {
         perror(errno);
+        pthread_mutex_unlock(param->mutex_R);
         return -1;
     }
     char a[1];
     if (recv(param->socket, a, 1, 0) <= 0) {
+        pthread_mutex_unlock(param->mutex_R);
         return -1;
     }
+    pthread_mutex_unlock(param->mutex_R);
     switch (a[0])
     {
         case 'Y':
