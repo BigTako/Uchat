@@ -17,8 +17,8 @@ int main(int argc, char * argv[]) {
     int cmdEXIT = 0;
     //int status_addr;
     param = malloc(sizeof(t_send_param*));
-    pthread_mutex_t mutex_R;
-    param->mutex_R = &mutex_R;
+    pthread_mutex_t * mutex_R = malloc(sizeof(pthread_mutex_t *));
+    param->mutex_R = mutex_R;
     param->server_IP = argv[1];
     param->server_port = argv[2];
     printf("Input params: %s %s\n", param->server_IP, param->server_port);

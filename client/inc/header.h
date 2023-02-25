@@ -64,6 +64,10 @@ gboolean enter_keypress(GtkWidget *widget, GdkEventKey *event, gpointer data);
 void scroll();
 void change_chat(GtkListBox* self, GtkListBoxRow* row, gpointer data);
 
+gboolean my_message_menu(GtkWidget *widget, GdkEventButton *event, gpointer data);
+gboolean other_message_menu(GtkWidget *widget, GdkEventButton *event, gpointer data);
+void create_options_popover(GtkWidget *widget, bool isMy);
+
 //window functions
 void open_login_window(void);
 GtkWidget *open_signup_window(void);
@@ -111,9 +115,14 @@ typedef struct app_s
     GtkWidget *chat_scroller;
     GtkWidget *chat_info;
 
+    GtkWidget *my_options;
+    GtkWidget *other_options;
+
     char *username;
     char *password;
     const char *username_t;
+
+    char *active_message;
 }              app_t;
 
 app_t *app_init();

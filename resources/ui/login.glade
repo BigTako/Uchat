@@ -94,6 +94,7 @@
           <object class="GtkEntry" id="password_entry">
             <property name="name">password_entry</property>
             <property name="visible">True</property>
+            <property name="visibility">False</property>
             <property name="can_focus">True</property>
             <property name="tooltip_text" translatable="yes">Enter password</property>
             <property name="margin_left">60</property>

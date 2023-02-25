@@ -11,6 +11,7 @@ app_t *app_init()
 	
     app->username = NULL;
     app->password = NULL;
+    app->active_message = malloc(1);
 
 	return app;
 }
@@ -23,29 +24,29 @@ void collect_new_messages()
     bool online = true;
     char ** message_info_parts = NULL;
     pthread_mutex_lock(param->mutex_R);
-    printf("in collect messages\n");
-    if (send(param->socket, "G", 2, 0) <= 0)  // send a request to server for new messages
+    if (send(param->socket, "G", 1, 0) <= 0) 
     {
-        online = false;
         perror(errno);
     }
+
     if (recv(param->socket, responce_buff, 1000, 0) <= 0) // receive a repsonce with count of messages
     {
         online = false;
         printf("[ERROR] Something went wrong while GET MESSAGES request handling\n");
     }
+
     if (send(param->socket, "Y", 2, 0) <= 0)  // send a responce to server with info that count is received
     {
         online = false;
         perror(errno);
     }
+
     switch(responce_buff[0])
     {
         case WAIT_FOR_CODE[0]:
             printf("Ready to recieve %s messages\n", responce_buff + 2);
             count_of_messages = atoi(responce_buff + 2);
             memset(responce_buff, '\0', strlen(responce_buff));
-
             for (int a = 0; a < count_of_messages; a++) 
             {
                 if (online) 
@@ -56,23 +57,24 @@ void collect_new_messages()
                     if (online) 
                     {
                         //M@message_id@from_username@message_text@send_datetime@conversation_id
-                        //message_info_parts = mx_strsplit(responce_buff, QUERY_DELIM[0]);
-                        //create_message(message_info_parts[3], 0);
-                        printf("Received message: %s\n", responce_buff);
+                        message_info_parts = mx_strsplit(responce_buff, QUERY_DELIM[0]);
+                        create_message(message_info_parts[3], 0);
                         if (send(param->socket, "Y", 2, 0) <= 0) online = false;
-                        //mx_del_strarr(&message_info_parts);
+                        mx_del_strarr(&message_info_parts);
                     }
                 }
 	        }
-            
+
             printf("[INFO] Successfuly received %d packages\n", count_of_messages);
             break;
         case 'N':
             printf("[INFO] No messages to receive\n");
             break;
     }
+    if (recv(param->socket, responce_buff, MESSAGE_MAX_LEN, 0) <= 0) online = false;
     pthread_mutex_unlock(param->mutex_R);
 }
+
 
 gboolean enter_keypress(GtkWidget *widget, GdkEventKey *event, gpointer data) {
     if (event->keyval == GDK_KEY_Return) 
@@ -157,7 +159,7 @@ void send_message() {
     char * server_query = create_query_delim_separated(4, action, message, mx_itoa((time(NULL))), chat_id);
     char responce_buff[1000];
     printf("Created server query: %s\n", server_query);
-    pthread_mutex_lock(param->mutex_R);
+    //pthread_mutex_lock(param->mutex_R);
     if (send(param->socket, server_query, strlen(server_query) + 1, 0) <= 0) 
     {
         perror(errno);
@@ -171,7 +173,7 @@ void send_message() {
     {
         printf("[INFO]] Successfuly inserted message to databse\n");
     }
-    pthread_mutex_unlock(param->mutex_R);
+    //pthread_mutex_unlock(param->mutex_R);
     if (strlen(gtk_entry_get_text(GTK_ENTRY(app->chat_entry))) != 0) 
     {
         if (change) create_message(message, true); 
@@ -194,19 +196,32 @@ void create_message(const char *m, bool is_user) {
     //     g_critical ("Couldn't load file: %s", window_path);
     // }
 
-    if (change) {
+    /*if (change) {
         if (!gtk_builder_add_from_file (builder, "../resources/ui/message_from_me.glade", &error)) {
             g_critical ("Couldn't load file: %s", window_path);
         }
-        change = false;
+        //change = false;
         
     }
     else {
         if (!gtk_builder_add_from_file (builder, "../resources/ui/message_from_other.glade", &error)) {
             g_critical ("Couldn't load file: %s", window_path);
         }
-        change = true;
+        //change = true;
         
+    }*/
+
+    if (is_user)
+    {
+        if (!gtk_builder_add_from_file (builder, "../resources/ui/message_from_me.glade", &error)) {
+            g_critical ("Couldn't load file: %s", window_path);
+        }
+    }
+    else
+    {
+        if (!gtk_builder_add_from_file (builder, "../resources/ui/message_from_other.glade", &error)) {
+            g_critical ("Couldn't load file: %s", window_path);
+        }
     }
 
     message = GTK_WIDGET(gtk_builder_get_object (builder, "message"));
