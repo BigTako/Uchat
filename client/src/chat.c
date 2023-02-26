@@ -121,11 +121,19 @@ GtkWidget *open_main_window(void)
     //gtk_widget_hide(app->chat_icon);
 
     //GET ALL CURRENT CONVERSATIONS
-    get_and_show_user_chats(TAKE_CURRENT_CHATS);
-    //START SEND MESSAGE REQUESTS
-    guint threadID = g_timeout_add(1000, collect_new_messages, NULL);
-    //collect_new_messages(); 
+    get_and_show_user_chats(GET_CURRENT_CHATS);
     //GET ALL CURRENT CONVERSATIONS
+    char action = GET_CHAT_HISTORY;
+    //GET CHAT HISTORY IGNORING THE STATUS
+    collect_messages(&action);
+    //GET CHAT HISTORY IGNORING THE STATUS
+    
+    //GET NEW MESSAGES
+    action = GET_NEW_MESSAGES;
+    guint threadID = g_timeout_add(100, collect_messages, (gpointer)"G");
+    //GET NEW MESSAGES
+    //START GETTING NEW MESSAGES CYCLE
+    //START GETTING NEW MESSAGES CYCLE
 
     gtk_builder_connect_signals(ui_builder, NULL);
 

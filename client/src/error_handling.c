@@ -77,6 +77,9 @@ int check_login_data_for_errors(const char *username, const char *password) {
     return 0;
 }
 
+//we need to take from database only last LOAD_MESSAGES_COUNT ignoring the status value first
+//then we need to take LOAD_MESSAGES_COUNT messages with status='unread' only
+
 int check_signup_data_for_errors(const char *username, const char *password, const char *c_password) {
     if (strcmp(username, "\0") == 0 
         || strcmp(password, "\0") == 0

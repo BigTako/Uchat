@@ -30,14 +30,14 @@
 #define SEND_MESSAGE 'S'
 #define CREATE_CHAT 'C'
 
-#define RENEW_CHAT 'A'
+#define GET_CHAT_HISTORY 'A'
 #define WAIT_FOR_CODE "W"
 #define MESSAGE_CODE "M"
 
 #define EDIT_MESSAGE 'B'
 #define DELETE_MESSAGE 'D'
 #define EXIT_CONVERSATION 'E'
-#define TAKE_CURRENT_CHATS 'F'
+#define GET_CURRENT_CHATS 'F'
 #define GET_NEW_MESSAGES 'G'
 
 #define USERS_TN "users"

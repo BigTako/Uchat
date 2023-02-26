@@ -16,15 +16,14 @@ app_t *app_init()
 	return app;
 }
 
-void collect_new_messages()
+void collect_messages(char * action)
 {
     char responce_buff[MESSAGE_MAX_LEN + 100];
-    char action = GET_NEW_MESSAGES;
     int count_of_messages = 0;
     bool online = true;
     char ** message_info_parts = NULL;
     pthread_mutex_lock(param->mutex_R);
-    if (send(param->socket, "G", 1, 0) <= 0) 
+    if (send(param->socket, action, 1, 0) <= 0) 
     {
         perror(errno);
     }
@@ -51,14 +50,20 @@ void collect_new_messages()
             {
                 if (online) 
                 {
-
                     memset(responce_buff, '\0', strlen(responce_buff));
                     if (recv(param->socket, responce_buff, MESSAGE_MAX_LEN, 0) <= 0) online = false;
                     if (online) 
                     {
                         //M@message_id@from_username@message_text@send_datetime@conversation_id
                         message_info_parts = mx_strsplit(responce_buff, QUERY_DELIM[0]);
-                        create_message(message_info_parts[3], 0);
+                        if (!strcmp(app->username_t, message_info_parts[2])) // from myself
+                        {
+                            create_message(message_info_parts[3], 1, 0);
+                        }
+                        else
+                        {
+                            create_message(message_info_parts[3], 0, 0);
+                        }
                         if (send(param->socket, "Y", 2, 0) <= 0) online = false;
                         mx_del_strarr(&message_info_parts);
                     }
@@ -176,15 +181,16 @@ void send_message() {
     //pthread_mutex_unlock(param->mutex_R);
     if (strlen(gtk_entry_get_text(GTK_ENTRY(app->chat_entry))) != 0) 
     {
-        if (change) create_message(message, true); 
-        else create_message(message, false);
+        create_message(message, true, 0);
+        /*if (change) create_message(message, true); 
+        else create_message(message, false);*/
         gtk_entry_set_text(GTK_ENTRY(app->chat_entry), "");
         scroll();
     }
 }
 
 
-void create_message(const char *m, bool is_user) {
+void create_message(const char *m, bool is_user, bool to_end) {
     GtkWidget *message, *icon, *username, *text, *datetime, *sticker;
     GtkBuilder *builder = gtk_builder_new ();
     GError* error = NULL;
@@ -261,9 +267,16 @@ void create_message(const char *m, bool is_user) {
     gtk_label_set_text(GTK_LABEL(text), m);
     gtk_label_set_text(GTK_LABEL(datetime), time_string);
 
-    gtk_box_pack_start(GTK_BOX(app->messages_container), message, false, true, 0);
+    if(to_end)
+    {
+        gtk_box_pack_end(GTK_BOX(app->messages_container), message, false, true, 0);
+    }
+    else
+    {
+        gtk_box_pack_start(GTK_BOX(app->messages_container), message, false, true, 0);
+    }
+    scroll();
     g_object_unref(builder);
-     
 }
 
 void create_chat(char * chat_id, char * chat_name, char ** chat_members) 

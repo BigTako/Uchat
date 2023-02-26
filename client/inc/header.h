@@ -29,11 +29,11 @@ typedef unsigned char * code;
 #define SIGNUP 'R'
 #define SEND_MESSAGE 'S'
 #define CREATE_CHAT 'C'
-#define RENEW_CHAT 'A'
+#define GET_CHAT_HISTORY 'A'
 #define EDIT_MESSAGE 'B'
 #define DELETE_MESSAGE 'D'
 #define EXIT_CONVERSATION 'E'
-#define TAKE_CURRENT_CHATS 'F'
+#define GET_CURRENT_CHATS 'F'
 #define GET_NEW_MESSAGES 'G'
 
 #define WAIT_FOR_CODE "W"
@@ -58,7 +58,7 @@ typedef struct s_send_param
 //action functions
 void show_settings(void);
 void send_message();
-void create_message(const char *m, bool is_user);
+void create_message(const char *m, bool is_user, bool to_end);
 void find_user();
 gboolean enter_keypress(GtkWidget *widget, GdkEventKey *event, gpointer data);
 void scroll();
@@ -82,7 +82,7 @@ int check_signup_data_for_errors(const char *username, const char *password, con
 
 //working with chats
 void create_chat(char * chat_id, char * chat_name, char ** chat_members);
-void collect_new_messages();
+void collect_messages(char * action);
 
 typedef struct app_s
 {

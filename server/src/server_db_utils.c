@@ -17,7 +17,7 @@ code create_query_delim_separated(int count, ...)
 {
 	code query = mx_strnew(100000);
     va_list ptr;
-    // Initializing argument to the
+    // Initializing argument to th e
     // list pointer
     va_start(ptr, count);
     for (int i = 0; i < count; i++)

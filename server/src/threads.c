@@ -161,6 +161,7 @@ void encode(char * code, t_thread_param *param, bool *online, char *user)
 	int count_of_chats = 0;
 	int newchat_id = 0;
 	char * another_user = NULL;
+	char * message_id = NULL;
 	switch(code_num)
 	{
 		case SEND_MESSAGE: //S@TEXT@TIME@CONVERSATION_ID - send message
@@ -257,21 +258,38 @@ void encode(char * code, t_thread_param *param, bool *online, char *user)
 			}
 			free(members_str);
 			break;
-		case RENEW_CHAT:
-			if (!validate_query(code, 1, "Chat renewing query is wrong, incorrent delimiter count!\n"))
+		case GET_CHAT_HISTORY:
+			//message_id@from_username@message_text
+			db_query = "SELECT * FROM %s WHERE conversation_id=1 ORDER BY message_id DESC";
+			table = get_db_data_table(param->db, db_query, 6, LOAD_MESSAGES_COUNT, MESSAGES_TN);
+
+			//UPDATE status of messages have got
+			if (table)
 			{
-				db_query = "SELECT * FROM %s WHERE conversation_id=%s ORDER BY message_id DESC";
-				table = get_db_data_table(param->db, db_query, 6, LOAD_MESSAGES_COUNT, MESSAGES_TN, parts[1]);
+				mx_bubble_sort(table, mx_null_arr_len(table));
 				online = s_to_c_info_exchange(param, table);
+				if (online)
+				{
+					for (int i = 0; table[i]; i++)
+					{
+						db_query = "UPDATE %s SET status='read' WHERE message_id=%s";
+						executing_status = format_and_execute(param->db, db_query, MESSAGES_TN, strtok(table[i], QUERY_DELIM));
+						printf("Execution status = %d\n", executing_status);
+					}
+				}
 				delete_table(&table);
 			}
+			else
+			{
+				printf("[INFO] No data to receive from table\n");
+			}
+			/*if (!validate_query(code, 1, "Chat renewing query is wrong, incorrent delimiter count!\n"))
+			{
+				
+			}*/
 			break;
 		case GET_NEW_MESSAGES:
 			//M@message_id@from_username@message_text@send_datetime@conversation_id
-			
-			/*db_query = "SELECT message_id, from_username, message_text FROM messages";
-			table = get_db_data_table(param->db, db_query, 3, DB_ROWS_MAX);*/
-
 			db_query = "SELECT %s.message_id, %s.from_username, %s.message_text, %s.send_datetime, %s.conversation_id \
             			FROM %s \
             			INNER JOIN %s \
@@ -287,19 +305,25 @@ void encode(char * code, t_thread_param *param, bool *online, char *user)
 			if (table)
 			{
 				printf("Have taken some data from table\n");
+				mx_bubble_sort(table, mx_null_arr_len(table));
+				online = s_to_c_info_exchange(param, table);
+				if (online)
+				{
+					for (int i = 0; table[i]; i++)
+					{
+						db_query = "UPDATE %s SET status='read' WHERE message_id=%s";
+						executing_status = format_and_execute(param->db, db_query, MESSAGES_TN, strtok(table[i], QUERY_DELIM));
+						printf("Execution status = %d\n", executing_status);
+					}
+				}
+				delete_table(&table);
 			}
 			else
 			{
 				printf("Cant find something in table\n");
 			}
-			online = s_to_c_info_exchange(param, table);
-			delete_table(&table);
-			//printf("Get a request to get new messages\n");
-			//we want to get all messages where WE ARE NOT SENDER, status is unread 
-			//but we want to get 
-			//if (send(param->socket, "Y", 1, 0) <= 0) *online = false;
 			break;
-		case TAKE_CURRENT_CHATS:
+		case GET_CURRENT_CHATS:
 			//parts[1] - username member of conversation
 			db_query = "SELECT * FROM %s WHERE chat_members LIKE '%%%s%s%%'"; // SELECT * FROM CONVERSATIONS_TN WHERE chat_members LIKE '%username%';
 			table = get_db_data_table(param->db, db_query, 3, DB_ROWS_MAX, CONVERSATIONS_TN, QUERY_DELIM, parts[1]);

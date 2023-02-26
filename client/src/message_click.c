@@ -104,7 +104,8 @@ void copy_text(GtkWidget *widget, gpointer data) {
     else gtk_widget_hide(app->other_options);
 }
 
-void delete_message() {
+void delete_message() 
+{
 
 }
 
