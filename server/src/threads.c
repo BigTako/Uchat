@@ -172,14 +172,19 @@ void encode(char * code, t_thread_param *param, bool *online, char *user)
 				executing_status = format_and_execute(param->db, db_query, MESSAGES_TN, user, parts[1], str_timestamp , parts[3]);
 				printf("Execution status = %d\n", executing_status);
 				free(str_timestamp);
+				
+				db_query = "SELECT max(message_id) FROM %s";
+				table = get_db_data_table(param->db, db_query, 1, 1, MESSAGES_TN);
+
 				if (executing_status != 0)
 				{
 					if (send(param->socket, "N", 1, 0) <= 0) *online = false;				
 				}
 				else
 				{
-					if (send(param->socket, "Y", 1, 0) <= 0) *online = false;
+					if (send(param->socket, table[0], strlen(table[0]) + 1, 0) <= 0) *online = false;
 				}
+				delete_table(&table);
 			}
 			break;
 		case CREATE_CHAT: //C@NAME@USERNAME1@USERNAME2@... - create new chat 
@@ -258,10 +263,17 @@ void encode(char * code, t_thread_param *param, bool *online, char *user)
 			}
 			free(members_str);
 			break;
-		case GET_CHAT_HISTORY:
+		case GET_CHATS_HISTORY:
 			//message_id@from_username@message_text
-			db_query = "SELECT * FROM %s WHERE conversation_id=1 ORDER BY message_id DESC";
-			table = get_db_data_table(param->db, db_query, 6, LOAD_MESSAGES_COUNT, MESSAGES_TN);
+			db_query = "SELECT %s.message_id, %s.from_username, %s.message_text, %s.send_datetime, %s.conversation_id \
+            			FROM %s \
+            			INNER JOIN %s \
+            			ON %s.conversation_id = %s.conversation_id \
+            			WHERE chat_members LIKE '%%%s%%' \
+						ORDER BY %s.message_id DESC";
+
+			table = get_db_data_table(param->db, db_query, 5,   DB_ROWS_MAX, MESSAGES_TN, MESSAGES_TN, MESSAGES_TN, MESSAGES_TN, MESSAGES_TN,
+									  CONVERSATIONS_TN, MESSAGES_TN, MESSAGES_TN, CONVERSATIONS_TN, user, MESSAGES_TN);
 
 			//UPDATE status of messages have got
 			if (table)
@@ -283,10 +295,6 @@ void encode(char * code, t_thread_param *param, bool *online, char *user)
 			{
 				printf("[INFO] No data to receive from table\n");
 			}
-			/*if (!validate_query(code, 1, "Chat renewing query is wrong, incorrent delimiter count!\n"))
-			{
-				
-			}*/
 			break;
 		case GET_NEW_MESSAGES:
 			//M@message_id@from_username@message_text@send_datetime@conversation_id
@@ -294,14 +302,15 @@ void encode(char * code, t_thread_param *param, bool *online, char *user)
             			FROM %s \
             			INNER JOIN %s \
             			ON %s.conversation_id = %s.conversation_id \
-            			WHERE %s.from_username != '%s' AND chat_members LIKE '%%%s%%' AND %s.status == 'unread'";
+            			WHERE %s.from_username != '%s' AND chat_members LIKE '%%%s%%' AND %s.status == 'unread' \
+						ORDER BY %s.message_id DESC";
 			
 			table = get_db_data_table(param->db, db_query, 5,   DB_ROWS_MAX, 
 																MESSAGES_TN, MESSAGES_TN, MESSAGES_TN, MESSAGES_TN, CONVERSATIONS_TN,
 																CONVERSATIONS_TN,
 																MESSAGES_TN,
 																MESSAGES_TN, CONVERSATIONS_TN,
-																MESSAGES_TN, user, user, MESSAGES_TN);
+																MESSAGES_TN, user, user, MESSAGES_TN, MESSAGES_TN);
 			if (table)
 			{
 				printf("Have taken some data from table\n");

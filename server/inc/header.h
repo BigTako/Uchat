@@ -30,7 +30,7 @@
 #define SEND_MESSAGE 'S'
 #define CREATE_CHAT 'C'
 
-#define GET_CHAT_HISTORY 'A'
+#define GET_CHATS_HISTORY 'A'
 #define WAIT_FOR_CODE "W"
 #define MESSAGE_CODE "M"
 

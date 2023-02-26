@@ -12,6 +12,7 @@ app_t *app_init()
     app->username = NULL;
     app->password = NULL;
     app->active_message = malloc(1);
+    app->current_chat = mx_strdup("1");
 
 	return app;
 }
@@ -23,6 +24,7 @@ void collect_messages(char * action)
     bool online = true;
     char ** message_info_parts = NULL;
     pthread_mutex_lock(param->mutex_R);
+    printf("in collect function\n");
     if (send(param->socket, action, 1, 0) <= 0) 
     {
         perror(errno);
@@ -39,7 +41,7 @@ void collect_messages(char * action)
         online = false;
         perror(errno);
     }
-
+    printf("After send-receive\n");
     switch(responce_buff[0])
     {
         case WAIT_FOR_CODE[0]:
@@ -58,11 +60,11 @@ void collect_messages(char * action)
                         message_info_parts = mx_strsplit(responce_buff, QUERY_DELIM[0]);
                         if (!strcmp(app->username_t, message_info_parts[2])) // from myself
                         {
-                            create_message(message_info_parts[3], 1, 0);
+                            create_message(responce_buff + 2, 0);
                         }
                         else
                         {
-                            create_message(message_info_parts[3], 0, 0);
+                            create_message(responce_buff + 2, 0);
                         }
                         if (send(param->socket, "Y", 2, 0) <= 0) online = false;
                         mx_del_strarr(&message_info_parts);
@@ -158,64 +160,58 @@ void send_message() {
     const char *message = gtk_entry_get_text(GTK_ENTRY(app->chat_entry));
     //when we'he got a content, message information can be transfered to database
     //S@TEXT@TIME@CONVERSATION_ID - send message
-    char * chat_id = "1";
-    char action[2] = {SEND_MESSAGE, '\0'};
+    //M@message_id@from_username@message_text@send_datetime@conversation_id
     
-    char * server_query = create_query_delim_separated(4, action, message, mx_itoa((time(NULL))), chat_id);
+    char action[2] = {SEND_MESSAGE, '\0'};
+    char * cur_time = mx_itoa((time(NULL)));
+    char * server_query = create_query_delim_separated(4, action, message, cur_time, app->current_chat);
     char responce_buff[1000];
     printf("Created server query: %s\n", server_query);
-    //pthread_mutex_lock(param->mutex_R);
+    pthread_mutex_lock(param->mutex_R);
     if (send(param->socket, server_query, strlen(server_query) + 1, 0) <= 0) 
     {
         perror(errno);
     }
 
-    if (recv(param->socket, responce_buff, 4096, 0) <= 0 || responce_buff[0] != 'Y') 
+    if (recv(param->socket, responce_buff, 4096, 0) <= 0 || responce_buff[0] == 'N') 
     {
-        printf("[ERROR] Something went wrong while inserting message to db\n");
+        printf("[ERROR] Something went wrong while inserting message to db, buff=%s\n", responce_buff);
     }
     else
     {
-        printf("[INFO]] Successfuly inserted message to databse\n");
+        printf("[INFO]] Successfuly inserted message to database, responce_buff =%s\n", responce_buff);
     }
-    //pthread_mutex_unlock(param->mutex_R);
+    free(server_query);
+    
+    //parts[0]
+
+    server_query = create_query_delim_separated(5, responce_buff, app->username_t, message, cur_time, app->current_chat);
+
     if (strlen(gtk_entry_get_text(GTK_ENTRY(app->chat_entry))) != 0) 
     {
-        create_message(message, true, 0);
-        /*if (change) create_message(message, true); 
-        else create_message(message, false);*/
+        //message_id@from_username@message_text@send_datetime@conversation_id
+        create_message(server_query, 0);
         gtk_entry_set_text(GTK_ENTRY(app->chat_entry), "");
         scroll();
     }
+    free(server_query);
+    free(cur_time);
+    pthread_mutex_unlock(param->mutex_R);
 }
 
 
-void create_message(const char *m, bool is_user, bool to_end) {
+void create_message(char * message_query, bool to_end) 
+{
+    //M@message_id@from_username@message_text@send_datetime@conversation_id
     GtkWidget *message, *icon, *username, *text, *datetime, *sticker;
     GtkBuilder *builder = gtk_builder_new ();
     GError* error = NULL;
     char *window_path = NULL, *icon_path = "../resources/icons/user_icon.png";
     char *timestr = NULL;
     char *title = NULL;
-
-    // if (!gtk_builder_add_from_file (builder, "../resources/ui/message_from_other.glade", &error)) {
-    //     g_critical ("Couldn't load file: %s", window_path);
-    // }
-
-    /*if (change) {
-        if (!gtk_builder_add_from_file (builder, "../resources/ui/message_from_me.glade", &error)) {
-            g_critical ("Couldn't load file: %s", window_path);
-        }
-        //change = false;
-        
-    }
-    else {
-        if (!gtk_builder_add_from_file (builder, "../resources/ui/message_from_other.glade", &error)) {
-            g_critical ("Couldn't load file: %s", window_path);
-        }
-        //change = true;
-        
-    }*/
+    char ** parts = mx_strsplit(message_query, QUERY_DELIM[0]);
+    printf("create message query: %s\n", message_query);
+    bool is_user = !strcmp(app->username_t, parts[1]);
 
     if (is_user)
     {
@@ -264,7 +260,17 @@ void create_message(const char *m, bool is_user, bool to_end) {
         gtk_label_set_text(GTK_LABEL(username), title);
         gtk_image_set_from_file(GTK_IMAGE(icon), icon_path);
     } 
-    gtk_label_set_text(GTK_LABEL(text), m);
+
+    /*
+        M@message_id@from_username@message_text@send_datetime@conversation_id
+        parts[0] - message_id
+        parts[1] - from_username
+        parts[2] - message_text
+        parts[3] - send_datetime
+        parts[4] - conversation_id
+    */
+
+    gtk_label_set_text(GTK_LABEL(text), parts[2]);
     gtk_label_set_text(GTK_LABEL(datetime), time_string);
 
     if(to_end)
@@ -277,6 +283,7 @@ void create_message(const char *m, bool is_user, bool to_end) {
     }
     scroll();
     g_object_unref(builder);
+    mx_del_strarr(&parts);
 }
 
 void create_chat(char * chat_id, char * chat_name, char ** chat_members) 

@@ -29,7 +29,7 @@ typedef unsigned char * code;
 #define SIGNUP 'R'
 #define SEND_MESSAGE 'S'
 #define CREATE_CHAT 'C'
-#define GET_CHAT_HISTORY 'A'
+#define GET_CHATS_HISTORY 'A'
 #define EDIT_MESSAGE 'B'
 #define DELETE_MESSAGE 'D'
 #define EXIT_CONVERSATION 'E'
@@ -58,7 +58,7 @@ typedef struct s_send_param
 //action functions
 void show_settings(void);
 void send_message();
-void create_message(const char *m, bool is_user, bool to_end);
+void create_message(char * message_query, bool to_end);
 void find_user();
 gboolean enter_keypress(GtkWidget *widget, GdkEventKey *event, gpointer data);
 void scroll();
@@ -123,6 +123,7 @@ typedef struct app_s
     const char *username_t;
 
     char *active_message;
+    char * current_chat; // HARDCODED IN APP_INIT!!!!!!!!!!!!!!!!!!!!!!
 }              app_t;
 
 app_t *app_init();

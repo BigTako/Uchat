@@ -123,7 +123,7 @@ GtkWidget *open_main_window(void)
     //GET ALL CURRENT CONVERSATIONS
     get_and_show_user_chats(GET_CURRENT_CHATS);
     //GET ALL CURRENT CONVERSATIONS
-    char action = GET_CHAT_HISTORY;
+    char action = GET_CHATS_HISTORY;
     //GET CHAT HISTORY IGNORING THE STATUS
     collect_messages(&action);
     //GET CHAT HISTORY IGNORING THE STATUS
