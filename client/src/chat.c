@@ -1,6 +1,5 @@
 #include "../inc/header.h"
 
-
 void get_and_show_user_chats(char action)
 {
     char * server_query = NULL;
@@ -52,7 +51,6 @@ void get_and_show_user_chats(char action)
     pthread_mutex_unlock(param->mutex_R);
     free(server_query);
 }
-
 
 
 GtkWidget *open_main_window(void) 
@@ -123,15 +121,10 @@ GtkWidget *open_main_window(void)
     //gtk_widget_hide(app->chat_icon);
 
     //GET ALL CURRENT CONVERSATIONS
-    
-    //pthread_mutex_lock(param->mutex_R);
     get_and_show_user_chats(TAKE_CURRENT_CHATS);
-    //pthread_mutex_unlock(param->mutex_R);
-    
-    //pthread_mutex_lock(param->mutex_R);
-    collect_new_messages(); 
-    //pthread_mutex_unlock(param->mutex_R);
-
+    //START SEND MESSAGE REQUESTS
+    guint threadID = g_timeout_add(1000, collect_new_messages, NULL);
+    //collect_new_messages(); 
     //GET ALL CURRENT CONVERSATIONS
 
     gtk_builder_connect_signals(ui_builder, NULL);

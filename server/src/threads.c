@@ -432,6 +432,7 @@ void* client_thread(void* vparam)
 		pthread_mutex_unlock(param->mutex_R);
 		memset(buffer, '\0', MESSAGE_MAX_LEN);
     }
+	printf("DISCONNECTING User: %s\n", user);
 	free(user);
     close(param->socket);
 	int *count_of_threads = param->count_of_threads;
