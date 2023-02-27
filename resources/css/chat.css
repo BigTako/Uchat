@@ -85,7 +85,7 @@
     outline-style: none;
     box-shadow: none;
     border-color: transparent;
-    /* transition: all 10000s ease; */
+    transition: all 10000s ease;
 }
 
 #chat #messages_container > button:hover {

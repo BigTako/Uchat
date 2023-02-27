@@ -122,6 +122,7 @@ typedef struct app_s
     char *password;
     const char *username_t;
 
+    GtkWidget *active_widget;
     char *active_message;
     char * current_chat; // HARDCODED IN APP_INIT!!!!!!!!!!!!!!!!!!!!!!
 }              app_t;

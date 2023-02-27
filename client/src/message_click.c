@@ -4,18 +4,11 @@ static gboolean popup_open = FALSE;
 static bool isOther;
 
 gboolean my_message_menu(GtkWidget *widget, GdkEventButton *event, gpointer data) {
-    //const char *label_text = gtk_label_get_text(GTK_BUTTON(widget));
-    // char *str = (char*)data;
-    // printf("Text: %s\n", str);
-    // char *str = (char*)data;
-    // g_print("!!!Button clicked with user data: %s\n", str);
     if (event->type == GDK_BUTTON_PRESS && event->button == 3) {
         char *str = data;
         g_print("Button clicked with user data: %s\n", str);
         app->active_message = mx_strdup(str);
-        // if (gtk_widget_has_focus(app->chat_entry)) send_message();
-        // if (gtk_widget_has_focus(app->find_user_entry)) find_user();
-        // return TRUE;
+        app->active_widget = widget;
         if (popup_open) {
             gtk_widget_hide(app->my_options);
             popup_open = FALSE;
@@ -25,9 +18,6 @@ gboolean my_message_menu(GtkWidget *widget, GdkEventButton *event, gpointer data
             create_options_popover(widget, true); 
             popup_open = TRUE;
         }
-        //mx_printstr("my\n");
-        // popup_open = TRUE;
-        // create_my_options_popover(widget);
         return TRUE;
     }
     return FALSE;
@@ -104,9 +94,12 @@ void copy_text(GtkWidget *widget, gpointer data) {
     else gtk_widget_hide(app->other_options);
 }
 
-void delete_message() 
+void delete_message(GtkWidget *widget, gpointer data) 
 {
-
+    gtk_widget_hide(app->active_widget);
+    app->active_widget = NULL;
+    if (!isOther) gtk_widget_hide(app->my_options);
+    else gtk_widget_hide(app->other_options);
 }
 
 void edit_message() {
