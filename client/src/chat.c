@@ -130,7 +130,7 @@ GtkWidget *open_main_window(void)
     
     //GET NEW MESSAGES
     action = GET_NEW_MESSAGES;
-    //guint threadID = g_timeout_add(100, collect_messages, (gpointer)"G");
+    guint threadID = g_timeout_add(100, collect_messages, (gpointer)"G");
     //GET NEW MESSAGES
     //START GETTING NEW MESSAGES CYCLE
     //START GETTING NEW MESSAGES CYCLE

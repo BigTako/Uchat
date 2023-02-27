@@ -206,18 +206,18 @@ void create_message(char * message_query, bool to_end)
 
     if (is_user)
     {
-        if (!gtk_builder_add_from_file (builder, "../resources/ui/message_from_me.glade", &error)) {
+        if (!gtk_builder_add_from_file (builder, "../resources/ui/my_message.glade", &error)) {
             g_critical ("Couldn't load file: %s", window_path);
         }
     }
     else
     {
-        if (!gtk_builder_add_from_file (builder, "../resources/ui/message_from_other.glade", &error)) {
+        if (!gtk_builder_add_from_file (builder, "../resources/ui/other_message.glade", &error)) {
             g_critical ("Couldn't load file: %s", window_path);
         }
     }
 
-    message = GTK_WIDGET(gtk_builder_get_object (builder, "message"));
+    message = GTK_WIDGET(gtk_builder_get_object (builder, "message_button"));
     if (!message) {
         g_critical("Window widget error!");
     }
@@ -260,6 +260,12 @@ void create_message(char * message_query, bool to_end)
 
     gtk_label_set_text(GTK_LABEL(text), parts[2]);
     gtk_label_set_text(GTK_LABEL(datetime), time_string);
+
+    const char *label_text;
+    label_text = gtk_label_get_text(GTK_LABEL(text));
+
+    if (is_user) g_signal_connect(message, "button-press-event", G_CALLBACK(my_message_menu), (gpointer)label_text);
+    else g_signal_connect(message, "button-press-event", G_CALLBACK(other_message_menu), (gpointer)label_text);
 
     if(to_end)
     {
