@@ -10,7 +10,7 @@ code sha256_string(char *string)
     SHA256_Final(out, &sha256);
     for (int i = 0; i < SHA256_DIGEST_LENGTH; i++) 
 	{
-        sprintf(hash + (i * 2), "%02x", out[i]);
+        sprintf((char *)hash + (i * 2), "%02x", out[i]);
     }
     return hash;
 }

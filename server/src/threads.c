@@ -1,10 +1,10 @@
 #include "../inc/header.h"
 
-bool s_to_c_info_exchange(t_thread_param *param, void ** table)
+bool s_to_c_info_exchange(t_thread_param *param, char ** table)
 {
 	bool online = true;
 	char query_buff[MESSAGE_MAX_LEN];
-	int count_of_chats = mx_null_arr_len(table);
+	int count_of_chats = mx_null_arr_len((char **)table);
 
 	sprintf(query_buff, "%s%s%d", WAIT_FOR_CODE, QUERY_DELIM, count_of_chats);
 	printf("taking chats query: %s\n", query_buff);
@@ -29,7 +29,7 @@ bool s_to_c_info_exchange(t_thread_param *param, void ** table)
 		memset(query_buff, '\0', strlen(query_buff));
 		if (online == true) 
 		{
-			sprintf(query_buff, "%s%s%s", MESSAGE_CODE, QUERY_DELIM, table[i]);
+			sprintf(query_buff, "%s%s%s", MESSAGE_CODE, QUERY_DELIM, (char *)table[i]);
 			if (send(param->socket, query_buff, strlen(query_buff) + 1, 0) <= 0) online = false; // send a messages with chats info one by one
 			printf("Send: %s\n", query_buff);
 	
@@ -61,8 +61,8 @@ char *encode_login(char *code, t_thread_param *param, bool *online)
 		R@NAME@PASSWORD_HASH - register
 	*/
 	printf("Login/signup query : %s\n", code);
-	void *** table = NULL;
-	char query_buf[1000];
+	char ** table = NULL;
+	//char query_buf[1000];
 	char ** parts = mx_strsplit(code, QUERY_DELIM[0]);
 	char code_num = parts[0][0];
 	char *user = NULL;
@@ -148,7 +148,7 @@ void encode(char * code, t_thread_param *param, bool *online, char *user)
 		X
 	*/
 	printf("Encode code string: %s\n", code);
-	void ** table = NULL;
+	char ** table = NULL;
 	char ** parts = mx_strsplit(code, QUERY_DELIM[0]);
 	char code_num = parts[0][0];
 	char query_buff[MESSAGE_MAX_LEN];
@@ -158,10 +158,8 @@ void encode(char * code, t_thread_param *param, bool *online, char *user)
 	char * members_str = NULL;
 	int members_int = 0;
 	int executing_status = 0;
-	int count_of_chats = 0;
 	int newchat_id = 0;
 	char * another_user = NULL;
-	char * message_id = NULL;
 	switch(code_num)
 	{
 		case SEND_MESSAGE: //S@TEXT@TIME@CONVERSATION_ID - send message
@@ -278,9 +276,9 @@ void encode(char * code, t_thread_param *param, bool *online, char *user)
 			//UPDATE status of messages have got
 			if (table)
 			{
-				mx_bubble_sort(table, mx_null_arr_len(table));
-				online = s_to_c_info_exchange(param, table);
-				if (online)
+				mx_bubble_sort((char **)table, mx_null_arr_len((char **)table));
+				*online = s_to_c_info_exchange(param, table);
+				if (*online)
 				{
 					for (int i = 0; table[i]; i++)
 					{
@@ -314,8 +312,8 @@ void encode(char * code, t_thread_param *param, bool *online, char *user)
 			if (table)
 			{
 				printf("Have taken some data from table\n");
-				mx_bubble_sort(table, mx_null_arr_len(table));
-				online = s_to_c_info_exchange(param, table);
+				mx_bubble_sort((char **)table, mx_null_arr_len(table));
+				*online = s_to_c_info_exchange(param, table);
 				if (online)
 				{
 					for (int i = 0; table[i]; i++)
@@ -336,7 +334,7 @@ void encode(char * code, t_thread_param *param, bool *online, char *user)
 			//parts[1] - username member of conversation
 			db_query = "SELECT * FROM %s WHERE chat_members LIKE '%%%s%s%%'"; // SELECT * FROM CONVERSATIONS_TN WHERE chat_members LIKE '%username%';
 			table = get_db_data_table(param->db, db_query, 3, DB_ROWS_MAX, CONVERSATIONS_TN, QUERY_DELIM, parts[1]);
-			online = s_to_c_info_exchange(param, table);
+			*online = s_to_c_info_exchange(param, table);
 			delete_table(&table);
 			break;
 		case EDIT_MESSAGE:
@@ -385,7 +383,7 @@ void encode(char * code, t_thread_param *param, bool *online, char *user)
 				}
 				else
 				{
-					printf("Members of chat with conv. ID(%s): %s\n", parts[1], table[0]);
+					printf("Members of chat with conv. ID(%s): %s\n", parts[1], (char *)table[0]);
 					if (strstr(table[0], user)) // founded occurence @username
 					{
 						new_members_str = mx_replace_substr(table[0], user, "");
@@ -415,7 +413,7 @@ void encode(char * code, t_thread_param *param, bool *online, char *user)
 void* client_thread(void* vparam) 
 {
     t_thread_param *param = (t_thread_param*) vparam;
-	*param->count_of_threads++;
+	//*param->count_of_threads++;
     printf("---Start-recving-from-new-client---\n");
     bool online = true;
     char *user = NULL;
@@ -468,17 +466,17 @@ void* client_thread(void* vparam)
 	printf("DISCONNECTING User: %s\n", user);
 	free(user);
     close(param->socket);
-	int *count_of_threads = param->count_of_threads;
+	//int *count_of_threads = param->count_of_threads;
     free(param);
-	*count_of_threads--;
+	//*count_of_threads--;
     pthread_exit(0);
 }
 
 void* exit_thread(void* vparam) {
 	t_thread_param *param = (t_thread_param*) vparam;
-	*param->count_of_threads++;
+	//*param->count_of_threads++;
 	printf("Print \"exit\" to terminal to exit)\n");
-	struct pollfd mypoll = { STDIN_FILENO, POLLIN|POLLPRI };
+	struct pollfd mypoll = { STDIN_FILENO, POLLIN|POLLPRI , 0};
     char string[10];
 	while(1) {
 		if( poll(&mypoll, 1, 10) ) {
@@ -489,9 +487,9 @@ void* exit_thread(void* vparam) {
         	}
     	}
 	}
-	int *count_of_threads = param->count_of_threads;
+	//int *count_of_threads = param->count_of_threads;
 	free(param);
-	*count_of_threads--;
+	//*count_of_threads--;
     pthread_exit(0);
 }
 

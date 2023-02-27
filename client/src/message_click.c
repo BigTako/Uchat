@@ -10,7 +10,7 @@ gboolean my_message_menu(GtkWidget *widget, GdkEventButton *event, gpointer data
     // char *str = (char*)data;
     // g_print("!!!Button clicked with user data: %s\n", str);
     if (event->type == GDK_BUTTON_PRESS && event->button == 3) {
-        char *str = (const char*)data;
+        char *str = data;
         g_print("Button clicked with user data: %s\n", str);
         app->active_message = mx_strdup(str);
         // if (gtk_widget_has_focus(app->chat_entry)) send_message();
@@ -35,7 +35,7 @@ gboolean my_message_menu(GtkWidget *widget, GdkEventButton *event, gpointer data
 
 gboolean other_message_menu(GtkWidget *widget, GdkEventButton *event, gpointer data) {
     if (event->type == GDK_BUTTON_PRESS && event->button == 3) {
-        char *str = (const char*)data;
+        char *str = data;
         g_print("Button clicked with user data: %s\n", str);
         app->active_message = mx_strdup(str);
         if (popup_open) {

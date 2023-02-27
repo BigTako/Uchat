@@ -132,8 +132,8 @@ extern t_send_param *param;
 
 //request utils
 int connect_to_server(t_send_param *param);
-code create_query_delim_separated(int count, ...);
-int send_server_request(t_send_param *param, code query);
+char * create_query_delim_separated(int count, ...);
+int send_server_request(t_send_param *param, char * query);
 
 #endif
 

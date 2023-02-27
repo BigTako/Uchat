@@ -94,7 +94,7 @@ int check_signup_data_for_errors(const char *username, const char *password, con
     char * server_query = create_query_delim_separated(3, "R", username, password); // have to store a hash password
     int online = send_server_request(param, server_query);
     //if (online < 0) {
-    //    perror(errno);
+    //    perror(strerror(errno));
     //}
     free(server_query);
     if (online < 0) {

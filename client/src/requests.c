@@ -20,16 +20,16 @@ int connect_to_server(t_send_param * param)
     return connect(param->socket, (struct sockaddr *) &serverAddr, addr_size);
 }
 
-code create_query_delim_separated(int count, ...)
+char * create_query_delim_separated(int count, ...)
 {
-	code query = mx_strnew(100000);
+	char * query = mx_strnew(100000);
     va_list ptr;
     // Initializing argument to the
     // list pointer
     va_start(ptr, count);
     for (int i = 0; i < count; i++)
 	{
-		query = mx_strcat(query, va_arg(ptr, unsigned char *));
+		query = mx_strcat(query, va_arg(ptr, const char *));
 		if (i != count - 1)
 		{
 			query = mx_strcat(query, QUERY_DELIM);
@@ -40,11 +40,11 @@ code create_query_delim_separated(int count, ...)
 }
 
 
-int send_server_request(t_send_param *param, code query)
+int send_server_request(t_send_param *param, char * query)
 {
     pthread_mutex_lock(param->mutex_R);
     if (send(param->socket, query, strlen(query) + 1, 0) <= 0) {
-        perror(errno);
+        perror(strerror(errno));
         pthread_mutex_unlock(param->mutex_R);
         return -1;
     }

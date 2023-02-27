@@ -79,7 +79,8 @@ int main(int argc, char ** argv)
     param->cmdEXIT = &cmdEXIT;
     param->count_of_threads = &count_of_threads;
     int status = pthread_create(&e_thread, NULL, exit_thread, param);
-    if (status != 0) {
+    if (status != 0) 
+    {
         printf("main error: can't create thread");
         exit(1);
     }

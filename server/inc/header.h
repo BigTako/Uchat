@@ -64,11 +64,11 @@ typedef struct s_thread_param
 //DATABASE UTILS
 int count_placeholders(char * str, char c);
 void clear_inner_list(void * ptr);
-void delete_table(void *** table);
+void delete_table(char *** table);
 char * mx_strstr_front(const char *haystack, const char *needle);
 char * execute_query(sqlite3 * db, char * query);
 t_list * get_db_data_list(sqlite3 * db, char * selection_query, int cols_count);
-void ** get_db_data_vector(sqlite3 * db, char * selection_query, int cols_count, int rows_count);
+char ** get_db_data_vector(sqlite3 * db, char * selection_query, int cols_count, int rows_count);
 char * format_query(char * template, t_list * values);
 int sqlite_execute(sqlite3 * db, char * query);
 
@@ -81,8 +81,8 @@ code encipher(code rsaPublicKeyChar, char * message, int * emLen, int * ekLen_v,
 code decipher(code rsaPrivateKeyChar, code encryptedMessage, unsigned long emLen, code ek, code iv, int ekLen);
 
 //SERVER DATABASE RELATIONSHIP UTILS
-void ** get_db_data_table(sqlite3 * db, char * template, int colums, int rows, ...);
-code create_query_delim_separated(int count, ...);
+char ** get_db_data_table(sqlite3 * db, char * template, int colums, int rows, ...);
+char * create_query_delim_separated(int count, ...);
 int validate_query(char * code, int delims_count, char * err_message);
 int format_and_execute (sqlite3 * db, char * template, ...);
 char *userID_from_name(char *sql_username_str, sqlite3 *db);

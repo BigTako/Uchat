@@ -49,9 +49,9 @@ t_list * get_db_data_list(sqlite3 * db, char * selection_query, int cols_count)
 	return table;
 }
 
-void ** get_db_data_vector(sqlite3 * db, char * selection_query, int cols_count, int rows_count)
+char ** get_db_data_vector(sqlite3 * db, char * selection_query, int cols_count, int rows_count)
 {
-	void ** table = malloc(((int)DB_ROWS_MAX)*sizeof(void*));
+	char ** table = malloc(((int)DB_ROWS_MAX)*sizeof(void*));
 	sqlite3_stmt * stmt;
 	sqlite3_prepare_v2(db, (const char *)selection_query, -1, &stmt, NULL);
 	
@@ -69,7 +69,7 @@ void ** get_db_data_vector(sqlite3 * db, char * selection_query, int cols_count,
 				delete_table(&table);
 				return NULL;			
 			}
-			table[row_indx] = strcat(table[row_indx], sqlite3_column_text(stmt, i));
+			table[row_indx] = strcat(table[row_indx], (const char *)sqlite3_column_text(stmt, i));
 			if (i != cols_count - 1)
 			{
 				table[row_indx] = strcat(table[row_indx], QUERY_DELIM);
@@ -116,7 +116,7 @@ void clear_inner_list(void * ptr)
 	list = temp;
 }
 
-void delete_table(void *** table)
+void delete_table(char *** table)
 {
 	if (!table) return;
 	for (int i = 0; (*table)[i]; i++)

@@ -22,12 +22,11 @@ void collect_messages(char * action)
     char responce_buff[MESSAGE_MAX_LEN + 100];
     int count_of_messages = 0;
     bool online = true;
-    char ** message_info_parts = NULL;
     pthread_mutex_lock(param->mutex_R);
     printf("in collect function\n");
     if (send(param->socket, action, 1, 0) <= 0) 
     {
-        perror(errno);
+        perror(strerror(errno));
     }
 
     if (recv(param->socket, responce_buff, 1000, 0) <= 0) // receive a repsonce with count of messages
@@ -39,44 +38,39 @@ void collect_messages(char * action)
     if (send(param->socket, "Y", 2, 0) <= 0)  // send a responce to server with info that count is received
     {
         online = false;
-        perror(errno);
+        perror(strerror(errno));
     }
+
     printf("After send-receive\n");
-    switch(responce_buff[0])
+    
+    if (responce_buff[0] == WAIT_FOR_CODE[0])
     {
-        case WAIT_FOR_CODE[0]:
-            printf("Ready to recieve %s messages\n", responce_buff + 2);
-            count_of_messages = atoi(responce_buff + 2);
-            memset(responce_buff, '\0', strlen(responce_buff));
-            for (int a = 0; a < count_of_messages; a++) 
+        printf("Ready to recieve %s messages\n", responce_buff + 2);
+        count_of_messages = atoi(responce_buff + 2);
+        memset(responce_buff, '\0', strlen(responce_buff));
+        for (int a = 0; a < count_of_messages; a++) 
+        {
+            if (online) 
             {
+                memset(responce_buff, '\0', strlen(responce_buff));
+                if (recv(param->socket, responce_buff, MESSAGE_MAX_LEN, 0) <= 0) online = false;
                 if (online) 
                 {
-                    memset(responce_buff, '\0', strlen(responce_buff));
-                    if (recv(param->socket, responce_buff, MESSAGE_MAX_LEN, 0) <= 0) online = false;
-                    if (online) 
-                    {
-                        //M@message_id@from_username@message_text@send_datetime@conversation_id
-                        message_info_parts = mx_strsplit(responce_buff, QUERY_DELIM[0]);
-                        if (!strcmp(app->username_t, message_info_parts[2])) // from myself
-                        {
-                            create_message(responce_buff + 2, 0);
-                        }
-                        else
-                        {
-                            create_message(responce_buff + 2, 0);
-                        }
-                        if (send(param->socket, "Y", 2, 0) <= 0) online = false;
-                        mx_del_strarr(&message_info_parts);
-                    }
+                    //M@message_id@from_username@message_text@send_datetime@conversation_id
+                    create_message(responce_buff + 2, 0);
+                    if (send(param->socket, "Y", 2, 0) <= 0) online = false;
                 }
-	        }
-
-            printf("[INFO] Successfuly received %d packages\n", count_of_messages);
-            break;
-        case 'N':
-            printf("[INFO] No messages to receive\n");
-            break;
+            }
+	    }
+        printf("[INFO] Successfuly received %d packages\n", count_of_messages);
+    }
+    else if (responce_buff[0] == 'N')
+    {
+        printf("[INFO] No messages to receive\n");
+    }
+    else
+    {
+        printf("[ERROR] Undefined expression\n");
     }
     if (recv(param->socket, responce_buff, MESSAGE_MAX_LEN, 0) <= 0) online = false;
     pthread_mutex_unlock(param->mutex_R);
@@ -115,26 +109,28 @@ void find_user() {
     printf("server query: %s\n", request_buff);
         
     if (send(param->socket, request_buff, strlen(request_buff) + 1, 0) <= 0) {
-        perror(errno);
+        perror(strerror(errno));
     }
     if (recv(param->socket, responce_buff, 4096, 0) <= 0) {
         printf("[ERROR] Something went wrong while creating a chat with user %s\n", username);
     }
     else
     {
-        switch (responce_buff[0])
+        if (responce_buff[0] == MESSAGE_CODE[0])
         {
-            case MESSAGE_CODE[0]:
-                info_parts = mx_strsplit(responce_buff, QUERY_DELIM[0]);
-                printf("Got a server responce: %s\n", responce_buff);
-                create_chat(info_parts[1], "?", info_parts + 2);
-                printf("[INFO] Chat successfuly created\n", username);
-                mx_del_strarr(&info_parts);
-                break;
-            case 'N':
-                open_error_window(responce_buff + 2);
-                //printf("[ERROR] %s\n", );
-                break;       
+            info_parts = mx_strsplit(responce_buff, QUERY_DELIM[0]);
+            printf("Got a server responce: %s\n", responce_buff);
+            create_chat(info_parts[1], "?", info_parts + 2);
+            printf("[INFO] Chat successfuly created(%s)\n", username);
+            mx_del_strarr(&info_parts);
+        }
+        else if (responce_buff[0] == 'N')
+        {
+            open_error_window(responce_buff + 2);
+        }
+        else
+        {
+            open_error_window("Undefined expression");
         }
     }
     pthread_mutex_unlock(param->mutex_R);
@@ -151,26 +147,23 @@ void change_chat(GtkListBox* self, GtkListBoxRow* row, gpointer data) {
     // call_show_chat();
 }
 
-bool change = true;
 
-void send_message() {
-    //create_chat();
-    //first user types a message in input field and presses enter key
-    //then we can get a content of inputed message
+void send_message() 
+{
     const char *message = gtk_entry_get_text(GTK_ENTRY(app->chat_entry));
     //when we'he got a content, message information can be transfered to database
     //S@TEXT@TIME@CONVERSATION_ID - send message
     //M@message_id@from_username@message_text@send_datetime@conversation_id
-    
+    printf("Got a message from input fiend: %s\n", message);
     char action[2] = {SEND_MESSAGE, '\0'};
     char * cur_time = mx_itoa((time(NULL)));
     char * server_query = create_query_delim_separated(4, action, message, cur_time, app->current_chat);
-    char responce_buff[1000];
+    char responce_buff[5100];
     printf("Created server query: %s\n", server_query);
     pthread_mutex_lock(param->mutex_R);
     if (send(param->socket, server_query, strlen(server_query) + 1, 0) <= 0) 
     {
-        perror(errno);
+        perror(strerror(errno));
     }
 
     if (recv(param->socket, responce_buff, 4096, 0) <= 0 || responce_buff[0] == 'N') 
@@ -183,8 +176,6 @@ void send_message() {
     }
     free(server_query);
     
-    //parts[0]
-
     server_query = create_query_delim_separated(5, responce_buff, app->username_t, message, cur_time, app->current_chat);
 
     if (strlen(gtk_entry_get_text(GTK_ENTRY(app->chat_entry))) != 0) 
@@ -243,13 +234,10 @@ void create_message(char * message_query, bool to_end)
         text = GTK_WIDGET(gtk_builder_get_object(builder, "message_text"));
         datetime = GTK_WIDGET(gtk_builder_get_object(builder, "message_time"));
     }
-
-    //берет текущее время, но его нужно будет хранить в базе данных чтоб потом правильно отображать время прошлых сообщений
-    time_t current_time;
+    time_t current_time = (time_t)atoi(parts[3]);
     struct tm *time_info;
     char time_string[9]; // HH:MM\0
 
-    time(&current_time);
     time_info = localtime(&current_time);
 
     strftime(time_string, sizeof(time_string), "%H:%M", time_info);
