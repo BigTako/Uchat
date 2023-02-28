@@ -2,11 +2,13 @@
 
 static gboolean popup_open = FALSE;
 static bool isOther;
+static int selected_id;
 
 gboolean my_message_menu(GtkWidget *widget, GdkEventButton *event, t_message *data) {
     if (event->type == GDK_BUTTON_PRESS && event->button == 3) {
         //char *str = data->message_text;
         g_print("Button clicked with user data: %s    ID: %d\n", data->message_text, data->id);
+        selected_id = data->id;
         app->active_message = data->message_text;
         app->active_widget = widget;
         if (popup_open) {
@@ -28,6 +30,7 @@ gboolean other_message_menu(GtkWidget *widget, GdkEventButton *event, t_message 
         //char *str = data->message_text;
         g_print("Button clicked with user data: %s    ID: %d\n", data->message_text, data->id);
         app->active_message = data->message_text;
+        selected_id = data->id;
         if (popup_open) {
             gtk_widget_hide(app->other_options);
             popup_open = FALSE;
@@ -100,6 +103,7 @@ void delete_message(GtkWidget *widget, gpointer data)
     app->active_widget = NULL;
     if (!isOther) gtk_widget_hide(app->my_options);
     else gtk_widget_hide(app->other_options);
+    printf("\nDeleted message with ID: %d\n", selected_id);
 }
 
 void edit_message() {

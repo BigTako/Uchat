@@ -76,7 +76,6 @@ void collect_messages(char * action)
     pthread_mutex_unlock(param->mutex_R);
 }
 
-
 gboolean enter_keypress(GtkWidget *widget, GdkEventKey *event, gpointer data) {
     if (event->keyval == GDK_KEY_Return) 
     {
@@ -298,7 +297,7 @@ void create_message(char * message_query, bool to_end)
     //message_data->id = NULL;
     //message_data->message_text = NULL;
 
-    play_music();
+    //play_music();
 
     if(to_end)
     {
