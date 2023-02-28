@@ -54,6 +54,11 @@ typedef struct s_send_param
     int * cmdEXIT;
 } t_send_param;
 
+typedef struct s_message {
+    int id;
+    char *username;
+    const char *message_text;
+} t_message;
 
 //action functions
 void show_settings(void);
@@ -64,8 +69,8 @@ gboolean enter_keypress(GtkWidget *widget, GdkEventKey *event, gpointer data);
 void scroll();
 void change_chat(GtkListBox* self, GtkListBoxRow* row, gpointer data);
 
-gboolean my_message_menu(GtkWidget *widget, GdkEventButton *event, gpointer data);
-gboolean other_message_menu(GtkWidget *widget, GdkEventButton *event, gpointer data);
+gboolean my_message_menu(GtkWidget *widget, GdkEventButton *event, t_message *data);
+gboolean other_message_menu(GtkWidget *widget, GdkEventButton *event, t_message *data);
 void create_options_popover(GtkWidget *widget, bool isMy);
 
 //window functions
@@ -130,6 +135,7 @@ typedef struct app_s
 app_t *app_init();
 extern app_t *app;
 extern t_send_param *param;
+extern t_message *message_data;
 
 //request utils
 int connect_to_server(t_send_param *param);

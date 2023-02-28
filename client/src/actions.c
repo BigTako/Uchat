@@ -138,7 +138,9 @@ void find_user() {
 }
 
 void change_chat(GtkListBox* self, GtkListBoxRow* row, gpointer data) {
-    //const char *name = gtk_widget_get_name(GTK_WIDGET(row));
+    const char *name = gtk_widget_get_name(GTK_WIDGET(row));
+    printf("Name: %s %d\n",name, atoi(name));
+    // GtkWidget *chat = GTK_WIDGET(gtk_builder_get_object(builder, "chat_id"));
     mx_printstr("changed chat\n");
     // app->chat_id = atoi(name);
     // change_chat(app->chat_id);
@@ -147,6 +149,14 @@ void change_chat(GtkListBox* self, GtkListBoxRow* row, gpointer data) {
     // call_show_chat();
 }
 
+static void* play_music() {
+    system("afplay ../resources/send.mp3");
+    return NULL;
+}
+
+static void stop_music() {
+    system("say done");
+}
 
 void send_message() 
 {
@@ -159,6 +169,7 @@ void send_message()
     char * cur_time = mx_itoa((time(NULL)));
     char * server_query = create_query_delim_separated(4, action, message, cur_time, app->current_chat);
     char responce_buff[5100];
+    
     printf("Created server query: %s\n", server_query);
     pthread_mutex_lock(param->mutex_R);
     if (send(param->socket, server_query, strlen(server_query) + 1, 0) <= 0) 
@@ -202,7 +213,11 @@ void create_message(char * message_query, bool to_end)
     char *title = NULL;
     char ** parts = mx_strsplit(message_query, QUERY_DELIM[0]);
     printf("create message query: %s\n", message_query);
+    printf("ID of message: %s\n", parts[0]);
     bool is_user = !strcmp(app->username_t, parts[1]);
+
+    t_message *message_struct;
+    message_struct = (t_message*)malloc(sizeof(t_message));
 
     if (is_user)
     {
@@ -249,6 +264,9 @@ void create_message(char * message_query, bool to_end)
         gtk_image_set_from_file(GTK_IMAGE(icon), icon_path);
     } 
 
+    GtkWidget *message_id = GTK_WIDGET(gtk_builder_get_object(builder, "message_id"));
+    gtk_label_set_text(GTK_LABEL(message_id), parts[0]);
+
     /*
         M@message_id@from_username@message_text@send_datetime@conversation_id
         parts[0] - message_id
@@ -264,8 +282,23 @@ void create_message(char * message_query, bool to_end)
     const char *label_text;
     label_text = gtk_label_get_text(GTK_LABEL(text));
 
-    if (is_user) g_signal_connect(message, "button-press-event", G_CALLBACK(my_message_menu), (gpointer)label_text);
-    else g_signal_connect(message, "button-press-event", G_CALLBACK(other_message_menu), (gpointer)label_text);
+    const char *id_text;
+    id_text = gtk_label_get_text(GTK_LABEL(message_id));
+    //printf("\nGet text from message widget with ID: %s\n", id_text);
+
+    message_struct->id = atoi(id_text);
+    message_struct->message_text = gtk_label_get_text(GTK_LABEL(text));
+
+    // if (is_user) g_signal_connect(message, "button-press-event", G_CALLBACK(my_message_menu), (gpointer)label_text);
+    // else g_signal_connect(message, "button-press-event", G_CALLBACK(other_message_menu), (gpointer)label_text);
+
+    if (is_user) g_signal_connect(message, "button-press-event", G_CALLBACK(my_message_menu), message_struct);
+    else g_signal_connect(message, "button-press-event", G_CALLBACK(other_message_menu), message_struct);
+
+    //message_data->id = NULL;
+    //message_data->message_text = NULL;
+
+    play_music();
 
     if(to_end)
     {
@@ -283,7 +316,7 @@ void create_message(char * message_query, bool to_end)
 void create_chat(char * chat_id, char * chat_name, char ** chat_members) 
 {
     //короче добавляются чаты в лист, но я хз конешно как переключать их
-    GtkWidget *chat, *icon, *title, *status;
+    GtkWidget *chat, *icon, *title, *status, *id;
     GtkBuilder *builder = gtk_builder_new ();
     GError* error = NULL;
 
@@ -299,6 +332,7 @@ void create_chat(char * chat_id, char * chat_name, char ** chat_members)
     icon = GTK_WIDGET(gtk_builder_get_object(builder, "chat_icon"));
     title = GTK_WIDGET(gtk_builder_get_object(builder, "chat_title"));
     status = GTK_WIDGET(gtk_builder_get_object(builder, "chat_status"));
+    id = GTK_WIDGET(gtk_builder_get_object(builder, "chat_id"));
 
     char query_buff[1000];
     sprintf(query_buff,"My id is %s", chat_id);
@@ -315,8 +349,9 @@ void create_chat(char * chat_id, char * chat_name, char ** chat_members)
         gtk_label_set_text(GTK_LABEL(title), chat_name);
     }
     gtk_label_set_text(GTK_LABEL(status), query_buff);
+    //gtk_label_set_text(GTK_LABEL(id), chat_id);
 
-    //gtk_widget_set_name(chat, itoa(c.chat_icon));
+    gtk_widget_set_name(chat, chat_id);
 
     gtk_list_box_insert(GTK_LIST_BOX(app->chat_list), chat, -1);
         

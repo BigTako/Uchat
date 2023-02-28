@@ -3,11 +3,11 @@
 static gboolean popup_open = FALSE;
 static bool isOther;
 
-gboolean my_message_menu(GtkWidget *widget, GdkEventButton *event, gpointer data) {
+gboolean my_message_menu(GtkWidget *widget, GdkEventButton *event, t_message *data) {
     if (event->type == GDK_BUTTON_PRESS && event->button == 3) {
-        char *str = data;
-        g_print("Button clicked with user data: %s\n", str);
-        app->active_message = mx_strdup(str);
+        //char *str = data->message_text;
+        g_print("Button clicked with user data: %s    ID: %d\n", data->message_text, data->id);
+        app->active_message = data->message_text;
         app->active_widget = widget;
         if (popup_open) {
             gtk_widget_hide(app->my_options);
@@ -23,11 +23,11 @@ gboolean my_message_menu(GtkWidget *widget, GdkEventButton *event, gpointer data
     return FALSE;
 }
 
-gboolean other_message_menu(GtkWidget *widget, GdkEventButton *event, gpointer data) {
+gboolean other_message_menu(GtkWidget *widget, GdkEventButton *event, t_message *data) {
     if (event->type == GDK_BUTTON_PRESS && event->button == 3) {
-        char *str = data;
-        g_print("Button clicked with user data: %s\n", str);
-        app->active_message = mx_strdup(str);
+        //char *str = data->message_text;
+        g_print("Button clicked with user data: %s    ID: %d\n", data->message_text, data->id);
+        app->active_message = data->message_text;
         if (popup_open) {
             gtk_widget_hide(app->other_options);
             popup_open = FALSE;

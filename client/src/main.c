@@ -2,6 +2,7 @@
 
 app_t *app;
 t_send_param *param;
+t_message *message_data;
 
 int main(int argc, char * argv[]) {
     printf("PID %d\n", getpid());
@@ -16,6 +17,9 @@ int main(int argc, char * argv[]) {
    
     int cmdEXIT = 0;
     //int status_addr;
+
+    message_data = (t_message*)malloc(sizeof(t_message));
+
     param = malloc(sizeof(t_send_param*));
     pthread_mutex_t * mutex_R = malloc(sizeof(pthread_mutex_t *));
     param->mutex_R = mutex_R;

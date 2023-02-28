@@ -104,6 +104,14 @@
                 <property name="position">2</property>
               </packing>
             </child>
+            <child>
+              <object class="GtkLabel" id="message_id">
+                <property name="visible">False</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes"></property>
+                <property name="wrap">True</property>
+              </object>
+            </child>
           </object>
           <packing>
             <property name="expand">False</property>
