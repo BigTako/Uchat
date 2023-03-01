@@ -19,9 +19,9 @@ int main(int argc, char ** argv)
 
     //creating table with conversations
     format_and_execute(db, "CREATE TABLE IF NOT EXISTS %s(\
-                            conversation_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, \
-                            name TEXT NOT NULL,\
-                            chat_members TEXT NOT NULL)", CONVERSATIONS_TN);
+                            chat_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, \
+                            chat_name TEXT NOT NULL,\
+                            chat_members TEXT NOT NULL)", CHATS_TN);
 
     //creating table with messages
 	format_and_execute(db, "CREATE TABLE IF NOT EXISTS %s(\
@@ -29,7 +29,7 @@ int main(int argc, char ** argv)
                             from_username TEXT NOT NULL, \
                             message_text TEXT NOT NULL, \
                             send_datetime INTEGER NOT NULL, \
-                            conversation_id INTEGER NOT NULL, \
+                            chat_id INTEGER NOT NULL, \
                             status TEXT NOT NULL DEFAULT 'unread')", MESSAGES_TN);
 
     /*GENERATION OF RSA KEYS*/

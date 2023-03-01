@@ -100,6 +100,8 @@ void find_user() {
     const char *username = gtk_entry_get_text(GTK_ENTRY(app->find_user_entry));
     char request_buff[4096];
     char responce_buff[4096];
+    char chat_query_buff[4096];
+
     char ** info_parts = NULL;
     //user1 makes a request to server(C@NAME@USERNAME1@USERNAME2@... - create new chat) with task to create a chat
     sprintf(request_buff, "%c%s?%s%s", CREATE_CHAT, QUERY_DELIM, QUERY_DELIM, username);
@@ -117,11 +119,13 @@ void find_user() {
     {
         if (responce_buff[0] == MESSAGE_CODE[0])
         {
-            info_parts = mx_strsplit(responce_buff, QUERY_DELIM[0]);
+            create_chat(responce_buff + 2);
+            /*info_parts = mx_strsplit(responce_buff, QUERY_DELIM[0]);
             printf("Got a server responce: %s\n", responce_buff);
             create_chat(info_parts[1], "?", info_parts + 2);
             printf("[INFO] Chat successfuly created(%s)\n", username);
-            mx_del_strarr(&info_parts);
+            mx_del_strarr(&info_parts);*/
+            printf("[INFO] Chat successfuly created(%s)\n", username);
         }
         else if (responce_buff[0] == 'N')
         {
@@ -372,12 +376,13 @@ void create_message(char * message_query, bool to_end)
     mx_del_strarr(&parts);
 }
 
-void create_chat(char * chat_id, char * chat_name, char ** chat_members) 
+void create_chat(char * chat_info_query) 
 {
     //короче добавляются чаты в лист, но я хз конешно как переключать их
     GtkWidget *chat, *icon, *title, *status, *id;
     GtkBuilder *builder = gtk_builder_new ();
     GError* error = NULL;
+    char ** parts = mx_strsplit(chat_info_query, QUERY_DELIM[0]);
 
     if (!gtk_builder_add_from_file (builder, "../resources/ui/chat_list.glade", &error)) {
         g_critical ("Couldn't load file: message_other.ui");
@@ -394,23 +399,33 @@ void create_chat(char * chat_id, char * chat_name, char ** chat_members)
     id = GTK_WIDGET(gtk_builder_get_object(builder, "chat_id"));
 
     char query_buff[1000];
-    sprintf(query_buff,"My id is %s", chat_id);
+    sprintf(query_buff, "%s:%s", parts[2], parts[3]);
+    //M@chat_id@chat_name@LM_from_username@LM_message_text@LM_message_status@chat_members
+    /*
+        parts[0] - chat_id
+        parts[1] - chat_name
+        parts[2] - LM_from_username
+        parts[3] - LM_message_text
+        parts[4] - LM_message_status
+        parts + 5 - chat members
+    */
+
     gtk_image_set_from_file(GTK_IMAGE(icon), "../resources/icons/message_icon.png");
-    if (!strcmp(chat_name, "?"))
+    if (!strcmp(parts[1], "?"))
     {
-        if (!strcmp(app->username_t, chat_members[0]))
-            gtk_label_set_text(GTK_LABEL(title), chat_members[1]);    
+        if (!strcmp(app->username_t, parts[5]))
+            gtk_label_set_text(GTK_LABEL(title), parts[6]);    
         else
-            gtk_label_set_text(GTK_LABEL(title), chat_members[0]);
+            gtk_label_set_text(GTK_LABEL(title), parts[5]);
     }
     else
     {
-        gtk_label_set_text(GTK_LABEL(title), chat_name);
+        gtk_label_set_text(GTK_LABEL(title), parts[1]);
     }
     gtk_label_set_text(GTK_LABEL(status), query_buff);
     //gtk_label_set_text(GTK_LABEL(id), chat_id);
 
-    gtk_widget_set_name(chat, chat_id);
+    gtk_widget_set_name(chat, parts[0]);
 
     gtk_list_box_insert(GTK_LIST_BOX(app->chat_list), chat, -1);
         

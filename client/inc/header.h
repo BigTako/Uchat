@@ -87,7 +87,7 @@ int check_login_data_for_errors(const char *username, const char *password);
 int check_signup_data_for_errors(const char *username, const char *password, const char *c_password);
 
 //working with chats
-void create_chat(char * chat_id, char * chat_name, char ** chat_members);
+void create_chat(char * chat_info_query);
 void collect_messages(char * action);
 
 typedef struct app_s

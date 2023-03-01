@@ -6,7 +6,6 @@ void get_and_show_user_chats(char action)
     char responce_buff[MESSAGE_MAX_LEN];
     int num_of_chats = 0;
     bool online = true;
-    char ** chat_info_parts = NULL;
     int members_rest_len = 0;
     //char ** chat_info = NULL;
     
@@ -16,7 +15,11 @@ void get_and_show_user_chats(char action)
     if (send(param->socket, server_query, strlen(server_query) + 1, 0) <= 0) online = false;
     if (recv(param->socket, responce_buff, MESSAGE_MAX_LEN, 0) <= 0) online = false;
     printf("Recived: %s\n", responce_buff);
-    if (responce_buff[0] != 'W') printf("RECIVED ABOBA (%d)\n", responce_buff[0]); // recived something wrong there are error in clients code!
+    if (responce_buff[0] != 'W') 
+    {
+        printf("RECIVED ABOBA (%d)\n", responce_buff[0]); // recived something wrong there are error in clients code!
+        return;
+    }
     num_of_chats = atoi(responce_buff + 2);
     printf("Recived: %d\n", num_of_chats);
     if (online == true) 
@@ -38,11 +41,11 @@ void get_and_show_user_chats(char action)
                 if (online) 
                 {
                     //M@chat_id@chat_name@LM_from_username@LM_message_text@LM_message_status@chat_members
-
-                    chat_info_parts = mx_strsplit(responce_buff, QUERY_DELIM[0]);                    
-                    create_chat(chat_info_parts[1], chat_info_parts[2] , chat_info_parts + 3);
+                    printf("Got a chat info: %s\n", responce_buff);
+                    //chat_info_parts = mx_strsplit(responce_buff, QUERY_DELIM[0]);                    
+                    create_chat(responce_buff + 2);
                     if (send(param->socket, "Y", 1, 0) <= 0) online = false;
-                    mx_del_strarr(&chat_info_parts);
+                    //mx_del_strarr(&chat_info_parts);
                 }
             }
         }
@@ -144,6 +147,6 @@ GtkWidget *open_main_window(void)
     g_signal_connect(window, "key_press_event", G_CALLBACK (enter_keypress), NULL);
     g_signal_connect(G_OBJECT(app->chat_list), "row-selected", G_CALLBACK(change_chat), "1");
     g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
-    scroll();
+    //scroll();
     return window;
 }
