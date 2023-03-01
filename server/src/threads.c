@@ -263,20 +263,22 @@ void encode(char * code, t_thread_param *param, bool *online, char *user)
 			break;
 		case GET_CHATS_HISTORY:
 			//message_id@from_username@message_text
-			db_query = "SELECT %s.message_id, %s.from_username, %s.message_text, %s.send_datetime, %s.conversation_id \
-            			FROM %s \
-            			INNER JOIN %s \
-            			ON %s.conversation_id = %s.conversation_id \
-            			WHERE chat_members LIKE '%%%s%%' \
-						ORDER BY %s.message_id DESC";
+			db_query = "SELECT * \
+						FROM (SELECT %s.message_id, %s.from_username, %s.message_text, %s.send_datetime, %s.conversation_id \
+            				  FROM %s \
+            			      INNER JOIN %s \
+            				  ON %s.conversation_id = %s.conversation_id \
+            				  WHERE chat_members LIKE '%%%s%%' \
+							  ORDER BY %s.message_id DESC)\
+						ORDER BY message_id";
 
-			table = get_db_data_table(param->db, db_query, 5,   DB_ROWS_MAX, MESSAGES_TN, MESSAGES_TN, MESSAGES_TN, MESSAGES_TN, MESSAGES_TN,
+			table = get_db_data_table(param->db, db_query, 5, DB_ROWS_MAX, MESSAGES_TN, MESSAGES_TN, MESSAGES_TN, MESSAGES_TN, MESSAGES_TN,
 									  CONVERSATIONS_TN, MESSAGES_TN, MESSAGES_TN, CONVERSATIONS_TN, user, MESSAGES_TN);
 
 			//UPDATE status of messages have got
 			if (table)
 			{
-				mx_bubble_sort((char **)table, mx_null_arr_len((char **)table));
+				//mx_bubble_sort((char **)table, mx_null_arr_len((char **)table));
 				*online = s_to_c_info_exchange(param, table);
 				if (*online)
 				{
@@ -296,12 +298,14 @@ void encode(char * code, t_thread_param *param, bool *online, char *user)
 			break;
 		case GET_NEW_MESSAGES:
 			//M@message_id@from_username@message_text@send_datetime@conversation_id
-			db_query = "SELECT %s.message_id, %s.from_username, %s.message_text, %s.send_datetime, %s.conversation_id \
-            			FROM %s \
-            			INNER JOIN %s \
-            			ON %s.conversation_id = %s.conversation_id \
-            			WHERE %s.from_username != '%s' AND chat_members LIKE '%%%s%%' AND %s.status == 'unread' \
-						ORDER BY %s.message_id DESC";
+			db_query = "SELECT * \
+						FROM	(SELECT %s.message_id, %s.from_username, %s.message_text, %s.send_datetime, %s.conversation_id \
+            					FROM %s \
+            					INNER JOIN %s \
+            					ON %s.conversation_id = %s.conversation_id \
+            					WHERE %s.from_username != '%s' AND chat_members LIKE '%%%s%%' AND %s.status == 'unread' \
+								ORDER BY %s.message_id DESC)\
+						ORDER BY message_id";
 			
 			table = get_db_data_table(param->db, db_query, 5,   DB_ROWS_MAX, 
 																MESSAGES_TN, MESSAGES_TN, MESSAGES_TN, MESSAGES_TN, CONVERSATIONS_TN,
@@ -312,7 +316,7 @@ void encode(char * code, t_thread_param *param, bool *online, char *user)
 			if (table)
 			{
 				printf("Have taken some data from table\n");
-				mx_bubble_sort((char **)table, mx_null_arr_len(table));
+				//mx_bubble_sort((char **)table, mx_null_arr_len(table));
 				*online = s_to_c_info_exchange(param, table);
 				if (online)
 				{

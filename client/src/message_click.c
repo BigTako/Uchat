@@ -104,8 +104,21 @@ void delete_message(GtkWidget *widget, gpointer data)
     if (!isOther) gtk_widget_hide(app->my_options);
     else gtk_widget_hide(app->other_options);
     printf("\nDeleted message with ID: %d\n", selected_id);
+    char server_query[1000];
+    sprintf(server_query, "%c%s%d", DELETE_MESSAGE, QUERY_DELIM, selected_id);
+    send_server_request(param, server_query);
+    printf("[INFO] Successfuly deleted message with id(%d)\n", selected_id);
+    //free(server_query);
 }
 
-void edit_message() {
-
+void edit_message() 
+{
+    /*
+        //B@MESSAGE_ID@NEW_CONTENT
+        char * new_content = "its new content";
+        char server_query[1000];
+        sprintf(server_query, "%c%s%d%s%s", EDIT_MESSAGE, QUERY_DELIM, selected_id, QUERY_DELIM, new_content);
+        send_server_request(param, server_query);
+        printf("[INFO] Successfuly edited message with id(%d)\n", selected_id);
+    */
 }

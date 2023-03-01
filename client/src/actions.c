@@ -138,6 +138,7 @@ void find_user() {
 
 void change_chat(GtkListBox* self, GtkListBoxRow* row, gpointer data) {
     const char *name = gtk_widget_get_name(GTK_WIDGET(row));
+    
     printf("Name: %s %d\n",name, atoi(name));
     // GtkWidget *chat = GTK_WIDGET(gtk_builder_get_object(builder, "chat_id"));
     mx_printstr("changed chat\n");
@@ -157,9 +158,67 @@ static void stop_music() {
     system("say done");
 }
 
+char * correct_input(char * str)
+{
+    for (int i = 0; str[i] != '\0'; i++)
+    {
+        switch(str[i])
+        {
+            case '\'':
+                str[i] = 0;
+                break;
+            case '\"':
+                str[i] = 1;
+                break;
+            case '=':
+                str[i] = 2;
+                break;
+            case ';':
+                str[i] = 3;
+                break;
+            case '<':
+                str[i] = 4;
+                break;
+            case '>':
+                str[i] = 5;
+                break;
+        }
+    }
+    return str;
+}
+
+char * restore_input(char * str)
+{
+    for (int i = 0; str[i] != '\0'; i++)
+    {
+        switch(str[i])
+        {
+            case 0:
+                str[i] = '\'';
+                break;
+            case 1:
+                str[i] = '\"';
+                break;
+            case 2:
+                str[i] = '=';
+                break;
+            case 3:
+                str[i] = ';';
+                break;
+            case 4:
+                str[i] = '<';
+                break;
+            case 5:
+                str[i] = '>';
+                break;
+        }
+    }
+    return str;
+}
+
 void send_message() 
 {
-    const char *message = gtk_entry_get_text(GTK_ENTRY(app->chat_entry));
+    const char *message = correct_input(gtk_entry_get_text(GTK_ENTRY(app->chat_entry)));
     //when we'he got a content, message information can be transfered to database
     //S@TEXT@TIME@CONVERSATION_ID - send message
     //M@message_id@from_username@message_text@send_datetime@conversation_id
@@ -167,6 +226,7 @@ void send_message()
     char action[2] = {SEND_MESSAGE, '\0'};
     char * cur_time = mx_itoa((time(NULL)));
     char * server_query = create_query_delim_separated(4, action, message, cur_time, app->current_chat);
+    char * message_query = NULL;
     char responce_buff[5100];
     
     printf("Created server query: %s\n", server_query);
@@ -186,7 +246,7 @@ void send_message()
     }
     free(server_query);
     
-    server_query = create_query_delim_separated(5, responce_buff, app->username_t, message, cur_time, app->current_chat);
+    message_query = create_query_delim_separated(5, responce_buff, app->username_t, message, cur_time, app->current_chat);
 
     if (strlen(gtk_entry_get_text(GTK_ENTRY(app->chat_entry))) != 0) 
     {
@@ -195,7 +255,7 @@ void send_message()
         gtk_entry_set_text(GTK_ENTRY(app->chat_entry), "");
         scroll();
     }
-    free(server_query);
+    free(message_query);
     free(cur_time);
     pthread_mutex_unlock(param->mutex_R);
 }
@@ -275,7 +335,7 @@ void create_message(char * message_query, bool to_end)
         parts[4] - conversation_id
     */
 
-    gtk_label_set_text(GTK_LABEL(text), parts[2]);
+    gtk_label_set_text(GTK_LABEL(text), restore_input(parts[2]));
     gtk_label_set_text(GTK_LABEL(datetime), time_string);
 
     const char *label_text;

@@ -33,11 +33,12 @@ void get_and_show_user_chats(char action)
         {
             if (online) 
             {
-
                 memset(responce_buff, '\0', strlen(responce_buff));
                 if (recv(param->socket, responce_buff, MESSAGE_MAX_LEN, 0) <= 0) online = false;
                 if (online) 
                 {
+                    //M@chat_id@chat_name@LM_from_username@LM_message_text@LM_message_status@chat_members
+
                     chat_info_parts = mx_strsplit(responce_buff, QUERY_DELIM[0]);                    
                     create_chat(chat_info_parts[1], chat_info_parts[2] , chat_info_parts + 3);
                     if (send(param->socket, "Y", 1, 0) <= 0) online = false;
@@ -130,7 +131,7 @@ GtkWidget *open_main_window(void)
     
     //GET NEW MESSAGES
     action = GET_NEW_MESSAGES;
-    //guint threadID = g_timeout_add(100, collect_messages, (gpointer)"G");
+    guint threadID = g_timeout_add(100, collect_messages, (gpointer)"G");
     //GET NEW MESSAGES
     //START GETTING NEW MESSAGES CYCLE
     //START GETTING NEW MESSAGES CYCLE
@@ -143,6 +144,6 @@ GtkWidget *open_main_window(void)
     g_signal_connect(window, "key_press_event", G_CALLBACK (enter_keypress), NULL);
     g_signal_connect(G_OBJECT(app->chat_list), "row-selected", G_CALLBACK(change_chat), "1");
     g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
-
+    scroll();
     return window;
 }

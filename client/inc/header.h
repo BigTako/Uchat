@@ -13,6 +13,7 @@
 #include <pthread.h>
 #include <poll.h>
 #include <errno.h>
+#include <stdlib.h>
 #include <gtk/gtk.h>
 
 #include "../libs/openssl/rsa.h"
