@@ -114,10 +114,13 @@ GtkWidget *open_main_window(void)
     gtk_widget_set_name(GTK_WIDGET(app->chat_scroller), "chat_scroller");
 
     app->chat_entry = GTK_WIDGET(gtk_builder_get_object(ui_builder, "new_message_entry"));
+    app->chat_entry_box = GTK_WIDGET(gtk_builder_get_object(ui_builder, "message_entry"));
     app->find_user_entry = GTK_WIDGET(gtk_builder_get_object(ui_builder, "user_search_bar"));
     //mx_printstr(app->username_t);
+    app->welcome_message = GTK_WIDGET(gtk_builder_get_object(ui_builder, "welcome_message"));
+    gtk_widget_set_name(GTK_WIDGET(app->welcome_message), "welcome_message");
+    app->send_message_button = GTK_WIDGET(gtk_builder_get_object(ui_builder, "send_message_button"));
 
-    
     //gtk_entry_set_text(GTK_ENTRY(app->username_label), app->username);
     gtk_label_set_text(GTK_LABEL(app->username_label), app->username_t);
 
@@ -141,10 +144,13 @@ GtkWidget *open_main_window(void)
 
     gtk_builder_connect_signals(ui_builder, NULL);
 
+    change_chat_by_id(0);
+
     gtk_widget_show(window);
 
     //signals
     g_signal_connect(window, "key_press_event", G_CALLBACK (enter_keypress), NULL);
+    g_signal_connect(window, "key_press_event", G_CALLBACK (enter_escape), NULL);
     g_signal_connect(G_OBJECT(app->chat_list), "row-selected", G_CALLBACK(change_chat), "1");
     g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
     //scroll();

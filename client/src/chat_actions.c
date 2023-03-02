@@ -1,21 +1,6 @@
 #include "../inc/header.h"
 
-app_t *app_init() 
-{
-	app_t *app = NULL;
- 
-	// allocate memory for app struct
-	app = (app_t *) malloc(sizeof(app_t));
-	if (app == NULL) return NULL;
-	memset(app, 0, sizeof(app_t));
-	
-    app->username = NULL;
-    app->password = NULL;
-    app->active_message = malloc(1);
-    app->current_chat = mx_strdup("1");
 
-	return app;
-}
 
 void collect_messages(char * action)
 {
@@ -76,23 +61,6 @@ void collect_messages(char * action)
     pthread_mutex_unlock(param->mutex_R);
 }
 
-gboolean enter_keypress(GtkWidget *widget, GdkEventKey *event, gpointer data) {
-    if (event->keyval == GDK_KEY_Return) 
-    {
-        if (gtk_widget_has_focus(app->chat_entry)) send_message();
-        if (gtk_widget_has_focus(app->find_user_entry)) find_user();
-        return TRUE;
-    }
-    return FALSE;
-}
-
-void scroll() {
-    GtkAdjustment *adjustment = gtk_scrolled_window_get_vadjustment(GTK_SCROLLED_WINDOW(app->chat_scroller));
-    gtk_adjustment_set_page_size(adjustment, 0);
-    double value = gtk_adjustment_get_upper(adjustment);
-    gtk_adjustment_set_value(adjustment, value);
-}
-
 void find_user() {
     //переписать под нормальный поиск)
     //user1 searches user2 in the searching panel
@@ -142,6 +110,10 @@ void find_user() {
 
 void change_chat(GtkListBox* self, GtkListBoxRow* row, gpointer data) {
     const char *name = gtk_widget_get_name(GTK_WIDGET(row));
+
+    app->current_chat_id = atoi(name);
+
+    change_chat_by_id(app->current_chat_id);
     
     printf("Name: %s %d\n",name, atoi(name));
     // GtkWidget *chat = GTK_WIDGET(gtk_builder_get_object(builder, "chat_id"));
@@ -153,71 +125,61 @@ void change_chat(GtkListBox* self, GtkListBoxRow* row, gpointer data) {
     // call_show_chat();
 }
 
-static void* play_music() {
-    system("afplay ../resources/send.mp3");
-    return NULL;
+char **fake_chat1 = {
+    "hello world",
+    "test chat1",
+    "amogus",
+    "a",
+    "sus"
+};
+
+char **fake_chat2 = {
+    "hello world",
+    "test chat2",
+    "amogus",
+    "a",
+    "sus"
+};
+
+void change_chat_by_id(int chat_id) {
+    if (chat_id != 0) {
+        gtk_widget_hide(app->welcome_message);
+        gtk_widget_show(app->chat_entry_box);
+        gtk_widget_show(app->chat_label_info);
+        gtk_widget_show(app->chat_icon);
+        delete_all_history();
+        show_chat_history(app->current_chat_id);
+    }
+    else {
+        gtk_widget_show(app->welcome_message);
+        gtk_widget_hide(app->chat_entry_box);
+        gtk_widget_hide(app->chat_label_info);
+        gtk_widget_hide(app->chat_icon);
+        delete_all_history();
+    }
 }
 
-static void stop_music() {
-    system("say done");
-}
-
-char * correct_input(char * str)
-{
-    for (int i = 0; str[i] != '\0'; i++)
-    {
-        switch(str[i])
-        {
-            case '\'':
-                str[i] = 0;
-                break;
-            case '\"':
-                str[i] = 1;
-                break;
-            case '=':
-                str[i] = 2;
-                break;
-            case ';':
-                str[i] = 3;
-                break;
-            case '<':
-                str[i] = 4;
-                break;
-            case '>':
-                str[i] = 5;
-                break;
+void show_chat_history(int chat_id) {
+    //M@message_id@from_username@message_text@send_datetime@conversation_id
+    //printf("\n\nCHAT ID: %d")
+    if (chat_id != 0) {
+        for (int i = 0; i < 5; i++) {
+            char *message = NULL;
+            asprintf(&message, "M@100@%d@M@18:01@1", chat_id);
+            create_message(message, false);
         }
     }
-    return str;
 }
 
-char * restore_input(char * str)
-{
-    for (int i = 0; str[i] != '\0'; i++)
-    {
-        switch(str[i])
-        {
-            case 0:
-                str[i] = '\'';
-                break;
-            case 1:
-                str[i] = '\"';
-                break;
-            case 2:
-                str[i] = '=';
-                break;
-            case 3:
-                str[i] = ';';
-                break;
-            case 4:
-                str[i] = '<';
-                break;
-            case 5:
-                str[i] = '>';
-                break;
-        }
+void delete_all_history() {
+    GtkContainer *box_container = GTK_CONTAINER(app->messages_container); // assuming 'box' is your GtkBox container
+    GList *children, *iter;
+
+    children = gtk_container_get_children(box_container);
+    for(iter = children; iter != NULL; iter = iter->next) {
+        gtk_widget_destroy(GTK_WIDGET(iter->data));
     }
-    return str;
+    g_list_free(children);
 }
 
 void send_message() 
@@ -430,16 +392,4 @@ void create_chat(char * chat_info_query)
     gtk_list_box_insert(GTK_LIST_BOX(app->chat_list), chat, -1);
         
     g_object_unref(builder);
-}
-
-void show_settings(void) {
-    gtk_widget_hide(app->chat_box);
-    gtk_widget_hide(app->chats_sidebar);
-    gtk_widget_show(app->settings_box);
-}
-
-void back_to_chat(void) {
-    gtk_widget_show(app->chat_box);
-    gtk_widget_show(app->chats_sidebar);
-    gtk_widget_hide(app->settings_box);
 }

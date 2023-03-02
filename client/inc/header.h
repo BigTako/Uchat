@@ -67,8 +67,13 @@ void send_message();
 void create_message(char * message_query, bool to_end);
 void find_user();
 gboolean enter_keypress(GtkWidget *widget, GdkEventKey *event, gpointer data);
+gboolean enter_escape(GtkWidget *widget, GdkEventKey *event, gpointer data);
+void change_chat_by_id(int chat_id);
 void scroll();
 void change_chat(GtkListBox* self, GtkListBoxRow* row, gpointer data);
+
+void delete_all_history();
+void show_chat_history(int chat_id);
 
 gboolean my_message_menu(GtkWidget *widget, GdkEventButton *event, t_message *data);
 gboolean other_message_menu(GtkWidget *widget, GdkEventButton *event, t_message *data);
@@ -85,6 +90,9 @@ GtkWidget *open_error_window(char *error_message);
 bool contains_wrong_char(const char *string);
 int check_login_data_for_errors(const char *username, const char *password);
 int check_signup_data_for_errors(const char *username, const char *password, const char *c_password);
+
+char * correct_input(char * str);
+char * restore_input(char * str);
 
 //working with chats
 void create_chat(char * chat_info_query);
@@ -120,6 +128,9 @@ typedef struct app_s
     GtkWidget *settings_box;
     GtkWidget *chat_scroller;
     GtkWidget *chat_info;
+    GtkWidget *welcome_message;
+    GtkWidget *send_message_button;
+    GtkWidget *chat_entry_box;
 
     GtkWidget *my_options;
     GtkWidget *other_options;
@@ -131,6 +142,7 @@ typedef struct app_s
     GtkWidget *active_widget;
     char *active_message;
     char * current_chat; // HARDCODED IN APP_INIT!!!!!!!!!!!!!!!!!!!!!!
+    int current_chat_id;
 }              app_t;
 
 app_t *app_init();
