@@ -1,15 +1,24 @@
 #include "../inc/header.h"
 
+static guint threadID = 0;
 
-
-void collect_messages(char * action)
+void collect_messages(void * info)
 {
+    if (!info)
+    {
+        return;
+    }
+    char * action;
+    action = mx_strdup((char *)info);
+    char query[1000];
+    sprintf(query, "%s%s%s", action, QUERY_DELIM, app->current_chat);
     char responce_buff[MESSAGE_MAX_LEN + 100];
     int count_of_messages = 0;
     bool online = true;
     pthread_mutex_lock(param->mutex_R);
-    printf("in collect function\n");
-    if (send(param->socket, action, 1, 0) <= 0) 
+    printf("in collect function, query(%s)\n", query);
+    free(action);
+    if (send(param->socket, query, strlen(query) + 1, 0) <= 0) 
     {
         perror(strerror(errno));
     }
@@ -52,10 +61,12 @@ void collect_messages(char * action)
     else if (responce_buff[0] == 'N')
     {
         printf("[INFO] No messages to receive\n");
+        return;    
     }
     else
     {
         printf("[ERROR] Undefined expression\n");
+        return;
     }
     if (recv(param->socket, responce_buff, MESSAGE_MAX_LEN, 0) <= 0) online = false;
     pthread_mutex_unlock(param->mutex_R);
@@ -88,16 +99,17 @@ void find_user() {
         if (responce_buff[0] == MESSAGE_CODE[0])
         {
             create_chat(responce_buff + 2);
-            /*info_parts = mx_strsplit(responce_buff, QUERY_DELIM[0]);
-            printf("Got a server responce: %s\n", responce_buff);
-            create_chat(info_parts[1], "?", info_parts + 2);
-            printf("[INFO] Chat successfuly created(%s)\n", username);
-            mx_del_strarr(&info_parts);*/
             printf("[INFO] Chat successfuly created(%s)\n", username);
         }
-        else if (responce_buff[0] == 'N')
+        else if (responce_buff[0] == MESSAGE_ERROR)
         {
             open_error_window(responce_buff + 2);
+        }
+        else if (responce_buff[0] == INFO_ERROR)
+        {
+            //responce_buff + 2 - chat_id
+            printf("CHAT ALREADY EXISTS\n");
+            open_error_window("[INFO] CHAT ALREADY EXISTS");
         }
         else
         {
@@ -112,9 +124,9 @@ void change_chat(GtkListBox* self, GtkListBoxRow* row, gpointer data) {
     const char *name = gtk_widget_get_name(GTK_WIDGET(row));
 
     app->current_chat_id = atoi(name);
-
+    free(app->current_chat);
+    app->current_chat = mx_strdup(name);
     change_chat_by_id(app->current_chat_id);
-    
     printf("Name: %s %d\n",name, atoi(name));
     // GtkWidget *chat = GTK_WIDGET(gtk_builder_get_object(builder, "chat_id"));
     mx_printstr("changed chat\n");
@@ -125,30 +137,22 @@ void change_chat(GtkListBox* self, GtkListBoxRow* row, gpointer data) {
     // call_show_chat();
 }
 
-char **fake_chat1 = {
-    "hello world",
-    "test chat1",
-    "amogus",
-    "a",
-    "sus"
-};
-
-char **fake_chat2 = {
-    "hello world",
-    "test chat2",
-    "amogus",
-    "a",
-    "sus"
-};
-
 void change_chat_by_id(int chat_id) {
-    if (chat_id != 0) {
+    if (chat_id != 0) 
+    {
         gtk_widget_hide(app->welcome_message);
         gtk_widget_show(app->chat_entry_box);
         gtk_widget_show(app->chat_label_info);
         gtk_widget_show(app->chat_icon);
+        if (threadID != 0)
+        {
+            g_source_remove(threadID);
+        }   
         delete_all_history();
-        show_chat_history(app->current_chat_id);
+
+        collect_messages((gpointer)"A");
+        
+        threadID = g_timeout_add(100, collect_messages, (gpointer)"G");
     }
     else {
         gtk_widget_show(app->welcome_message);
@@ -156,18 +160,6 @@ void change_chat_by_id(int chat_id) {
         gtk_widget_hide(app->chat_label_info);
         gtk_widget_hide(app->chat_icon);
         delete_all_history();
-    }
-}
-
-void show_chat_history(int chat_id) {
-    //M@message_id@from_username@message_text@send_datetime@conversation_id
-    //printf("\n\nCHAT ID: %d")
-    if (chat_id != 0) {
-        for (int i = 0; i < 5; i++) {
-            char *message = NULL;
-            asprintf(&message, "M@100@%d@M@18:01@1", chat_id);
-            create_message(message, false);
-        }
     }
 }
 
@@ -180,6 +172,24 @@ void delete_all_history() {
         gtk_widget_destroy(GTK_WIDGET(iter->data));
     }
     g_list_free(children);
+}
+
+void clear_chat_list() 
+{
+    GtkContainer *box_container = GTK_CONTAINER(app->chat_list); // assuming 'box' is your GtkBox container
+    GList *children, *iter;
+
+    children = gtk_container_get_children(box_container);
+    for(iter = children; iter != NULL; iter = iter->next) {
+        gtk_widget_destroy(GTK_WIDGET(iter->data));
+    }
+    g_list_free(children);
+}
+
+void renew_chat_list()
+{
+    clear_chat_list();
+    get_and_show_user_chats(GET_CURRENT_CHATS);
 }
 
 void send_message() 

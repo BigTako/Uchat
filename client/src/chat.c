@@ -42,10 +42,8 @@ void get_and_show_user_chats(char action)
                 {
                     //M@chat_id@chat_name@LM_from_username@LM_message_text@LM_message_status@chat_members
                     printf("Got a chat info: %s\n", responce_buff);
-                    //chat_info_parts = mx_strsplit(responce_buff, QUERY_DELIM[0]);                    
                     create_chat(responce_buff + 2);
                     if (send(param->socket, "Y", 1, 0) <= 0) online = false;
-                    //mx_del_strarr(&chat_info_parts);
                 }
             }
         }
@@ -128,16 +126,19 @@ GtkWidget *open_main_window(void)
     //gtk_widget_hide(app->chat_icon);
 
     //GET ALL CURRENT CONVERSATIONS
+    
+    //threadID = g_timeout_add(100, collect_messages, data);
     get_and_show_user_chats(GET_CURRENT_CHATS);
+    //g_timeout_add(10, renew_chat_list, NULL);
     //GET ALL CURRENT CONVERSATIONS
-    char action = GET_CHATS_HISTORY;
+    //char action[] = {GET_CHATS_HISTORY, '\0'};
     //GET CHAT HISTORY IGNORING THE STATUS
-    collect_messages(&action);
+    //collect_messages(action);
     //GET CHAT HISTORY IGNORING THE STATUS
     
     //GET NEW MESSAGES
-    action = GET_NEW_MESSAGES;
-    guint threadID = g_timeout_add(100, collect_messages, (gpointer)"G");
+    //action[0] = GET_NEW_MESSAGES;
+    //guint threadID = g_timeout_add(100, collect_messages, (gpointer)"G");
     //GET NEW MESSAGES
     //START GETTING NEW MESSAGES CYCLE
     //START GETTING NEW MESSAGES CYCLE

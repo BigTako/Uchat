@@ -12,7 +12,7 @@ app_t *app_init()
     app->username = NULL;
     app->password = NULL;
     app->active_message = malloc(1);
-    app->current_chat = mx_strdup("1");
+    app->current_chat = mx_strdup("0");
     app->current_chat_id = 0;
 
 	return app;

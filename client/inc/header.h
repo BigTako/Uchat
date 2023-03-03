@@ -40,6 +40,10 @@ typedef unsigned char * code;
 #define WAIT_FOR_CODE "W"
 #define MESSAGE_CODE "M"
 
+//CHAT ERRORS
+#define MESSAGE_ERROR 'N'
+#define INFO_ERROR 'I'
+
 #define DB_ROWS_MAX 10000
 #define MESSAGE_MAX_LEN 4096
 #define KEY_LENGHT 4096
@@ -61,6 +65,11 @@ typedef struct s_message {
     const char *message_text;
 } t_message;
 
+typedef struct s_collect_m_query
+{
+    char * query;
+} t_collect_m_query;
+
 //action functions
 void show_settings(void);
 void send_message();
@@ -72,8 +81,11 @@ void change_chat_by_id(int chat_id);
 void scroll();
 void change_chat(GtkListBox* self, GtkListBoxRow* row, gpointer data);
 
+void get_and_show_user_chats(char action);
+
 void delete_all_history();
-void show_chat_history(int chat_id);
+void clear_chat_list() ;
+void renew_chat_list();
 
 gboolean my_message_menu(GtkWidget *widget, GdkEventButton *event, t_message *data);
 gboolean other_message_menu(GtkWidget *widget, GdkEventButton *event, t_message *data);
@@ -96,7 +108,7 @@ char * restore_input(char * str);
 
 //working with chats
 void create_chat(char * chat_info_query);
-void collect_messages(char * action);
+void collect_messages(void * info);
 
 typedef struct app_s
 {

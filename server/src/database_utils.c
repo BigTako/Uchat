@@ -118,7 +118,7 @@ void clear_inner_list(void * ptr)
 
 void delete_table(char *** table)
 {
-	if (!table) return;
+	if (!table || !*table) return;
 	for (int i = 0; (*table)[i]; i++)
 	{
 		free((*table)[i]);	

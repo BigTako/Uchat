@@ -42,7 +42,6 @@
 
 #define USERS_TN "users"
 #define MESSAGES_TN "messages"
-#define GROUP_MEMBERS_TN "gropMembers"
 #define CHATS_TN "chats"
 #define DB_ROWS_MAX 10000
 

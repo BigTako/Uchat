@@ -4,10 +4,12 @@ bool s_to_c_info_exchange(t_thread_param *param, char ** table)
 {
 	if (!table || !*table)
 	{
-		/*if (send(param->socket, "N", 2, 0) <= 0){
-			return 0;
-		}*/
-		//return 1;
+		printf("Nothing to search\n");
+		if (send(param->socket, "N", 2, 0) <= 0)
+		{
+			printf("[ERROR] while sending NO to client\n");
+		}
+		return 1;
 	}
 	bool online = true;
 	char query_buff[MESSAGE_MAX_LEN];
@@ -219,11 +221,29 @@ void encode(char * code, t_thread_param *param, bool *online, char *user)
 						printf("[ERROR] No such user\n");
 						//free(members_str);
 						if (send(param->socket, "N@No such user", 1000, 0) <= 0) *online = false;
+						free(members_str);
 						break;
 					}
 					else
 					{
 						printf("[INFO] User exists\n");
+						delete_table(&table);
+						db_query = "SELECT chat_id \
+									FROM %s \
+									WHERE chat_members LIKE '%%%s%%' AND chat_members LIKE '%%%s%%'";
+	
+						table = get_db_data_table(param->db, db_query, 1, 1, CHATS_TN, user, another_user);
+
+						if (table && *table)
+						{
+							printf("[INFO] Chat already exist\n");
+							memset(query_buff, '\0', strlen(query_buff));
+							sprintf(query_buff, "I@%s", table[0]);
+							if (send(param->socket, query_buff, strlen(query_buff) + 1, 0) <= 0) *online = false;
+							delete_table(&table);
+							free(members_str);
+							return;
+						}	
 					}
 				}
 				db_query = "SELECT max(chat_id) FROM %s";
@@ -269,90 +289,74 @@ void encode(char * code, t_thread_param *param, bool *online, char *user)
 			}
 			free(members_str);
 			break;
-		case GET_CHATS_HISTORY:
+		case GET_CHATS_HISTORY: // GET LAST 20 MESSAGES IGNORING STATUS
 			//message_id@from_username@message_text
 			db_query = "SELECT * \
-						FROM (SELECT %s.message_id, %s.from_username, %s.message_text, %s.send_datetime, %s.chat_id \
-            				  FROM %s \
-            			      INNER JOIN %s \
-            				  ON %s.chat_id = %s.chat_id \
-            				  WHERE chat_members LIKE '%%%s%%' \
-							  ORDER BY %s.message_id DESC)\
+						FROM (SELECT m.message_id, m.from_username, m.message_text, m.send_datetime, m.chat_id \
+							  FROM %s c \
+							  INNER JOIN %s m \
+							  ON c.chat_id = m.chat_id \
+							  WHERE chat_members LIKE '%%%s%%' AND m.chat_id=%s \
+							  ORDER BY m.message_id DESC) \
 						ORDER BY message_id";
 
-			table = get_db_data_table(param->db, db_query, 5, DB_ROWS_MAX, MESSAGES_TN, MESSAGES_TN, MESSAGES_TN, MESSAGES_TN, MESSAGES_TN,
-									  CHATS_TN, MESSAGES_TN, MESSAGES_TN, CHATS_TN, user, MESSAGES_TN);
+			table = get_db_data_table(param->db, db_query, 5, DB_ROWS_MAX, CHATS_TN, MESSAGES_TN, user, parts[1]);
 
 			//UPDATE status of messages have got
-			if (table)
+			*online = s_to_c_info_exchange(param, table);
+			if (*online && table && *table)
 			{
-				//mx_bubble_sort((char **)table, mx_null_arr_len((char **)table));
-				*online = s_to_c_info_exchange(param, table);
-				if (*online)
+				for (int i = 0; table[i]; i++)
 				{
-					for (int i = 0; table[i]; i++)
-					{
-						db_query = "UPDATE %s SET status='read' WHERE message_id=%s";
-						executing_status = format_and_execute(param->db, db_query, MESSAGES_TN, strtok(table[i], QUERY_DELIM));
-						printf("Execution status = %d\n", executing_status);
-					}
+					db_query = "UPDATE %s SET status='read' WHERE message_id=%s";
+					executing_status = format_and_execute(param->db, db_query, MESSAGES_TN, strtok(table[i], QUERY_DELIM));
+					printf("Execution status = %d\n", executing_status);
 				}
-				delete_table(&table);
 			}
-			else
-			{
-				printf("[INFO] No data to receive from table\n");
-			}
+			delete_table(&table);
 			break;
-		case GET_NEW_MESSAGES:
+		case GET_NEW_MESSAGES: // CONTINUALY GET MESSAGES WITH UNREAD STATUS
 			//M@message_id@from_username@message_text@send_datetime@chat_id
 			db_query = "SELECT * \
-						FROM	(SELECT %s.message_id, %s.from_username, %s.message_text, %s.send_datetime, %s.chat_id \
-            					FROM %s \
-            					INNER JOIN %s \
-            					ON %s.chat_id = %s.chat_id \
-            					WHERE %s.from_username != '%s' AND chat_members LIKE '%%%s%%' AND %s.status == 'unread' \
-								ORDER BY %s.message_id DESC)\
+						FROM (SELECT m.message_id, m.from_username, m.message_text, m.send_datetime, m.chat_id \
+							  FROM %s c \
+							  INNER JOIN %s m \
+							  ON c.chat_id = m.chat_id \
+							  WHERE m.frop_username != '%s' AND chat_members LIKE '%%%s%%' AND m.chat_id=%s AND m.status='unread'\
+							  ORDER BY m.message_id DESC) \
 						ORDER BY message_id";
 			
 			table = get_db_data_table(param->db, db_query, 5,   DB_ROWS_MAX, 
-																MESSAGES_TN, MESSAGES_TN, MESSAGES_TN, MESSAGES_TN, CHATS_TN,
-																CHATS_TN,
-																MESSAGES_TN,
-																MESSAGES_TN, CHATS_TN,
-																MESSAGES_TN, user, user, MESSAGES_TN, MESSAGES_TN);
-			if (table)
+																CHATS_TN, 
+																MESSAGES_TN, 
+																user,
+																user,
+																parts[1]);
+			*online = s_to_c_info_exchange(param, table);
+			if (*online && table && *table)
 			{
-				printf("Have taken some data from table\n");
-				//mx_bubble_sort((char **)table, mx_null_arr_len(table));
-				*online = s_to_c_info_exchange(param, table);
-				if (online)
+				for (int i = 0; table[i]; i++)
 				{
-					for (int i = 0; table[i]; i++)
-					{
-						db_query = "UPDATE %s SET status='read' WHERE message_id=%s";
-						executing_status = format_and_execute(param->db, db_query, MESSAGES_TN, strtok(table[i], QUERY_DELIM));
-						printf("Execution status = %d\n", executing_status);
-					}
+					db_query = "UPDATE %s SET status='read' WHERE message_id=%s";
+					executing_status = format_and_execute(param->db, db_query, MESSAGES_TN, strtok(table[i], QUERY_DELIM));
 				}
-				delete_table(&table);
 			}
-			else
-			{
-				printf("Cant find something in table\n");
-			}
+			delete_table(&table);
 			break;
 		case GET_CURRENT_CHATS:
-			//parts[1] - username member of chat
-			/*db_query = "SELECT * FROM %s WHERE chat_members LIKE '%%%s%s%%'"; // SELECT * FROM CHATS_TN WHERE chat_members LIKE '%username%';
-			table = get_db_data_table(param->db, db_query, 3, DB_ROWS_MAX, CHATS_TN, QUERY_DELIM, parts[1]);*/
-
-			db_query = "SELECT c.chat_id, chat_name, m.from_username, m.message_text, m.status, chat_members, (SELECT max(message_id) FROM %s m2 WHERE m2.chat_id=c.chat_id) AS MAX_MID \
+			db_query = "SELECT  c.chat_id, \
+								c.chat_name, \
+								CASE (SELECT max(message_id) FROM %s m WHERE m.chat_id=c.chat_id) IS NULL \
+									WHEN 1 THEN 'You'||' @ '||'...'||'@'||'...' \
+									ELSE (SELECT m3.from_username || '@' || m3.message_text || '@' || m3.status  \
+									FROM %s m3 WHERE m3.message_id=(SELECT max(message_id) FROM %s m2 WHERE m2.chat_id=c.chat_id)) \
+        						END MESSAGE_DATA \
+        						, \
+								c.chat_members \ 
 						FROM %s c \
-						INNER JOIN %s m \
-						ON c.chat_id = m.chat_id \
-						WHERE chat_members LIKE '%%%s%s%%' AND m.message_id = MAX_MID";
-			table = get_db_data_table(param->db, db_query, 6, DB_ROWS_MAX, MESSAGES_TN, CHATS_TN, MESSAGES_TN, QUERY_DELIM, parts[1]);
+						WHERE chat_members LIKE '%%%s%%'";
+
+			table = get_db_data_table(param->db, db_query, 4, DB_ROWS_MAX, MESSAGES_TN, MESSAGES_TN, MESSAGES_TN, CHATS_TN, user);
 			if (table && *table)
 			{
 				printf("Have something to work with\n");
