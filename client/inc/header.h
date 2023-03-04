@@ -63,6 +63,7 @@ typedef struct s_message {
     int id;
     char *username;
     const char *message_text;
+    GtkWidget *message_label;
 } t_message;
 
 typedef struct s_collect_m_query
@@ -80,6 +81,8 @@ gboolean enter_escape(GtkWidget *widget, GdkEventKey *event, gpointer data);
 void change_chat_by_id(int chat_id);
 void scroll();
 void change_chat(GtkListBox* self, GtkListBoxRow* row, gpointer data);
+void set_text();
+//gboolean chat_actions_menu(GtkWidget *widget, GdkEventButton *event, gpointer data);
 
 void get_and_show_user_chats(char action);
 
@@ -155,6 +158,8 @@ typedef struct app_s
     char *active_message;
     char * current_chat; // HARDCODED IN APP_INIT!!!!!!!!!!!!!!!!!!!!!!
     int current_chat_id;
+
+    bool edit_message;
 }              app_t;
 
 app_t *app_init();

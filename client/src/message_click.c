@@ -3,12 +3,14 @@
 static gboolean popup_open = FALSE;
 static bool isOther;
 static int selected_id;
+static GtkWidget *label_to_change;
 
 gboolean my_message_menu(GtkWidget *widget, GdkEventButton *event, t_message *data) {
     if (event->type == GDK_BUTTON_PRESS && event->button == 3) {
         //char *str = data->message_text;
         g_print("Button clicked with user data: %s    ID: %d\n", data->message_text, data->id);
         selected_id = data->id;
+        label_to_change = data->message_label;
         app->active_message = data->message_text;
         app->active_widget = widget;
         if (popup_open) {
@@ -111,7 +113,7 @@ void delete_message(GtkWidget *widget, gpointer data)
     //free(server_query);
 }
 
-void edit_message() 
+void edit_message(GtkWidget *widget, gpointer data) 
 {
     /*
         //B@MESSAGE_ID@NEW_CONTENT
@@ -121,4 +123,35 @@ void edit_message()
         send_server_request(param, server_query);
         printf("[INFO] Successfuly edited message with id(%d)\n", selected_id);
     */
+    gtk_widget_grab_focus(app->chat_entry);
+    if (app->active_message != NULL) { 
+        app->active_widget = NULL;
+        if (!isOther) gtk_widget_hide(app->my_options);
+        else gtk_widget_hide(app->other_options);
+        gtk_entry_set_text(GTK_ENTRY(app->chat_entry), app->active_message);
+        app->edit_message = true;
+        //отсоединяю прошлый сигнал и делаю новый
+        g_signal_handlers_disconnect_by_func(app->send_message_button, (gpointer)send_message, NULL);
+        g_signal_connect(app->send_message_button, "clicked", G_CALLBACK(set_text), NULL);
+    }
 }
+
+void set_text() {
+    gtk_label_set_text(GTK_LABEL(label_to_change), gtk_entry_get_text(GTK_ENTRY(app->chat_entry)));
+    gtk_entry_set_text(GTK_ENTRY(app->chat_entry), "");
+    g_signal_handlers_disconnect_by_func(app->send_message_button, (gpointer)set_text, NULL);
+    g_signal_connect(app->send_message_button, "clicked", G_CALLBACK(send_message), NULL);
+    app->edit_message = false;
+}
+
+// gboolean chat_actions_menu(GtkWidget *widget, GdkEventButton *event, gpointer data) {
+//     if (event->button == GDK_BUTTON_SECONDARY) { 
+//         const char *name = gtk_widget_get_name(GTK_WIDGET(widget));
+//         printf("\n\nID OF THIS: %s\n\n", name);
+//         return TRUE;
+//     }
+//     else if (event->button == GDK_BUTTON_PRIMARY) {
+//         return FALSE; // Allow the default behavior to proceed
+//     }
+//     return TRUE;
+// }

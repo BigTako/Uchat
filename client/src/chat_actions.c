@@ -135,6 +135,7 @@ void change_chat(GtkListBox* self, GtkListBoxRow* row, gpointer data) {
     // reshow_old_messages(app->chat_id);
     // g_print("Chat changed: %d\n", app->chat_id);
     // call_show_chat();
+    
 }
 
 void change_chat_by_id(int chat_id) {
@@ -153,6 +154,7 @@ void change_chat_by_id(int chat_id) {
         collect_messages((gpointer)"A");
         
         threadID = g_timeout_add(100, collect_messages, (gpointer)"G");
+        
     }
     else {
         gtk_widget_show(app->welcome_message);
@@ -323,6 +325,7 @@ void create_message(char * message_query, bool to_end)
 
     message_struct->id = atoi(id_text);
     message_struct->message_text = gtk_label_get_text(GTK_LABEL(text));
+    if (is_user) message_struct->message_label = text;
 
     // if (is_user) g_signal_connect(message, "button-press-event", G_CALLBACK(my_message_menu), (gpointer)label_text);
     // else g_signal_connect(message, "button-press-event", G_CALLBACK(other_message_menu), (gpointer)label_text);

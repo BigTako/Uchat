@@ -153,6 +153,7 @@ GtkWidget *open_main_window(void)
     g_signal_connect(window, "key_press_event", G_CALLBACK (enter_keypress), NULL);
     g_signal_connect(window, "key_press_event", G_CALLBACK (enter_escape), NULL);
     g_signal_connect(G_OBJECT(app->chat_list), "row-selected", G_CALLBACK(change_chat), "1");
+    //g_signal_connect(G_OBJECT(app->chat_list), "button-press-event", G_CALLBACK(chat_actions_menu), "1");
     g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
     //scroll();
     return window;
