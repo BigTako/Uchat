@@ -23,6 +23,8 @@
 #include "../libs/libmx/inc/libmx.h"
 ///Users/alex/Desktop/studing/Uchat-danil/client/libs/openssl/pem.h
 
+#define START_PAGE 0
+
 typedef unsigned char * code;
 #define QUERY_DELIM "@"
 
@@ -82,7 +84,9 @@ void change_chat_by_id(int chat_id);
 void scroll();
 void change_chat(GtkListBox* self, GtkListBoxRow* row, gpointer data);
 void set_text();
-//gboolean chat_actions_menu(GtkWidget *widget, GdkEventButton *event, gpointer data);
+gboolean chat_actions_menu(GtkWidget *widget, GdkEventButton *event, gpointer data);
+void delete_chat();
+void create_chat_options_popover();
 
 void get_and_show_user_chats(char action);
 
@@ -115,23 +119,22 @@ void collect_messages(void * info);
 
 typedef struct app_s
 {
+    //login widgets
     GtkWidget *login_window;
     GtkWidget *signup_window;
     GtkWidget *username_entry;
     GtkWidget *password_entry;
     GtkWidget *login_button;
-
+    //signup widgets
     GtkWidget *signup_username_entry;
     GtkWidget *signup_password_entry;
     GtkWidget *signup_confirm_password_entry;
-
+    //error hangling widgets
     GtkWidget *error_window;
     GtkWidget *error_label;
     GtkWidget *error_button;
-
+    //chat widgets
     GtkWidget *chat_window;
-    GtkWidget *chat_entry;
-    GtkWidget *find_user_entry;
     GtkWidget *chats_sidebar;
     GtkWidget *username_label;
     GtkWidget *user_icon;
@@ -146,9 +149,12 @@ typedef struct app_s
     GtkWidget *welcome_message;
     GtkWidget *send_message_button;
     GtkWidget *chat_entry_box;
-
+    GtkWidget *chat_entry;
+    GtkWidget *find_user_entry;
+    //widgets for right mouse click
     GtkWidget *my_options;
     GtkWidget *other_options;
+    GtkWidget *chat_options;
 
     char *username;
     char *password;

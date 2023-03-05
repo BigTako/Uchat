@@ -135,7 +135,6 @@ void change_chat(GtkListBox* self, GtkListBoxRow* row, gpointer data) {
     // reshow_old_messages(app->chat_id);
     // g_print("Chat changed: %d\n", app->chat_id);
     // call_show_chat();
-    
 }
 
 void change_chat_by_id(int chat_id) {

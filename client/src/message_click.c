@@ -1,14 +1,14 @@
 #include "../inc/header.h"
 
 static gboolean popup_open = FALSE;
+static bool delete_popup_open = false;
 static bool isOther;
 static int selected_id;
 static GtkWidget *label_to_change;
+static GtkListBoxRow *row_to_delete;
 
 gboolean my_message_menu(GtkWidget *widget, GdkEventButton *event, t_message *data) {
     if (event->type == GDK_BUTTON_PRESS && event->button == 3) {
-        //char *str = data->message_text;
-        g_print("Button clicked with user data: %s    ID: %d\n", data->message_text, data->id);
         selected_id = data->id;
         label_to_change = data->message_label;
         app->active_message = data->message_text;
@@ -29,7 +29,6 @@ gboolean my_message_menu(GtkWidget *widget, GdkEventButton *event, t_message *da
 
 gboolean other_message_menu(GtkWidget *widget, GdkEventButton *event, t_message *data) {
     if (event->type == GDK_BUTTON_PRESS && event->button == 3) {
-        //char *str = data->message_text;
         g_print("Button clicked with user data: %s    ID: %d\n", data->message_text, data->id);
         app->active_message = data->message_text;
         selected_id = data->id;
@@ -75,15 +74,12 @@ void create_options_popover(GtkWidget *widget, bool isMy) {
     GtkCssProvider *cssProvider = gtk_css_provider_new();
 	gtk_css_provider_load_from_path(cssProvider, "../resources/css/popup.css", NULL);
 	gtk_style_context_add_provider_for_screen(gdk_screen_get_default(), GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
-
     gtk_builder_connect_signals(ui_builder, NULL);
 
     if (isMy) app->my_options =  GTK_WIDGET(gtk_builder_get_object(ui_builder, "my_options_popup"));
     else app->other_options =  GTK_WIDGET(gtk_builder_get_object(ui_builder, "my_options_popup"));
 
     gtk_widget_show(window);
-
-    //g_signal_connect(window, "destroy", G_CALLBACK(on_popup_closed), NULL);
     g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
 }
 
@@ -144,14 +140,67 @@ void set_text() {
     app->edit_message = false;
 }
 
-// gboolean chat_actions_menu(GtkWidget *widget, GdkEventButton *event, gpointer data) {
-//     if (event->button == GDK_BUTTON_SECONDARY) { 
-//         const char *name = gtk_widget_get_name(GTK_WIDGET(widget));
-//         printf("\n\nID OF THIS: %s\n\n", name);
-//         return TRUE;
-//     }
-//     else if (event->button == GDK_BUTTON_PRIMARY) {
-//         return FALSE; // Allow the default behavior to proceed
-//     }
-//     return TRUE;
-// }
+gboolean chat_actions_menu(GtkWidget *widget, GdkEventButton *event, gpointer data) {
+    if (event->button == GDK_BUTTON_SECONDARY) { 
+        GtkListBox *listbox = GTK_LIST_BOX(widget);
+        GtkListBoxRow *selected_row = gtk_list_box_get_selected_row(listbox);
+        if (selected_row != NULL) {
+            gint row_number = gtk_list_box_row_get_index(selected_row);
+            row_to_delete = selected_row;
+            //const char *name = gtk_widget_get_name(GTK_WIDGET(selected_row));
+            //g_print("\n\nSelected row number: %d %s\n\n", row_number, name);
+            if (delete_popup_open) {
+                gtk_widget_hide(app->chat_options);
+                delete_popup_open = false;
+            }
+            else {
+                create_chat_options_popover();
+                delete_popup_open = true;
+            }
+        }
+        return TRUE;
+    }
+    else if (event->button == GDK_BUTTON_PRIMARY) return FALSE; 
+    return TRUE;
+}
+
+void create_chat_options_popover() {
+    GtkWidget *window;
+    GtkBuilder * ui_builder;
+    GError *err = NULL;
+
+    ui_builder = gtk_builder_new();
+    if(!gtk_builder_add_from_file(ui_builder, "../resources/ui/chat_list_popup.glade", &err)) {
+        g_critical ("Couldn't download the UI file : %s", err->message);
+        g_error_free (err);
+    }
+
+
+    window = GTK_WIDGET(gtk_builder_get_object(ui_builder, "my_options_popup"));
+    if (!window) {
+        g_critical ("Window widget error");
+    }
+    gtk_widget_set_name(GTK_WIDGET(window), "popup");
+
+    GtkCssProvider *cssProvider = gtk_css_provider_new();
+	gtk_css_provider_load_from_path(cssProvider, "../resources/css/popup.css", NULL);
+	gtk_style_context_add_provider_for_screen(gdk_screen_get_default(), GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+
+    gtk_builder_connect_signals(ui_builder, NULL);
+
+    app->chat_options =  GTK_WIDGET(gtk_builder_get_object(ui_builder, "my_options_popup"));
+
+    gtk_widget_show(window);
+
+    //g_signal_connect(window, "destroy", G_CALLBACK(on_popup_closed), NULL);
+    g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
+}
+
+void delete_chat() {
+    gtk_widget_hide(GTK_WIDGET(row_to_delete));
+    gtk_widget_hide(app->chat_options);
+    delete_popup_open = false;
+    delete_all_history();
+    change_chat_by_id(START_PAGE);
+    //gtk_container_remove(GTK_CONTAINER(listbox_delete), );
+}
