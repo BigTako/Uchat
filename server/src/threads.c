@@ -452,7 +452,9 @@ void* client_thread(void* vparam)
     char buffer[MESSAGE_MAX_LEN]; //!!!
     while (user == NULL) 
 	{
+		printf("WAIT\n");
 		if (u_recv(param, buffer, MESSAGE_MAX_LEN) <= 0) {
+			printf("hmm\n");
             online = false;
             break;
         }

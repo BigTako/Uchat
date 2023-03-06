@@ -107,6 +107,8 @@ int u_recv(t_send_param *param, void* buf, int len) {
     if (SSL_write(param->ssl, "Y", 2) <= 0) {
         return -1;
     }
+    printf("[INFO] Successfully recv message.\n");
+    return 0;
 }
 
 int u_send(t_send_param *param, void* buf, int len) {
@@ -123,7 +125,7 @@ int u_send(t_send_param *param, void* buf, int len) {
     if (SSL_read(param->ssl, response_buff, 2) <= 0) {
         return -1;
     }
-    if (*response_buff == 'Y') {
+    if (response_buff[0] == 'Y') {
         printf("[INFO] Successfully sent message.\n");
     }
     else {
