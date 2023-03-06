@@ -4,7 +4,7 @@ static guint threadID = 0;
 
 void collect_messages(void * info)
 {
-    if (!info)
+    /*if (!info)
     {
         return;
     }
@@ -67,7 +67,7 @@ void collect_messages(void * info)
         printf("[ERROR] Undefined expression\n");
         return;
     }
-    if (recv(param->socket, responce_buff, MESSAGE_MAX_LEN, 0) <= 0) online = false;
+    if (recv(param->socket, responce_buff, MESSAGE_MAX_LEN, 0) <= 0) online = false;*/
 }
 
 void find_user() {

@@ -1,6 +1,6 @@
 #include "../inc/header.h"
 
-void get_and_show_user_chats(char action)
+/*void get_and_show_user_chats(char action)
 {
     char * server_query = NULL;
     char responce_buff[MESSAGE_MAX_LEN];
@@ -50,7 +50,7 @@ void get_and_show_user_chats(char action)
     }
     if (recv(param->socket, responce_buff, MESSAGE_MAX_LEN, 0) <= 0) online = false;
     free(server_query);
-}
+}*/
 
 
 GtkWidget *open_main_window(void) 
@@ -126,7 +126,7 @@ GtkWidget *open_main_window(void)
     //GET ALL CURRENT CONVERSATIONS
     
     //threadID = g_timeout_add(100, collect_messages, data);
-    get_and_show_user_chats(GET_CURRENT_CHATS);
+    //get_and_show_user_chats(GET_CURRENT_CHATS);
     //g_timeout_add(10, renew_chat_list, NULL);
     //GET ALL CURRENT CONVERSATIONS
     //char action[] = {GET_CHATS_HISTORY, '\0'};
@@ -143,7 +143,7 @@ GtkWidget *open_main_window(void)
 
     gtk_builder_connect_signals(ui_builder, NULL);
 
-    change_chat_by_id(0);
+    //change_chat_by_id(0);
 
     gtk_widget_show(window);
 

@@ -9,27 +9,8 @@ int main(int argc, char ** argv)
         exit(EXIT_FAILURE);
 	}
     //SQL DATABASE TABLES INITIALISATION
-    sqlite3 * db = NULL;
-	sqlite3_open("database.db", &db);
-	
-    format_and_execute(db, "CREATE TABLE IF NOT EXISTS %s(\
-                            username TEXT NOT NULL UNIQUE, \
-                            password TEXT NOT NULL)", USERS_TN);
-
-    //creating table with conversations
-    format_and_execute(db, "CREATE TABLE IF NOT EXISTS %s(\
-                            chat_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, \
-                            chat_name TEXT NOT NULL,\
-                            chat_members TEXT NOT NULL)", CHATS_TN);
-
-    //creating table with messages
-	format_and_execute(db, "CREATE TABLE IF NOT EXISTS %s(\
-                            message_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, \
-                            from_username TEXT NOT NULL, \
-                            message_text TEXT NOT NULL, \
-                            send_datetime INTEGER NOT NULL, \
-                            chat_id INTEGER NOT NULL, \
-                            status TEXT NOT NULL DEFAULT 'unread')", MESSAGES_TN);
+    sqlite3 * db = db_init();
+    
     SSL_CTX *ctx;
     // Initialize the SSL library
     SSL_library_init();
@@ -70,7 +51,8 @@ int main(int argc, char ** argv)
         t_thread_param* param = (t_thread_param*) malloc(sizeof(t_thread_param));
         param->ssl = SSL_new(ctx);              // get new SSL state with context 
         SSL_set_fd(param->ssl, client);
-        if(SSL_accept(param->ssl) == -1) {
+        if(SSL_accept(param->ssl) == -1) 
+        {
             close(client);
             free(param);
             ERR_print_errors_fp(stderr);

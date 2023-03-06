@@ -1,46 +1,31 @@
-NAME	=	uchat
+OBJDIR = obj
+SRCDIR = src
+SERVER_DIR = server
+CLIENT_DIR = client
+SERVER = userver
+CLIENT = uclient
 
-CFLG	=	-std=c11 $(addprefix -W, all extra pedantic) -g -Wno-unused-command-line-argument -Wno-unused-variable \
-    -Wno-unused-function -Wno-unused-parameter
-CLIENT_COMPILE_GLOBAL = `pkg-config --cflags gtk+-3.0 pkg-config --libs gtk+-3.0`
+SRC = $(SRCDIR)/*.c
+OBJS = $(OBJDIR)/*.o
 
-SRC_DIR	= src
-INC_DIR	= inc
-OBJ_DIR	= obj
+all: $(SERVER) $(CLIENT)
 
-INC_FILES = $(wildcard $(INC_DIR)/*.h)
-SRC_FILES = $(wildcard $(SRC_DIR)/*.c)
-OBJ_FILES = $(addprefix $(OBJ_DIR)/, $(notdir $(SRC_FILES:%.c=%.o)))
+$(SERVER):
+	make -sC $(SERVER_DIR)
 
-LMX_DIR	= libs/libmx
-LMX_A:=	$(LMX_DIR)/libmx.a
-LMX_INC:= $(LMX_DIR)/inc
+$(CLIENT):
+	make -sC $(CLIENT_DIR)
 
-all: clean install 
-
-install: $(LMX_A) $(NAME)
-
-$(NAME): $(OBJ_FILES)
-	@clang $(CFLG) $(OBJ_FILES) -L$(LMX_DIR) -lmx -o $@ $(CLIENT_COMPILE_GLOBAL)
-
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c $(INC_FILES)
-	@clang $(CFLG) -c $< -o $@ -I$(INC_DIR) -I$(LMX_INC) $(CLIENT_COMPILE_GLOBAL)
-
-$(OBJ_FILES): | $(OBJ_DIR)
-
-$(OBJ_DIR):
-	@mkdir -p $@
-
-$(LMX_A):
-	@make -sC $(LMX_DIR)
-	
 clean:
-	@rm -rf $(OBJ_DIR)
-	@rm -rf $(NAME)
+	rm -f $(OBJS)
+	rm -df $(OBJDIR) 
 
 uninstall:
-	@make -sC $(LMX_DIR) $@
-	@rm -rf $(OBJ_DIR)
-	@rm -rf $(NAME)
+	make -sC $(SERVER_DIR) $@
+	make -sC $(CLIENT_DIR) $@
+	make clean
+	rm -f $(UCHAT)
 
-reinstall: uninstall all
+reinstall:
+	make uninstall
+	make all

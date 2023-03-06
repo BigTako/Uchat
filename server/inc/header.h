@@ -22,36 +22,45 @@
 #include "../libraries/libmx/inc/libmx.h"
 //#include <poll.h>
 
-#define CETRIFS_FILENAME "mycert.pem"
-
-#define QUERY_DELIM "@"
 #define LOAD_MESSAGES_COUNT 20
-
-#define LOGIN 'L'
-#define SIGNUP 'R'
-#define SEND_MESSAGE 'S'
-#define CREATE_CHAT 'C'
-
-#define GET_CHATS_HISTORY 'A'
-#define WAIT_FOR_CODE "W"
-#define MESSAGE_CODE "M"
-
-#define EDIT_MESSAGE 'B'
-#define DELETE_MESSAGE 'D'
-#define EXIT_CONVERSATION 'E'
-#define GET_CURRENT_CHATS 'F'
-#define GET_NEW_MESSAGES 'G'
-
-#define USERS_TN "users"
-#define MESSAGES_TN "messages"
-#define CHATS_TN "chats"
 #define DB_ROWS_MAX 10000
-
 #define MESSAGE_MAX_LEN 10000
 #define KEY_LENGHT 4096
 
+#define QUERY_DELIM "@"
+
+//GET REQUESTS
+#define GET_ALL_CHATS 'F'
+#define GET_NEW_CHATS 'H'
+#define GET_NEW_MESSAGES 'G'
+#define GET_CHATS_HISTORY 'A'
+
+//POST REQUESTS
+#define SEND_MESSAGE 'S'
+#define CREATE_CHAT 'C'
+#define EDIT_MESSAGE 'B'
+#define DELETE_MESSAGE 'D'
+#define EXIT_CONVERSATION 'E'
+
+//OTHERS
+#define LOGIN 'L'
+#define SIGNUP 'R'
+
+//CODES
+#define WAIT_FOR_CODE "W"
+#define MESSAGE_CODE "M"
+#define OK_CODE "Y"
+#define ERROR_CODE "N"
+#define NO_DATA_CODE "E"
+
+//DATABASE TABLES NAMES
+#define USERS_TN "users"
+#define MESSAGES_TN "messages"
+#define CHATS_TN "chats"
+#define DB_FILENAME "database.db"
+#define CETRIFS_FILENAME "mycert.pem"
+
 typedef unsigned char * code;
-#define HOLDERS(string) (count_placeholders(string, '%'))
 
 typedef struct s_thread_param
 {
@@ -65,30 +74,21 @@ typedef struct s_thread_param
 } t_thread_param;
 
 //DATABASE UTILS
+sqlite3 * db_init();
 int count_placeholders(char * str, char c);
 void clear_inner_list(void * ptr);
 void delete_table(char *** table);
 char * mx_strstr_front(const char *haystack, const char *needle);
-char * execute_query(sqlite3 * db, char * query);
 t_list * get_db_data_list(sqlite3 * db, char * selection_query, int cols_count);
-char ** get_db_data_vector(sqlite3 * db, char * selection_query, int cols_count, int rows_count);
-char * format_query(char * template, t_list * values);
-int sqlite_execute(sqlite3 * db, char * query);
 
 //CRYPTOGRAPHY
 code sha256_string(char *string);
-EVP_PKEY * generate_key_pair();
-code PRIVKEY_to_str(EVP_PKEY * keypair);
-code PUBKEY_to_str(EVP_PKEY * keypair);
-code encipher(code rsaPublicKeyChar, char * message, int * emLen, int * ekLen_v, code * ek_v, code * iv_v);
-code decipher(code rsaPrivateKeyChar, code encryptedMessage, unsigned long emLen, code ek, code iv, int ekLen);
 
 //SERVER DATABASE RELATIONSHIP UTILS
 char ** get_db_data_table(sqlite3 * db, char * template, int colums, int rows, ...);
 char * create_query_delim_separated(int count, ...);
 int validate_query(char * code, int delims_count, char * err_message);
 int format_and_execute (sqlite3 * db, char * template, ...);
-char *userID_from_name(char *sql_username_str, sqlite3 *db);
 
 //SERVER UTILS
 void* client_thread(void* vparam);
