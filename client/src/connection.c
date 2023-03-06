@@ -1,8 +1,5 @@
 #include "../inc/header.h"
 
-
-#define FAIL    -1
-
 int connect_to_server(t_send_param *param) 
 {
     struct sockaddr_in serverAddr;
@@ -16,7 +13,7 @@ int connect_to_server(t_send_param *param)
 int ssl_connect(t_send_param *param) {
     param->ssl = SSL_new(param->ctx);      /* create new SSL connection state */
     SSL_set_fd(param->ssl, param->socket);    /* attach the socket descriptor */
-    if ( SSL_connect(param->ssl) == FAIL ) { /* perform the connection */
+    if ( SSL_connect(param->ssl) == -1 ) { /* perform the connection */
         ERR_print_errors_fp(stderr);
         return 1;
     }
@@ -27,28 +24,6 @@ int ssl_connect(t_send_param *param) {
     }
     return 0;
 }
-
-void send_request_to_server(SSL *ssl, char *message, char *response_buff) {
-    int bytes;
-    SSL_write(ssl, message, strlen(message) + 1);   /* encrypt & send message */
-    bytes = SSL_read(ssl, response_buff, 100); /* get reply & decrypt */
-    response_buff[bytes] = 0;
-    printf("Received: \"%s\"\n", response_buff);
-        
-    if (response_buff[0] == 'Y')
-    {
-        printf("[INFO] Successfully received message: %s\n", response_buff);    
-    }
-    else if (response_buff[0] == 'N')
-    {
-        printf("[ERROR] Received an error\n");
-    }
-    else
-    {
-        printf("[ERROR] Undefined package\n");
-    }
-}
-
 
 SSL_CTX* initCTX(void)
 {
@@ -110,6 +85,7 @@ int u_recv(t_send_param *param, void* buf, int len) {
         return -1;
     }
     actualLen = ntohl(actualLen);
+    printf("actualLen %d", actualLen);
     if(actualLen > len) {
         printf("WARNING: you received not all message\n");
         if (SSL_read(param->ssl, buf, len) <= 0) {
@@ -118,11 +94,15 @@ int u_recv(t_send_param *param, void* buf, int len) {
         if (skip_bytes(param, actualLen - len) < 0) {
             return -1;
         }
+        write(1, buf, len);
+        printf("[R]\n");
     }
     else {
         if (SSL_read(param->ssl, buf, actualLen) <= 0) {
             return -1;
         }
+        write(1, buf, actualLen);
+        printf("[R]\n");
     }
     if (SSL_write(param->ssl, "Y", 2) <= 0) {
         return -1;
@@ -130,6 +110,8 @@ int u_recv(t_send_param *param, void* buf, int len) {
 }
 
 int u_send(t_send_param *param, void* buf, int len) {
+    write(1, buf, len);
+    printf("[S]\n");
     int len_n = htonl(len);
     if (SSL_write(param->ssl, &len_n, sizeof(len_n)) <= 0) {
         return -1;
@@ -152,7 +134,7 @@ int u_send(t_send_param *param, void* buf, int len) {
 }
 
 
-int main(int argc, char * argv[])
+/*int main(int argc, char * argv[])
 {
     if ( argc != 3 )
     {
@@ -171,30 +153,15 @@ int main(int argc, char * argv[])
     printf("\nSUCCES\n");
 
     char acClientRequest[1000];
-    /*ssl = SSL_new(ctx);      // create new SSL connection state 
-    SSL_set_fd(ssl, server);    // attach the socket descriptor 
-    if ( SSL_connect(ssl) == FAIL )   // perform the connection 
-        ERR_print_errors_fp(stderr);
-    else
-    {
-        //const char *cpRequestMessage = "<Body><UserName>%s<UserName><Password>%s<Password><\\Body>";
-        
-        /*printf("\n\nConnected with %s encryption\n", SSL_get_cipher(ssl));
-        SSL_write(ssl, acClientRequest, strlen(acClientRequest));   // encrypt & send message
-        bytes = SSL_read(ssl, buf, sizeof(buf)); // get reply & decrypt
-        buf[bytes] = 0;
-        printf("Received: \"%s\"\n", buf);
-        SSL_free(ssl);        // release connection state 
-    }*/
     char buff[1000];
     u_recv(param, buff, 1000);
     printf("Отримано: %s\n", buff);
     char buff2[1000] = "привіт я клієнт";
     u_send(param, buff2, strlen(buff2));
-    close(param->socket);         /* close socket */
-    SSL_CTX_free(param->ctx);        /* release context */
+    close(param->socket);
+    SSL_CTX_free(param->ctx);
     return 0;
-}
+}*/
 
 
 

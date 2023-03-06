@@ -1,14 +1,13 @@
 #include "../inc/header.h"
 #include <errno.h>
 
-/*int main(int argc, char ** argv) 
+int main(int argc, char ** argv) 
 {
-    printf("PID %d\n", getpid());
-    if (argc != 3)
+    if (argv[1] == NULL) 
     {
-        printf("Usage: ./userver <server IP> <server port>\n");
-        return 0;
-    }
+		mx_printerr("usage: ./userver [port]\n");
+        exit(EXIT_FAILURE);
+	}
     //SQL DATABASE TABLES INITIALISATION
     sqlite3 * db = NULL;
 	sqlite3_open("database.db", &db);
@@ -31,37 +30,12 @@
                             send_datetime INTEGER NOT NULL, \
                             chat_id INTEGER NOT NULL, \
                             status TEXT NOT NULL DEFAULT 'unread')", MESSAGES_TN);
-
-    int welcomeSocket;
-    struct sockaddr_in serverAddr;
-    struct sockaddr_storage serverStorage;
-    socklen_t addr_size;
-
-    welcomeSocket = socket(PF_INET, SOCK_STREAM, 0);
-    if(fcntl(welcomeSocket, F_SETFL, fcntl(welcomeSocket, F_GETFL) | O_NONBLOCK) < 0) {
-        printf("ERROR cant Put welcomeSocket in non-blocking mode\n");
-    }
-    serverAddr.sin_family = AF_INET;
-    serverAddr.sin_port = htons(atoi(argv[2]));
-    serverAddr.sin_addr.s_addr = inet_addr(argv[1]);
-    memset(serverAddr.sin_zero, '\0', sizeof serverAddr.sin_zero);
-    int status_ = bind(welcomeSocket, (struct sockaddr *) &serverAddr, sizeof(serverAddr));
-    if(status_ < 0) {
-        printf("ERROR in bind %d\n", errno);
-        printf("====== \n");
-        exit(0);
-    }
-
-    if (listen(welcomeSocket,5)==0)
-    {
-        printf("Listening\n");
-    }
-    else
-    {
-        printf("Error\n");
-    }
-
-    addr_size = sizeof serverStorage;
+    SSL_CTX *ctx;
+    // Initialize the SSL library
+    SSL_library_init();
+    ctx = InitServerCTX();        /* initialize SSL */
+    LoadCertificates(ctx, CETRIFS_FILENAME, CETRIFS_FILENAME);
+    int welcomeSocket = openListener(atoi(argv[1]));
 
     pthread_mutex_t mutex_R;
 
@@ -80,48 +54,55 @@
     }
 
     while (cmdEXIT == 0) {
-        int Client = accept(welcomeSocket, (struct sockaddr *) &serverStorage, &addr_size);
-        while (Client == -1 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
+        struct sockaddr_in addr;
+        socklen_t len = sizeof(addr);
+        int client = accept(welcomeSocket, (struct sockaddr *)&addr, &len);
+        while (client == -1 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
 			if(cmdEXIT > 0) {
 				break;
 			}
-			Client = accept(welcomeSocket, (struct sockaddr *) &serverStorage, &addr_size);
+			client = accept(welcomeSocket, (struct sockaddr *)&addr, &len);
 		}
-        if (Client == -1) {
-            break;
+        if (client == -1) {
+            printf("[ERROR]\n");
+            continue;
         }
-        // Put the socket in non-blocking mode:
-        if(fcntl(Client, F_SETFL, fcntl(Client, F_GETFL) | O_NONBLOCK) < 0) {
-            printf("ERROR cant Put the socket in non-blocking mode\n");
-        }
-        pthread_t thread;
         t_thread_param* param = (t_thread_param*) malloc(sizeof(t_thread_param));
-
+        param->ssl = SSL_new(ctx);              // get new SSL state with context 
+        SSL_set_fd(param->ssl, client);
+        if(SSL_accept(param->ssl) == -1) {
+            close(client);
+            free(param);
+            ERR_print_errors_fp(stderr);
+            continue;
+        }
+        printf("Connection: %s:%d\n",inet_ntoa(addr.sin_addr), ntohs(addr.sin_port));
         param->cmdEXIT = &cmdEXIT;
         param->count_of_threads = &count_of_threads;
-        param->socket = Client;
+        param->socket = client;
         param->mutex_R = &mutex_R;
         param->db = db;
+        pthread_t thread;
         int status = pthread_create(&thread, NULL, client_thread, param);
         if (status != 0) {
-            printf("main error: can't create thread");
-            exit(1);
+           printf("main error: can't create thread");
+           exit(1);
         }
+
     }
     //int status_addr;
-
-    
     //status = pthread_join(thread, (void**)&status_addr);
     //if (status != 0) {
     //    printf("main error: can't join thread");
     //    exit(1);
     //}
     while(count_of_threads > 0);
-    free(privateKeyChar);
-    free(publicKeyChar);
     sqlite3_close(db);
     close(welcomeSocket);
+    SSL_CTX_free(ctx);
     printf("bye\n");
     return 0;
-}*/
+}
+
+
 

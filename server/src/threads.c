@@ -90,7 +90,7 @@ char *encode_login(char *code, t_thread_param *param, bool *online)
 				if (!table || !(*table)) // NO SUCH USERNAME IN DATABASE
 				{
 					printf("[ERROR] Invalid username or password\n");
-					if (send(param->socket, "N", 1, 0) <= 0) *online = false;
+					if (u_send(param, "N", 1) <= 0) *online = false;
 				}
 				else
 				{
@@ -99,17 +99,17 @@ char *encode_login(char *code, t_thread_param *param, bool *online)
 						printf("[INFO] correct loging\n");
 						user = mx_strjoin(QUERY_DELIM, parts[1]);
 						*online = true;
-						if (send(param->socket, "Y", 1, 0) <= 0) *online = false;
+						if (u_send(param, "Y", 1) <= 0) *online = false;
 					}
 					else
 					{
 						printf("[ERROR] Invalid username or password\n");
-						if (send(param->socket, "N", 1, 0) <= 0) *online = false;	
+						if (u_send(param, "N", 1) <= 0) *online = false;	
 					}
 				}
 				delete_table(&table);
 			} else {
-				if (send(param->socket, "C", 1, 0) <= 0) *online = false;
+				if (u_send(param, "C", 1) <= 0) *online = false;
 			}
 			break;		
 		case SIGNUP:
@@ -124,16 +124,16 @@ char *encode_login(char *code, t_thread_param *param, bool *online)
 					format_and_execute(param->db, db_query, USERS_TN, QUERY_DELIM, parts[1], parts[2]);
 					printf("[INFO] Successfuly signed up\n");
 					*online = true;
-					if (send(param->socket, "Y", 1, 0) <= 0) *online = false;
+					if (u_send(param, "Y", 1) <= 0) *online = false;
 				}
 				else
 				{
 					printf("[ERROR] Account with such username is already exists\n");
-					if (send(param->socket, "N", 1, 0) <= 0) *online = false;
+					if (u_send(param, "N", 1) <= 0) *online = false;
 				}
 				delete_table(&table);
 			} else {
-				if (send(param->socket, "C", 1, 0) <= 0) *online = false;
+				if (u_send(param, "C", 1) <= 0) *online = false;
 			}
 			break;
 	}
@@ -445,22 +445,14 @@ void encode(char * code, t_thread_param *param, bool *online, char *user)
 void* client_thread(void* vparam) 
 {
     t_thread_param *param = (t_thread_param*) vparam;
-	//*param->count_of_threads++;
-    printf("---Start-recving-from-new-client---\n");
+	*(param->count_of_threads)++;
+    printf("---Start-recving-from-new-client---thread-N-%d---\n", *param->count_of_threads);
     bool online = true;
     char *user = NULL;
     char buffer[MESSAGE_MAX_LEN]; //!!!
     while (user == NULL) 
 	{
-		int status = recv(param->socket, buffer, MESSAGE_MAX_LEN, 0);
-		while (status == -1 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
-			if(*param->cmdEXIT > 0) {
-				online = false;
-				break;
-			}
-			status = recv(param->socket, buffer, MESSAGE_MAX_LEN, 0);
-		}
-        if (status <= 0) {
+		if (u_recv(param, buffer, MESSAGE_MAX_LEN) <= 0) {
             online = false;
             break;
         }
@@ -477,13 +469,7 @@ void* client_thread(void* vparam)
 	printf("got a username: %s\n", user);
     while (online) 
 	{
-		int status = recv(param->socket, buffer, MESSAGE_MAX_LEN, 0);
-		while (status == -1 && (errno == EAGAIN || errno == EWOULDBLOCK)) 
-		{
-			//perror(errno);
-			status = recv(param->socket, buffer, MESSAGE_MAX_LEN, 0);
-		}
-        if (status <= 0) 
+        if (u_recv(param, buffer, MESSAGE_MAX_LEN) <= 0) 
 		{
             online = false;
             //OFLINE
@@ -498,9 +484,9 @@ void* client_thread(void* vparam)
 	printf("DISCONNECTING User: %s\n", user);
 	free(user);
     close(param->socket);
-	//int *count_of_threads = param->count_of_threads;
+	int *count_of_threads = param->count_of_threads;
     free(param);
-	//*count_of_threads--;
+	*count_of_threads--;
     pthread_exit(0);
 }
 

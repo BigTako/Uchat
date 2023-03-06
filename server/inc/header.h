@@ -8,11 +8,12 @@
 #include <stdio.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
-#include <string.h>
 #include <arpa/inet.h>
 #include <pthread.h>
 #include <errno.h>
 #include <poll.h>
+#include <sys/types.h>
+#include <resolv.h>
 
 #include "../libraries/openssl/openssl/ssl.h"
 #include "../libraries/openssl/openssl/err.h"
@@ -20,6 +21,8 @@
 #include "../libraries/Sqlite3/sqlite3.h"
 #include "../libraries/libmx/inc/libmx.h"
 //#include <poll.h>
+
+#define CETRIFS_FILENAME "mycert.pem"
 
 #define QUERY_DELIM "@"
 #define LOAD_MESSAGES_COUNT 20
@@ -92,6 +95,14 @@ void* client_thread(void* vparam);
 void* exit_thread(void* vparam);
 char *encode_login(char *code, t_thread_param *param, bool *online);
 void encode(char * code, t_thread_param *param, bool *online, char *userID);
+
+//CONNECTION
+int openListener(int port);
+SSL_CTX* InitServerCTX(void);
+void LoadCertificates(SSL_CTX* ctx, char* CertFile, char* KeyFile);
+void ShowCerts(SSL* ssl);
+int u_recv(t_thread_param *param, void* buf, int len);
+int u_send(t_thread_param *param, void* buf, int len);
 
 #endif
 

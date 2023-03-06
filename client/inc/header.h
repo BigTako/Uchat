@@ -162,8 +162,15 @@ extern app_t *app;
 extern t_send_param *param;
 extern t_message *message_data;
 
-//request utils
+//CONECTION
 int connect_to_server(t_send_param *param);
+int ssl_connect(t_send_param *param);
+SSL_CTX* initCTX(void);
+void ShowCerts(SSL *ssl);
+int u_recv(t_send_param *param, void* buf, int len);
+int u_send(t_send_param *param, void* buf, int len);
+
+//request utils
 char * create_query_delim_separated(int count, ...);
 int send_server_request(t_send_param *param, char * query);
 
