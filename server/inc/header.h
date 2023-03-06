@@ -14,10 +14,9 @@
 #include <errno.h>
 #include <poll.h>
 
-#include "../libraries/openssl/openssl/rsa.h"
-#include "../libraries/openssl/openssl/evp.h"
-#include "../libraries/openssl/openssl/pem.h"
-#include "../libraries/openssl/openssl/sha.h"
+#include "../libraries/openssl/openssl/ssl.h"
+#include "../libraries/openssl/openssl/err.h"
+
 #include "../libraries/Sqlite3/sqlite3.h"
 #include "../libraries/libmx/inc/libmx.h"
 //#include <poll.h>
@@ -55,6 +54,8 @@ typedef struct s_thread_param
 {
 	sqlite3 *db;
     int socket;
+    SSL_CTX *ctx;
+    SSL *ssl;
     int *cmdEXIT;
     pthread_mutex_t *mutex_R;
     int *count_of_threads;

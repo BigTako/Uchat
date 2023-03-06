@@ -15,7 +15,6 @@ void collect_messages(void * info)
     char responce_buff[MESSAGE_MAX_LEN + 100];
     int count_of_messages = 0;
     bool online = true;
-    pthread_mutex_lock(param->mutex_R);
     printf("in collect function, query(%s)\n", query);
     free(action);
     if (send(param->socket, query, strlen(query) + 1, 0) <= 0) 
@@ -69,7 +68,6 @@ void collect_messages(void * info)
         return;
     }
     if (recv(param->socket, responce_buff, MESSAGE_MAX_LEN, 0) <= 0) online = false;
-    pthread_mutex_unlock(param->mutex_R);
 }
 
 void find_user() {
@@ -85,7 +83,6 @@ void find_user() {
     //user1 makes a request to server(C@NAME@USERNAME1@USERNAME2@... - create new chat) with task to create a chat
     sprintf(request_buff, "%c%s?%s%s", CREATE_CHAT, QUERY_DELIM, QUERY_DELIM, username);
     // ? sign is putted to identify that name of chat have to be equal to username of user2(or to user1 if the user2 account)
-    pthread_mutex_lock(param->mutex_R);
     printf("server query: %s\n", request_buff);
         
     if (send(param->socket, request_buff, strlen(request_buff) + 1, 0) <= 0) {
@@ -116,7 +113,6 @@ void find_user() {
             open_error_window("Undefined expression");
         }
     }
-    pthread_mutex_unlock(param->mutex_R);
     mx_printstr(username);
 }
 
@@ -206,7 +202,6 @@ void send_message()
     char responce_buff[5100];
     
     printf("Created server query: %s\n", server_query);
-    pthread_mutex_lock(param->mutex_R);
     if (send(param->socket, server_query, strlen(server_query) + 1, 0) <= 0) 
     {
         perror(strerror(errno));
@@ -233,7 +228,6 @@ void send_message()
     }
     free(message_query);
     free(cur_time);
-    pthread_mutex_unlock(param->mutex_R);
 }
 
 

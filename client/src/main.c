@@ -4,7 +4,7 @@ app_t *app;
 t_send_param *param;
 t_message *message_data;
 
-int main(int argc, char * argv[]) {
+/*int main(int argc, char * argv[]) {
     printf("PID %d\n", getpid());
     if (argc != 3)
     {
@@ -39,7 +39,7 @@ int main(int argc, char * argv[]) {
     
 
     return 0;
-}
+}*/
 
 
 

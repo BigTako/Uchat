@@ -7,18 +7,6 @@
 	D@MESSAGE_ID
 	E@USERNAME@CONVERSATION_ID
 */
-int connect_to_server(t_send_param * param) 
-{
-    struct sockaddr_in serverAddr;
-    socklen_t addr_size;
-    param->socket = socket(PF_INET, SOCK_STREAM, 0);
-    serverAddr.sin_family = AF_INET;
-    serverAddr.sin_port = htons(atoi(param->server_port));
-    serverAddr.sin_addr.s_addr = inet_addr(param->server_IP);
-    memset(serverAddr.sin_zero, '\0', sizeof(serverAddr.sin_zero));
-    addr_size = sizeof(serverAddr);
-    return connect(param->socket, (struct sockaddr *) &serverAddr, addr_size);
-}
 
 char * create_query_delim_separated(int count, ...)
 {
@@ -42,18 +30,14 @@ char * create_query_delim_separated(int count, ...)
 
 int send_server_request(t_send_param *param, char * query)
 {
-    pthread_mutex_lock(param->mutex_R);
     if (send(param->socket, query, strlen(query) + 1, 0) <= 0) {
         perror(strerror(errno));
-        pthread_mutex_unlock(param->mutex_R);
         return -1;
     }
     char a[1];
     if (recv(param->socket, a, 1, 0) <= 0) {
-        pthread_mutex_unlock(param->mutex_R);
         return -1;
     }
-    pthread_mutex_unlock(param->mutex_R);
     switch (a[0])
     {
         case 'Y':

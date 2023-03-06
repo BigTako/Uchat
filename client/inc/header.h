@@ -16,10 +16,9 @@
 #include <stdlib.h>
 #include <gtk/gtk.h>
 
-#include "../libs/openssl/rsa.h"
-#include "../libs/openssl/evp.h"
-#include "../libs/openssl/pem.h"
-#include "../libs/openssl/sha.h"
+#include "../libs/openssl/ssl.h"
+#include "../libs/openssl/err.h"
+
 #include "../libs/libmx/inc/libmx.h"
 ///Users/alex/Desktop/studing/Uchat-danil/client/libs/openssl/pem.h
 
@@ -55,7 +54,8 @@ typedef struct s_send_param
 	int socket;
     char *server_IP;
     char *server_port;
-    pthread_mutex_t *mutex_R;
+    SSL_CTX *ctx;
+    SSL *ssl;
     int * cmdEXIT;
 } t_send_param;
 

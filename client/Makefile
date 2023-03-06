@@ -16,9 +16,12 @@ LMX_DIR	= libs/libmx
 LMX_A:=	$(LMX_DIR)/libmx.a
 LMX_INC:= $(LMX_DIR)/inc
 
-SSL_DIR = libraries/openssl
+SSL_DIR = libs/openssl
 SSL_FILES:= local_lib/lib
 SSL_INC_FILES:= $(SSL_DIR)
+
+LIB_FLAGS = -lmx -lsqlite3 -lssl -lcrypto \
+			-L$(SSL_FILES) -I$(SSL_INC_FILES)
 
 all: clean install 
 

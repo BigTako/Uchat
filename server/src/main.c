@@ -1,7 +1,7 @@
 #include "../inc/header.h"
 #include <errno.h>
 
-int main(int argc, char ** argv) 
+/*int main(int argc, char ** argv) 
 {
     printf("PID %d\n", getpid());
     if (argc != 3)
@@ -9,7 +9,7 @@ int main(int argc, char ** argv)
         printf("Usage: ./userver <server IP> <server port>\n");
         return 0;
     }
-    /*SQL DATABASE TABLES INITIALISATION*/
+    //SQL DATABASE TABLES INITIALISATION
     sqlite3 * db = NULL;
 	sqlite3_open("database.db", &db);
 	
@@ -31,12 +31,6 @@ int main(int argc, char ** argv)
                             send_datetime INTEGER NOT NULL, \
                             chat_id INTEGER NOT NULL, \
                             status TEXT NOT NULL DEFAULT 'unread')", MESSAGES_TN);
-
-    /*GENERATION OF RSA KEYS*/
-    EVP_PKEY * key = generate_key_pair();
-    code privateKeyChar = PRIVKEY_to_str(key);
-    code publicKeyChar = PUBKEY_to_str(key);
-    EVP_PKEY_free(key);
 
     int welcomeSocket;
     struct sockaddr_in serverAddr;
@@ -129,5 +123,5 @@ int main(int argc, char ** argv)
     close(welcomeSocket);
     printf("bye\n");
     return 0;
-}
+}*/
 
