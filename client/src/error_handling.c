@@ -1,21 +1,5 @@
 #include "../inc/header.h"
 
-char *fake_database_username[] = {
-    "heisenberg",
-    "a",
-    "b",
-    "xd",
-    "qwerty",
-};
-
-char *fake_database_password[] = {
-    "123",
-    "11",
-    "11",
-    "12345abc",
-    "xcvb",
-};
-
 GtkWidget *open_error_window(char *error_message) {
     GtkWidget *window;
     GtkBuilder * ui_builder;
@@ -64,7 +48,8 @@ int check_login_data_for_errors(const char *username, const char *password) {
         return 2;
     }
     //if user dont exist
-    char * server_query = create_query_delim_separated(3, "L", username, password); // have to store a hash password
+    char action[] = {LOGIN, '\0'};
+    char * server_query = create_query_delim_separated(3, action, username, password); // have to store a hash password
     int online = send_server_request(param, server_query);
     free(server_query);
     if (online < 0) {
@@ -89,8 +74,8 @@ int check_signup_data_for_errors(const char *username, const char *password, con
         return 2;
     }
     if (strcmp(password, c_password) != 0) return 4;
-
-    char * server_query = create_query_delim_separated(3, "R", username, password); // have to store a hash password
+    char action[] = {SIGNUP, '\0'};
+    char * server_query = create_query_delim_separated(3, action, username, password); // have to store a hash password
     int online = send_server_request(param, server_query);
     free(server_query);
     if (online < 0) {

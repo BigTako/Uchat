@@ -84,11 +84,11 @@ void create_message(char * message_query, bool to_end);
 void find_user();
 gboolean enter_keypress(GtkWidget *widget, GdkEventKey *event, gpointer data);
 gboolean enter_escape(GtkWidget *widget, GdkEventKey *event, gpointer data);
-void change_chat_by_id(int chat_id);
+void change_chat_by_id(char * new_chat_id);
 void scroll();
 void change_chat(GtkListBox* self, GtkListBoxRow* row, gpointer data);
 
-void get_and_show_user_chats(void * info);
+void collect_user_info(void * info);
 
 void delete_all_history();
 void clear_chat_list() ;
@@ -160,8 +160,7 @@ typedef struct app_s
 
     GtkWidget *active_widget;
     char *active_message;
-    char * current_chat; // HARDCODED IN APP_INIT!!!!!!!!!!!!!!!!!!!!!!
-    int current_chat_id;
+    char * current_chat_id; // HARDCODED IN APP_INIT!!!!!!!!!!!!!!!!!!!!!!
 }              app_t;
 
 app_t *app_init();

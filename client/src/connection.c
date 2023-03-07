@@ -104,7 +104,7 @@ int u_recv(t_send_param *param, void* buf, int len) {
     if (SSL_write(param->ssl, OK_CODE, 2) <= 0) {
         return -1;
     }
-    printf("[INFO] Successfully recv message.\n");
+    //printf("[INFO] Successfully recv message.\n");
     return actualLen;
 }
 
@@ -121,7 +121,7 @@ int u_send(t_send_param *param, void* buf, int len) {
         return -1;
     }
     if (response_buff[0] == OK_CODE[0]) {
-        printf("[INFO] Successfully sent message.\n");
+        //printf("[INFO] Successfully sent message.\n");
     }
     else if (response_buff[0] == NO_DATA_CODE[0])
     {

@@ -2,74 +2,14 @@
 
 static guint threadID = 0;
 
-void collect_messages(void * info)
-{
-    if (!info)
-    {
-        return;
-    }
-    char * action;
-    action = mx_strdup((char *)info);
-    char query[1000];
-    sprintf(query, "%s%s%s", action, QUERY_DELIM, app->current_chat);
-    char responce_buff[MESSAGE_MAX_LEN + 100];
-    int count_of_messages = 0;
-    bool online = true;
-    printf("in collect function, query(%s)\n", query);
-    free(action);
-
-    if (u_send(param, query, strlen(query) + 1) <= 0) online=false;
-    if (u_recv(param, responce_buff, MESSAGE_MAX_LEN) <= 0) online=false;
-
-    printf("After send-receive\n");
-    
-    if (responce_buff[0] == WAIT_FOR_CODE[0])
-    {
-        printf("Ready to recieve %s messages\n", responce_buff + 2);
-        count_of_messages = atoi(responce_buff + 2);
-        memset(responce_buff, '\0', strlen(responce_buff));
-        for (int a = 0; a < count_of_messages; a++) 
-        {
-            if (online) 
-            {
-                memset(responce_buff, '\0', strlen(responce_buff));
-                if (u_recv(param, responce_buff, MESSAGE_MAX_LEN) > 0)
-                {
-                    create_message(responce_buff + 2, 0);
-                }
-                else
-                {
-                    online = false;
-                }
-            }
-	    }
-        printf("[INFO] Successfuly received %d packages\n", count_of_messages);
-    }
-    else if (responce_buff[0] == ERROR_CODE[0])
-    {
-        printf("[INFO] No messages to receive\n");
-        return;    
-    }
-    else if (responce_buff[0] == NO_DATA_CODE[0])
-    {
-        printf("[ERROR] Undefined expression\n");
-        return;
-    }
-}
-
 void find_user() {
-    //переписать под нормальный поиск)
-    //user1 searches user2 in the searching panel
-    //user1 gets user2 username
     const char *username = gtk_entry_get_text(GTK_ENTRY(app->find_user_entry));
     char request_buff[4096];
     char responce_buff[4096];
     char chat_query_buff[4096];
 
     char ** info_parts = NULL;
-    //user1 makes a request to server(C@NAME@USERNAME1@USERNAME2@... - create new chat) with task to create a chat
     sprintf(request_buff, "%c%s?%s%s", CREATE_CHAT, QUERY_DELIM, QUERY_DELIM, username);
-    // ? sign is putted to identify that name of chat have to be equal to username of user2(or to user1 if the user2 account)
     printf("server query: %s\n", request_buff);
         
     u_send(param, request_buff, strlen(request_buff) + 1); // send a request to server
@@ -85,10 +25,8 @@ void find_user() {
         else if (responce_buff[0] == RECORD_EXISTS_CODE[0])
         {
             info_parts = mx_strsplit(responce_buff + 2, QUERY_DELIM[0]);
-            open_error_window("Chat already exists");
-            //change chat id parts[0]
+            change_chat_by_id(info_parts[0]);
             mx_del_strarr(&info_parts);
-            //open_error_window(responce_buff + 2);
         }
         else if (responce_buff[0] == ERROR_CODE[0])
         {
@@ -98,25 +36,19 @@ void find_user() {
     mx_printstr(username);
 }
 
-void change_chat(GtkListBox* self, GtkListBoxRow* row, gpointer data) {
-    const char *name = gtk_widget_get_name(GTK_WIDGET(row));
-
-    app->current_chat_id = atoi(name);
-    free(app->current_chat);
-    app->current_chat = mx_strdup(name);
-    change_chat_by_id(app->current_chat_id);
-    printf("Name: %s %d\n",name, atoi(name));
-    // GtkWidget *chat = GTK_WIDGET(gtk_builder_get_object(builder, "chat_id"));
-    mx_printstr("changed chat\n");
-    // app->chat_id = atoi(name);
-    // change_chat(app->chat_id);
-    // reshow_old_messages(app->chat_id);
-    // g_print("Chat changed: %d\n", app->chat_id);
-    // call_show_chat();
+void change_chat(GtkListBox* self, GtkListBoxRow* row, gpointer data) 
+{
+    change_chat_by_id(gtk_widget_get_name(GTK_WIDGET(row)));
 }
 
-void change_chat_by_id(int chat_id) {
-    if (chat_id != 0) 
+void change_chat_by_id(char * new_chat_id) 
+{
+    if (!new_chat_id) return;
+    
+    free(app->current_chat_id);
+    app->current_chat_id = mx_strdup(new_chat_id);
+
+    if (new_chat_id[0] != '0') 
     {
         gtk_widget_hide(app->welcome_message);
         gtk_widget_show(app->chat_entry_box);
@@ -127,10 +59,8 @@ void change_chat_by_id(int chat_id) {
             g_source_remove(threadID);
         }   
         delete_all_history();
-
-        collect_messages((gpointer)"A");
-        
-        threadID = g_timeout_add(100, collect_messages, (gpointer)"G");
+        collect_user_info("A");
+        threadID = g_timeout_add(100, collect_user_info, (gpointer)"G");
     }
     else {
         gtk_widget_show(app->welcome_message);
@@ -139,14 +69,15 @@ void change_chat_by_id(int chat_id) {
         gtk_widget_hide(app->chat_icon);
         delete_all_history();
     }
+    scroll();
 }
 
 void delete_all_history() {
     GtkContainer *box_container = GTK_CONTAINER(app->messages_container); // assuming 'box' is your GtkBox container
     GList *children, *iter;
-
     children = gtk_container_get_children(box_container);
-    for(iter = children; iter != NULL; iter = iter->next) {
+    for(iter = children; iter != NULL; iter = iter->next) 
+    {
         gtk_widget_destroy(GTK_WIDGET(iter->data));
     }
     g_list_free(children);
@@ -164,16 +95,16 @@ void clear_chat_list()
     g_list_free(children);
 }
 
+
 void send_message() 
 {
     const char *message = correct_input(gtk_entry_get_text(GTK_ENTRY(app->chat_entry)));
-    //when we'he got a content, message information can be transfered to database
     //S@TEXT@TIME@CONVERSATION_ID - send message
-    //M@message_id@from_username@message_text@send_datetime@conversation_id
+    //M@message_id@from_username@message_text@send_datetime@conversation_id - transfer query to create message
     printf("Got a message from input fiend: %s\n", message);
     char action[2] = {SEND_MESSAGE, '\0'};
     char * cur_time = mx_itoa((time(NULL)));
-    char * server_query = create_query_delim_separated(4, action, message, cur_time, app->current_chat);
+    char * server_query = create_query_delim_separated(4, action, message, cur_time, app->current_chat_id);
     char * message_query = NULL;
     char responce_buff[5100];
     
@@ -183,7 +114,7 @@ void send_message()
     u_recv(param, responce_buff, 5100);
     
     free(server_query);
-    message_query = create_query_delim_separated(5, responce_buff, app->username_t, message, cur_time, app->current_chat);
+    message_query = create_query_delim_separated(5, responce_buff, app->username_t, message, cur_time, app->current_chat_id);
 
     if (strlen(gtk_entry_get_text(GTK_ENTRY(app->chat_entry))) != 0) 
     {

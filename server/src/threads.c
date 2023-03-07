@@ -5,8 +5,6 @@ bool s_to_c_info_exchange(t_thread_param *param, char ** table)
 	char error_buff[1000];
 	if (!table || !*table)
 	{
-		printf("Nothing to search\n");
-		//u_send(param, NO_DATA_CODE, 2);
 		return 1;
 	}
 	bool online = true;
@@ -29,7 +27,6 @@ bool s_to_c_info_exchange(t_thread_param *param, char ** table)
 			memset(query_buff, '\0', strlen(query_buff));
 		}
 	}
-	//if (send(param->socket, "Y", 2, 0) <= 0) online = false;
     printf("[INFO] Successfuly sent %d packages\n", count_of_chats);
 	return online;
 }
@@ -309,7 +306,7 @@ void encode(char * code, t_thread_param *param, bool *online, char *user)
 			}
 			else
 			{
-				sprintf(error_buf, "%s%sFailed to get initial chat history", ERROR_CODE, QUERY_DELIM);
+				sprintf(error_buf, "%s%sEmpty chat history", NO_DATA_CODE, QUERY_DELIM);
 				if (u_send(param, error_buf, strlen(error_buf) + 1) <= 0) *online = false;
 			}
 			delete_table(&table);
@@ -346,7 +343,7 @@ void encode(char * code, t_thread_param *param, bool *online, char *user)
 			}
 			else
 			{
-				sprintf(error_buf, "%s%sFailed to get new messages", ERROR_CODE, QUERY_DELIM);
+				sprintf(error_buf, "%s%sNo new messages to receive", NO_DATA_CODE, QUERY_DELIM);
 				if (u_send(param, error_buf, strlen(error_buf) + 1) <= 0) *online = false;
 			}
 			delete_table(&table);
@@ -403,7 +400,7 @@ void encode(char * code, t_thread_param *param, bool *online, char *user)
 			}
 			else
 			{
-				sprintf(error_buf, "%s%sFailed to get new chats", ERROR_CODE, QUERY_DELIM);
+				sprintf(error_buf, "%s%sNo new chats to send", NO_DATA_CODE, QUERY_DELIM);
 				if (u_send(param, error_buf, strlen(error_buf) + 1) <= 0) *online = false;
 			}
 			delete_table(&table);

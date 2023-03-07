@@ -1,60 +1,54 @@
 #include "../inc/header.h"
 
-void get_and_show_user_chats(void * info)
+void collect_user_info(void * info)
 {
-    
     if (!info)
     {
         return;
     }
     char * action;
     action = mx_strdup((char *)info);
+    char query[1000];
 
-    char * server_query = NULL;
-    char responce_buff[MESSAGE_MAX_LEN];
-    int num_of_chats = 0;
+    sprintf(query, "%s%s%s", action, QUERY_DELIM, app->current_chat_id);
+    char responce_buff[MESSAGE_MAX_LEN + 100];
+    int records_count = 0;
     bool online = true;
-    int members_rest_len = 0;
-    //char ** chat_info = NULL;
     
-    server_query = create_query_delim_separated(2, action, app->username_t); // have to store a hash password
-    free(action);
-    if (u_send(param, server_query, strlen(server_query) + 1) <= 0) online=false;
+    if (u_send(param, query, strlen(query) + 1) <= 0) online=false;
     if (u_recv(param, responce_buff, MESSAGE_MAX_LEN) <= 0) online=false;
     
-    if (responce_buff[0] != 'W') 
+    if (responce_buff[0] == WAIT_FOR_CODE[0])
     {
-        printf("[ERROR] Received wrong query (%d)\n", responce_buff[0]); // recived something wrong there are error in clients code!
-        return;
-    }
-    num_of_chats = atoi(responce_buff + 2);
-
-    if (num_of_chats == 0)
-    {
-        printf("[INFO] No chats to receive\n");
-    }
-    else
-    {
-        for (int a = 0; a < num_of_chats; a++) 
+        records_count = atoi(responce_buff + 2);
+        memset(responce_buff, '\0', strlen(responce_buff));
+        for (int a = 0; a < records_count; a++) 
         {
             if (online) 
             {
-                //M@chat_id@chat_name@LM_from_username@LM_message_text@LM_message_status@chat_members
                 memset(responce_buff, '\0', strlen(responce_buff));
                 if (u_recv(param, responce_buff, MESSAGE_MAX_LEN) > 0)
                 {
-                    create_chat(responce_buff + 2);
+                    if (action[0] == GET_ALL_CHATS || action[0] == GET_NEW_CHATS) 
+                        create_chat(responce_buff + 2);
+                    else if (action[0] == GET_CHATS_HISTORY || action[0] == GET_NEW_MESSAGES) 
+                        create_message(responce_buff + 2, 0);
                 }
                 else
                 {
-                    printf("[ERROR] Error while receiving chat info\n");
                     online = false;
                 }
             }
-        }
-        printf("[INFO] Successfuly received %d packages\n", num_of_chats);
+	    }
+        printf("[INFO] Successfuly received %d packages\n", records_count);
     }
-    free(server_query);
+    else if (responce_buff[0] == ERROR_CODE[0])
+        printf("[ERROR] %s\n", responce_buff + 2);
+    else if (responce_buff[0] == NO_DATA_CODE[0])
+        printf("[INFO] %s\n", responce_buff + 2);
+    else
+        printf("[RECV ERROR] Undefined query '%s'\n", responce_buff);
+    free(action);
 }
 
 
@@ -131,8 +125,8 @@ GtkWidget *open_main_window(void)
     //GET ALL CURRENT CONVERSATIONS
     
     //threadID = g_timeout_add(100, collect_messages, data);
-    get_and_show_user_chats("F");
-    g_timeout_add(100, get_and_show_user_chats, "H");
+    collect_user_info("F");
+    g_timeout_add(100, collect_user_info, "H");
     //GET ALL CURRENT CONVERSATIONS
     //char action[] = {GET_CHATS_HISTORY, '\0'};
     //GET CHAT HISTORY IGNORING THE STATUS

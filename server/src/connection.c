@@ -175,7 +175,7 @@ int u_send(t_thread_param *param, void* buf, int len) {
     }
     if (response_buff[0] == OK_CODE[0]) 
     {
-        printf("[INFO] u_send success).\n");
+        //printf("[INFO] u_send success).\n");
     }
     else if (response_buff[0] == NO_DATA_CODE[0]) 
     {
