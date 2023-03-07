@@ -85,9 +85,11 @@ int u_recv(t_send_param *param, void* buf, int len) {
         return -1;
     }
     actualLen = ntohl(actualLen);
-    if(actualLen > len) {
+    if(actualLen > len)
+    {
         printf("WARNING: you received not all message\n");
-        if (SSL_read(param->ssl, buf, len) <= 0) {
+        if (SSL_read(param->ssl, buf, len) <= 0) 
+        {
             return -1;
         }
         if (skip_bytes(param, actualLen - len) < 0) {
@@ -99,7 +101,7 @@ int u_recv(t_send_param *param, void* buf, int len) {
             return -1;
         }
     }
-    if (SSL_write(param->ssl, "Y", 2) <= 0) {
+    if (SSL_write(param->ssl, OK_CODE, 2) <= 0) {
         return -1;
     }
     printf("[INFO] Successfully recv message.\n");
@@ -118,11 +120,20 @@ int u_send(t_send_param *param, void* buf, int len) {
     if (SSL_read(param->ssl, response_buff, 2) <= 0) {
         return -1;
     }
-    if (response_buff[0] == 'Y') {
+    if (response_buff[0] == OK_CODE[0]) {
         printf("[INFO] Successfully sent message.\n");
     }
+    else if (response_buff[0] == NO_DATA_CODE[0])
+    {
+        printf("[INFO] No data to receive\n");
+    }
+    else if (response_buff[0] == ERROR_CODE[0])
+    {
+        printf("[ERROR] Got an error in urecv\n");
+        return 0;
+    }
     else {
-        printf("[ERROR] Undefined package.\n");
+        printf("[ERROR] Undefined package(%s).\n", response_buff);
         return -1;
     }
     return len;

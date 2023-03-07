@@ -65,10 +65,7 @@ int check_login_data_for_errors(const char *username, const char *password) {
     }
     //if user dont exist
     char * server_query = create_query_delim_separated(3, "L", username, password); // have to store a hash password
-    int online = 1;
-    u_send(param, server_query, strlen(server_query));
-    //int online = send_server_request(param, server_query);
-    
+    int online = send_server_request(param, server_query);
     free(server_query);
     if (online < 0) {
         return 4;
@@ -94,8 +91,7 @@ int check_signup_data_for_errors(const char *username, const char *password, con
     if (strcmp(password, c_password) != 0) return 4;
 
     char * server_query = create_query_delim_separated(3, "R", username, password); // have to store a hash password
-    int online = 1;
-    u_send(param, server_query, strlen(server_query));
+    int online = send_server_request(param, server_query);
     free(server_query);
     if (online < 0) {
         return 5;

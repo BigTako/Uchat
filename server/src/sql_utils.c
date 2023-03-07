@@ -14,7 +14,8 @@ sqlite3 * db_init()
     format_and_execute(db, "CREATE TABLE IF NOT EXISTS %s(\
                             chat_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, \
                             chat_name TEXT NOT NULL,\
-                            chat_members TEXT NOT NULL)", CHATS_TN);
+                            chat_members TEXT NOT NULL,\
+							load_status TEXT NOT NULL DEFAULT 'unloaded')", CHATS_TN);
 
     //creating table with messages
 	format_and_execute(db, "CREATE TABLE IF NOT EXISTS %s(\
@@ -61,7 +62,7 @@ char ** get_db_data_table(sqlite3 * db, char * template, int colums, int rows, .
  	va_list ptr;
   	va_start(ptr, count_placeholders(template, '%'));
   	vsprintf(query_buf, template, ptr);
-	printf("Query: %s\n", query_buf);
+	//printf("Query: %s\n", query_buf);
 	
 	char ** table = malloc(((int)DB_ROWS_MAX)*sizeof(void*));
 	sqlite3_stmt * stmt;
@@ -127,7 +128,7 @@ int format_and_execute (sqlite3 * db, char * template, ...)
 	int rc;
     int holders_count = count_placeholders(template, '%');
     va_list ptr;
-    printf("Format execute query: %s holders: %d\n", template, holders_count);
+    //printf("Format execute query: %s holders: %d\n", template, holders_count);
     //int size = char_count(template, '%');
 	va_start(ptr, holders_count);
 	vsprintf(query_buf, template, ptr);

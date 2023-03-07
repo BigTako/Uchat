@@ -131,11 +131,13 @@ int skip_bytes(t_thread_param *param, int num_bytes_to_skip) {
 
 int u_recv(t_thread_param *param, void* buf, int len) {
     int actualLen;
-    if (SSL_read(param->ssl, &actualLen, sizeof(actualLen)) <= 0) {
+    if (SSL_read(param->ssl, &actualLen, sizeof(actualLen)) <= 0) 
+    {
         return -1;
     }
     actualLen = ntohl(actualLen);
-    if(actualLen > len) {
+    if(actualLen > len) 
+    {
         printf("WARNING: you received not all message\n");
         if (SSL_read(param->ssl, buf, len) <= 0) {
             return -1;
@@ -144,12 +146,14 @@ int u_recv(t_thread_param *param, void* buf, int len) {
             return -1;
         }
     }
-    else {
-        if (SSL_read(param->ssl, buf, actualLen) <= 0) {
+    else 
+    {
+        if (SSL_read(param->ssl, buf, actualLen) <= 0) 
+        {
             return -1;
         }
     }
-    if (SSL_write(param->ssl, "Y", 2) <= 0) {
+    if (SSL_write(param->ssl, OK_CODE, 2) <= 0) {
         return -1;
     }
     printf("[INFO] Successfully recv message.\n");
@@ -165,14 +169,21 @@ int u_send(t_thread_param *param, void* buf, int len) {
         return -1;
     }
     char response_buff[2];
-    if (SSL_read(param->ssl, response_buff, 2) <= 0) {
+    if (SSL_read(param->ssl, response_buff, 2) <= 0) 
+    {
         return -1;
     }
-    if (response_buff[0] == 'Y') {
-        printf("[INFO] Successfully sent message.\n");
+    if (response_buff[0] == OK_CODE[0]) 
+    {
+        printf("[INFO] u_send success).\n");
     }
-    else {
-        printf("[ERROR] Undefined package.\n");
+    else if (response_buff[0] == NO_DATA_CODE[0]) 
+    {
+        printf("[INFO] No data to receive(%s)\n", response_buff);
+    }
+    else
+    {
+        printf("[ERROR] usend failure(Undefined package=%s)\n", response_buff);
         return -1;
     }
     return len;

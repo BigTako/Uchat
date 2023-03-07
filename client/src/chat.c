@@ -1,7 +1,15 @@
 #include "../inc/header.h"
 
-/*void get_and_show_user_chats(char action)
+void get_and_show_user_chats(void * info)
 {
+    
+    if (!info)
+    {
+        return;
+    }
+    char * action;
+    action = mx_strdup((char *)info);
+
     char * server_query = NULL;
     char responce_buff[MESSAGE_MAX_LEN];
     int num_of_chats = 0;
@@ -9,22 +17,18 @@
     int members_rest_len = 0;
     //char ** chat_info = NULL;
     
-    server_query = create_query_delim_separated(2, &action, app->username_t); // have to store a hash password
-    //printf("Working with user (%s) (%s)\n", app->username, app->password);
-    if (send(param->socket, server_query, strlen(server_query) + 1, 0) <= 0) online = false;
-    if (recv(param->socket, responce_buff, MESSAGE_MAX_LEN, 0) <= 0) online = false;
-    printf("Recived: %s\n", responce_buff);
+    server_query = create_query_delim_separated(2, action, app->username_t); // have to store a hash password
+    free(action);
+    if (u_send(param, server_query, strlen(server_query) + 1) <= 0) online=false;
+    if (u_recv(param, responce_buff, MESSAGE_MAX_LEN) <= 0) online=false;
+    
     if (responce_buff[0] != 'W') 
     {
-        printf("RECIVED ABOBA (%d)\n", responce_buff[0]); // recived something wrong there are error in clients code!
+        printf("[ERROR] Received wrong query (%d)\n", responce_buff[0]); // recived something wrong there are error in clients code!
         return;
     }
     num_of_chats = atoi(responce_buff + 2);
-    printf("Recived: %d\n", num_of_chats);
-    if (online == true) 
-    {
-        if (send(param->socket, "Y", 1, 0) <= 0) online = false;
-    }
+
     if (num_of_chats == 0)
     {
         printf("[INFO] No chats to receive\n");
@@ -35,22 +39,23 @@
         {
             if (online) 
             {
+                //M@chat_id@chat_name@LM_from_username@LM_message_text@LM_message_status@chat_members
                 memset(responce_buff, '\0', strlen(responce_buff));
-                if (recv(param->socket, responce_buff, MESSAGE_MAX_LEN, 0) <= 0) online = false;
-                if (online) 
+                if (u_recv(param, responce_buff, MESSAGE_MAX_LEN) > 0)
                 {
-                    //M@chat_id@chat_name@LM_from_username@LM_message_text@LM_message_status@chat_members
-                    printf("Got a chat info: %s\n", responce_buff);
                     create_chat(responce_buff + 2);
-                    if (send(param->socket, "Y", 1, 0) <= 0) online = false;
+                }
+                else
+                {
+                    printf("[ERROR] Error while receiving chat info\n");
+                    online = false;
                 }
             }
         }
         printf("[INFO] Successfuly received %d packages\n", num_of_chats);
     }
-    if (recv(param->socket, responce_buff, MESSAGE_MAX_LEN, 0) <= 0) online = false;
     free(server_query);
-}*/
+}
 
 
 GtkWidget *open_main_window(void) 
@@ -126,8 +131,8 @@ GtkWidget *open_main_window(void)
     //GET ALL CURRENT CONVERSATIONS
     
     //threadID = g_timeout_add(100, collect_messages, data);
-    //get_and_show_user_chats(GET_CURRENT_CHATS);
-    //g_timeout_add(10, renew_chat_list, NULL);
+    get_and_show_user_chats("F");
+    g_timeout_add(100, get_and_show_user_chats, "H");
     //GET ALL CURRENT CONVERSATIONS
     //char action[] = {GET_CHATS_HISTORY, '\0'};
     //GET CHAT HISTORY IGNORING THE STATUS

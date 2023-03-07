@@ -52,6 +52,7 @@
 #define OK_CODE "Y"
 #define ERROR_CODE "N"
 #define NO_DATA_CODE "E"
+#define RECORD_EXISTS_CODE "J"
 
 //DATABASE TABLES NAMES
 #define USERS_TN "users"

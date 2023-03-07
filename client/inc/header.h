@@ -25,23 +25,30 @@
 typedef unsigned char * code;
 #define QUERY_DELIM "@"
 
-#define LOGIN 'L'
-#define SIGNUP 'R'
+//GET REQUESTS
+#define GET_ALL_CHATS 'F'
+#define GET_NEW_CHATS 'H'
+#define GET_NEW_MESSAGES 'G'
+#define GET_CHATS_HISTORY 'A'
+
+//POST REQUESTS
 #define SEND_MESSAGE 'S'
 #define CREATE_CHAT 'C'
-#define GET_CHATS_HISTORY 'A'
 #define EDIT_MESSAGE 'B'
 #define DELETE_MESSAGE 'D'
 #define EXIT_CONVERSATION 'E'
-#define GET_CURRENT_CHATS 'F'
-#define GET_NEW_MESSAGES 'G'
 
+//OTHERS
+#define LOGIN 'L'
+#define SIGNUP 'R'
+
+//CODES
 #define WAIT_FOR_CODE "W"
 #define MESSAGE_CODE "M"
-
-//CHAT ERRORS
-#define MESSAGE_ERROR 'N'
-#define INFO_ERROR 'I'
+#define OK_CODE "Y"
+#define ERROR_CODE "N"
+#define NO_DATA_CODE "E"
+#define RECORD_EXISTS_CODE "J"
 
 #define DB_ROWS_MAX 10000
 #define MESSAGE_MAX_LEN 4096
@@ -81,7 +88,7 @@ void change_chat_by_id(int chat_id);
 void scroll();
 void change_chat(GtkListBox* self, GtkListBoxRow* row, gpointer data);
 
-void get_and_show_user_chats(char action);
+void get_and_show_user_chats(void * info);
 
 void delete_all_history();
 void clear_chat_list() ;

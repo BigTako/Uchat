@@ -4,7 +4,7 @@ static guint threadID = 0;
 
 void collect_messages(void * info)
 {
-    /*if (!info)
+    if (!info)
     {
         return;
     }
@@ -17,22 +17,9 @@ void collect_messages(void * info)
     bool online = true;
     printf("in collect function, query(%s)\n", query);
     free(action);
-    if (send(param->socket, query, strlen(query) + 1, 0) <= 0) 
-    {
-        perror(strerror(errno));
-    }
 
-    if (recv(param->socket, responce_buff, 1000, 0) <= 0) // receive a repsonce with count of messages
-    {
-        online = false;
-        printf("[ERROR] Something went wrong while GET MESSAGES request handling\n");
-    }
-
-    if (send(param->socket, "Y", 2, 0) <= 0)  // send a responce to server with info that count is received
-    {
-        online = false;
-        perror(strerror(errno));
-    }
+    if (u_send(param, query, strlen(query) + 1) <= 0) online=false;
+    if (u_recv(param, responce_buff, MESSAGE_MAX_LEN) <= 0) online=false;
 
     printf("After send-receive\n");
     
@@ -46,28 +33,28 @@ void collect_messages(void * info)
             if (online) 
             {
                 memset(responce_buff, '\0', strlen(responce_buff));
-                if (recv(param->socket, responce_buff, MESSAGE_MAX_LEN, 0) <= 0) online = false;
-                if (online) 
+                if (u_recv(param, responce_buff, MESSAGE_MAX_LEN) > 0)
                 {
-                    //M@message_id@from_username@message_text@send_datetime@conversation_id
                     create_message(responce_buff + 2, 0);
-                    if (send(param->socket, "Y", 2, 0) <= 0) online = false;
+                }
+                else
+                {
+                    online = false;
                 }
             }
 	    }
         printf("[INFO] Successfuly received %d packages\n", count_of_messages);
     }
-    else if (responce_buff[0] == 'N')
+    else if (responce_buff[0] == ERROR_CODE[0])
     {
         printf("[INFO] No messages to receive\n");
         return;    
     }
-    else
+    else if (responce_buff[0] == NO_DATA_CODE[0])
     {
         printf("[ERROR] Undefined expression\n");
         return;
     }
-    if (recv(param->socket, responce_buff, MESSAGE_MAX_LEN, 0) <= 0) online = false;*/
 }
 
 void find_user() {
@@ -85,32 +72,27 @@ void find_user() {
     // ? sign is putted to identify that name of chat have to be equal to username of user2(or to user1 if the user2 account)
     printf("server query: %s\n", request_buff);
         
-    if (send(param->socket, request_buff, strlen(request_buff) + 1, 0) <= 0) {
-        perror(strerror(errno));
-    }
-    if (recv(param->socket, responce_buff, 4096, 0) <= 0) {
-        printf("[ERROR] Something went wrong while creating a chat with user %s\n", username);
-    }
-    else
+    u_send(param, request_buff, strlen(request_buff) + 1); // send a request to server
+
+    if (u_recv(param, responce_buff, MESSAGE_MAX_LEN) > 0)
     {
+        printf("[INFO] Received buff(%s)\n", responce_buff);
         if (responce_buff[0] == MESSAGE_CODE[0])
         {
             create_chat(responce_buff + 2);
             printf("[INFO] Chat successfuly created(%s)\n", username);
         }
-        else if (responce_buff[0] == MESSAGE_ERROR)
+        else if (responce_buff[0] == RECORD_EXISTS_CODE[0])
+        {
+            info_parts = mx_strsplit(responce_buff + 2, QUERY_DELIM[0]);
+            open_error_window("Chat already exists");
+            //change chat id parts[0]
+            mx_del_strarr(&info_parts);
+            //open_error_window(responce_buff + 2);
+        }
+        else if (responce_buff[0] == ERROR_CODE[0])
         {
             open_error_window(responce_buff + 2);
-        }
-        else if (responce_buff[0] == INFO_ERROR)
-        {
-            //responce_buff + 2 - chat_id
-            printf("CHAT ALREADY EXISTS\n");
-            open_error_window("[INFO] CHAT ALREADY EXISTS");
-        }
-        else
-        {
-            open_error_window("Undefined expression");
         }
     }
     mx_printstr(username);
@@ -182,12 +164,6 @@ void clear_chat_list()
     g_list_free(children);
 }
 
-void renew_chat_list()
-{
-    clear_chat_list();
-    get_and_show_user_chats(GET_CURRENT_CHATS);
-}
-
 void send_message() 
 {
     const char *message = correct_input(gtk_entry_get_text(GTK_ENTRY(app->chat_entry)));
@@ -202,27 +178,17 @@ void send_message()
     char responce_buff[5100];
     
     printf("Created server query: %s\n", server_query);
-    if (send(param->socket, server_query, strlen(server_query) + 1, 0) <= 0) 
-    {
-        perror(strerror(errno));
-    }
-
-    if (recv(param->socket, responce_buff, 4096, 0) <= 0 || responce_buff[0] == 'N') 
-    {
-        printf("[ERROR] Something went wrong while inserting message to db, buff=%s\n", responce_buff);
-    }
-    else
-    {
-        printf("[INFO]] Successfuly inserted message to database, responce_buff =%s\n", responce_buff);
-    }
-    free(server_query);
     
+    u_send(param, server_query, strlen(server_query) + 1);
+    u_recv(param, responce_buff, 5100);
+    
+    free(server_query);
     message_query = create_query_delim_separated(5, responce_buff, app->username_t, message, cur_time, app->current_chat);
 
     if (strlen(gtk_entry_get_text(GTK_ENTRY(app->chat_entry))) != 0) 
     {
         //message_id@from_username@message_text@send_datetime@conversation_id
-        create_message(server_query, 0);
+        create_message(message_query, 0);
         gtk_entry_set_text(GTK_ENTRY(app->chat_entry), "");
         scroll();
     }
