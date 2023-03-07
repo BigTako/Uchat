@@ -1,21 +1,5 @@
 #include "../inc/header.h"
 
-char *fake_database_username[] = {
-    "heisenberg",
-    "a",
-    "b",
-    "xd",
-    "qwerty",
-};
-
-char *fake_database_password[] = {
-    "123",
-    "11",
-    "11",
-    "12345abc",
-    "xcvb",
-};
-
 GtkWidget *open_error_window(char *error_message) {
     GtkWidget *window;
     GtkBuilder * ui_builder;
@@ -33,9 +17,7 @@ GtkWidget *open_error_window(char *error_message) {
     }
     gtk_widget_set_name(GTK_WIDGET(window), "error");
 
-    GtkCssProvider *cssProvider = gtk_css_provider_new();
-	gtk_css_provider_load_from_path(cssProvider, "../resources/css/error.css", NULL);
-	gtk_style_context_add_provider_for_screen(gdk_screen_get_default(), GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+    load_css_from_file();
     
     app->error_window = GTK_WIDGET(gtk_builder_get_object(ui_builder, "error_window"));
     app->error_label = GTK_WIDGET(gtk_builder_get_object(ui_builder, "error_label"));

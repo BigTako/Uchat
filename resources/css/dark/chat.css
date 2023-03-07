@@ -72,6 +72,7 @@
 
 #chat #welcome_message {
     background: #414b4b93;
+    color: #eef0f0;
     border-radius: 30px;
     padding: 15px;
     border: none;
@@ -84,7 +85,7 @@
 
 #chat #chat_list {
     background: #414b4b;
-    border-right: 1px solid #414b4b;
+    /* border-right: 1px solid #414b4b; */
 }
 
 #chat #messages_container > button {
@@ -103,13 +104,12 @@
     border-color: transparent;
     outline-style: none;
     box-shadow: none;
-    -gtk-button-images: 0;
-    -gtk-button-inner-border: 0;
 }
 
 #chat #messages_container > button > box > box {
     background: #5e6e6d;
     padding: 15px;
+    border: none;
     box-shadow: 0px 10px 10px 2px rgba(0,0,0,0.65);
     border-radius: 20px 20px 20px 20px;
 }
@@ -189,6 +189,168 @@
     color: #d9dede;
 }
 
-/* #chat viewport {
-    background-image: linear-gradient(to bottom, #9464f0, #8f5ce9, #8954e1, #844cda, #7f44d3, #7b40cc, #763bc6, #7237bf, #6e36b8, #6934b0, #6533a9, #6131a2);
-} */
+/* CSS FOR ERROR WINDOW */
+#error {
+    background: #394141;
+    font-family: sans-serif;
+}
+
+#error label {
+    color: #eef0f0;
+    font-size: 16px;
+}
+
+#error button {
+    background: #8f9e9d;
+    color: #eef0f0;
+    border: none;
+    border-radius: 12px;
+    transition: all 0.3s;
+}
+
+#error button:hover {
+    background: #738483;
+    border: none;
+    color: #d9dede;
+    box-shadow: none;
+}
+
+#error button:active {
+    background: #5d6c6b;
+    border: none;
+    color: #d9dede;
+}
+
+/* CSS FOR REGISTRATION */
+#login {
+    background: #394141;
+    font-size: 15px;
+    color: #eef0f0;
+}
+
+#login label {
+    color: #eef0f0;
+}
+
+#login entry {
+    background: #4c5858;
+    color: #eef0f0;
+    border: 0px;
+    border-radius: 15px;
+    transition: all 0.3s;
+}
+
+#login entry:focus {
+    border: 2px solid #d9dede;
+    border-radius: 13px;
+    outline-style: none;
+    box-shadow: none;
+    border-color: transparent;
+
+}
+
+#login button:nth-child(6) {
+    background: #8f9e9d;
+    color: #eef0f0;
+    border: none;
+    border-radius: 15px;
+}
+
+#login button:nth-child(6):hover {
+    background: #738483;
+    border: none;
+    color: #d9dede;
+    box-shadow: none;
+}
+
+#login button:nth-child(6):active {
+    background: #5d6c6b;
+    border: none;
+    color: #d9dede;
+}
+
+#login button:nth-child(7) {
+    color: #eef0f0;
+}
+
+#signup {
+    background: #394141;
+    font-size: 15px;
+    color: #eef0f0;
+}
+
+#signup label {
+    color: #eef0f0;
+}
+
+#signup entry {
+    color: #eef0f0;
+    background: #4c5858;
+    border: 0px;
+    border-radius: 15px;
+    transition: all 0.3s;
+}
+
+#signup entry:focus {
+    border: 2px solid #d9dede;
+    border-radius: 13px;
+    outline-style: none;
+    box-shadow: none;
+    border-color: transparent;
+}
+
+#signup button:nth-child(8) {
+    background: #8f9e9d;
+    color: #eef0f0;
+    border: none;
+    border-radius: 15px;
+}
+
+#signup button:nth-child(8):hover {
+    background: #738483;
+    border: none;
+    color: #d0c7fe;
+    box-shadow: none;
+}
+
+#signup button:nth-child(8):active {
+    background: #5d6c6b;
+    border: none;
+    color: #d0c7fe;
+}
+
+#signup button:nth-child(9) {
+    color: #eef0f0;
+}
+
+/* CSS FOR POPUP */
+#popup {
+    background: #8f9e9d;
+    font-family: sans-serif;
+    border-radius: 12px;
+    border: 1px solid #5d6c6b;
+}
+
+#popup label {
+    color: #eef0f0;
+    font-size: 16px;
+}
+
+#popup button {
+    background: #8f9e9d;
+    color: #eef0f0;
+    border: none;
+    transition: all 0.3s;
+}
+
+#popup button:hover {
+    background: #5d6c6b;
+    color: #d9dede;
+    box-shadow: none;
+}
+
+#popup button:active {
+    background: #5d6c6b;
+    border: none;
+    color: #d9dede;
+}

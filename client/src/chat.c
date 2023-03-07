@@ -76,9 +76,14 @@ GtkWidget *open_main_window(void)
 
     gtk_widget_set_name(GTK_WIDGET(window), "chat");
 
-    GtkCssProvider *cssProvider = gtk_css_provider_new();
-	gtk_css_provider_load_from_path(cssProvider, "../resources/css/chat.css", NULL);
-	gtk_style_context_add_provider_for_screen(gdk_screen_get_default(), GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+    app->theme_combobox = GTK_WIDGET(gtk_builder_get_object(ui_builder, "theme_selector"));
+    app->chat_window = window;
+
+    load_css_from_file();
+
+    // GtkCssProvider *cssProvider = gtk_css_provider_new();
+	// gtk_css_provider_load_from_path(cssProvider, "../resources/css/chat.css", NULL);
+	// gtk_style_context_add_provider_for_screen(gdk_screen_get_default(), GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
 
     app->username_label = GTK_WIDGET(gtk_builder_get_object(ui_builder, "username_label"));
     app->chat_icon = GTK_WIDGET(gtk_builder_get_object(ui_builder, "other_user_icon"));

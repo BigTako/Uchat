@@ -71,9 +71,7 @@ void create_options_popover(GtkWidget *widget, bool isMy) {
     }
     gtk_widget_set_name(GTK_WIDGET(window), "popup");
 
-    GtkCssProvider *cssProvider = gtk_css_provider_new();
-	gtk_css_provider_load_from_path(cssProvider, "../resources/css/popup.css", NULL);
-	gtk_style_context_add_provider_for_screen(gdk_screen_get_default(), GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+    load_css_from_file();
     gtk_builder_connect_signals(ui_builder, NULL);
 
     if (isMy) app->my_options =  GTK_WIDGET(gtk_builder_get_object(ui_builder, "my_options_popup"));
@@ -182,9 +180,7 @@ void create_chat_options_popover() {
     }
     gtk_widget_set_name(GTK_WIDGET(window), "popup");
 
-    GtkCssProvider *cssProvider = gtk_css_provider_new();
-	gtk_css_provider_load_from_path(cssProvider, "../resources/css/popup.css", NULL);
-	gtk_style_context_add_provider_for_screen(gdk_screen_get_default(), GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+    load_css_from_file();
 
     gtk_builder_connect_signals(ui_builder, NULL);
 

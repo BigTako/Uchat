@@ -88,6 +88,10 @@ gboolean chat_actions_menu(GtkWidget *widget, GdkEventButton *event, gpointer da
 void delete_chat();
 void create_chat_options_popover();
 
+void load_css(int theme);
+void save_user_theme(int theme);
+void load_css_from_file();
+
 void get_and_show_user_chats(char action);
 
 void delete_all_history();
@@ -151,6 +155,7 @@ typedef struct app_s
     GtkWidget *chat_entry_box;
     GtkWidget *chat_entry;
     GtkWidget *find_user_entry;
+    GtkWidget *theme_combobox;
     //widgets for right mouse click
     GtkWidget *my_options;
     GtkWidget *other_options;
