@@ -25,6 +25,8 @@
 typedef unsigned char * code;
 #define QUERY_DELIM "@"
 
+#define START_PAGE "0"
+
 //GET REQUESTS
 #define GET_ALL_CHATS 'F'
 #define GET_NEW_CHATS 'H'
@@ -76,11 +78,15 @@ typedef struct s_message {
 } t_message;
 
 //action functions
+void log_in(void);
+void create_account(void);
 void show_settings(void);
 void send_message();
 void create_message(char * message_query, bool to_end);
 void find_user();
-gboolean enter_keypress(GtkWidget *widget, GdkEventKey *event, gpointer data);
+gboolean chat_enter_keypress(GtkWidget *widget, GdkEventKey *event, gpointer data);
+gboolean login_enter_keypress(GtkWidget *widget, GdkEventKey *event, gpointer data);
+gboolean signup_enter_keypress(GtkWidget *widget, GdkEventKey *event, gpointer data);
 gboolean enter_escape(GtkWidget *widget, GdkEventKey *event, gpointer data);
 void change_chat_by_id(char * new_chat_id);
 void scroll();
@@ -112,6 +118,14 @@ bool contains_wrong_char(const char *string);
 int check_login_data_for_errors(const char *username, const char *password);
 int check_signup_data_for_errors(const char *username, const char *password, const char *c_password);
 
+gboolean chat_actions_menu(GtkWidget *widget, GdkEventButton *event, gpointer data);
+void delete_chat();
+void create_chat_options_popover();
+
+void load_css(int theme);
+void save_user_theme(int theme);
+void load_css_from_file();
+
 char * correct_input(char * str);
 char * restore_input(char * str);
 
@@ -122,23 +136,22 @@ void collect_messages(void * info);
 typedef struct app_s
 {
     GtkLabel *status;
+    //login widgets
     GtkWidget *login_window;
     GtkWidget *signup_window;
     GtkWidget *username_entry;
     GtkWidget *password_entry;
     GtkWidget *login_button;
-
+    //signup widgets
     GtkWidget *signup_username_entry;
     GtkWidget *signup_password_entry;
     GtkWidget *signup_confirm_password_entry;
-
+    //error hangling widgets
     GtkWidget *error_window;
     GtkWidget *error_label;
     GtkWidget *error_button;
-
+    //chat widgets
     GtkWidget *chat_window;
-    GtkWidget *chat_entry;
-    GtkWidget *find_user_entry;
     GtkWidget *chats_sidebar;
     GtkWidget *username_label;
     GtkWidget *user_icon;
@@ -153,9 +166,13 @@ typedef struct app_s
     GtkWidget *welcome_message;
     GtkWidget *send_message_button;
     GtkWidget *chat_entry_box;
-
+    GtkWidget *chat_entry;
+    GtkWidget *find_user_entry;
+    GtkWidget *theme_combobox;
+    //widgets for right mouse click
     GtkWidget *my_options;
     GtkWidget *other_options;
+    GtkWidget *chat_options;
 
     char *username;
     char *password;

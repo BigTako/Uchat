@@ -17,7 +17,7 @@ app_t *app_init()
     return app;
 }
 
-gboolean enter_keypress(GtkWidget *widget, GdkEventKey *event, gpointer data) {
+gboolean chat_enter_keypress(GtkWidget *widget, GdkEventKey *event, gpointer data) {
     if (event->keyval == GDK_KEY_Return) 
     {
         //if (gtk_widget_has_focus(app->chat_entry)) send_message();
@@ -29,9 +29,27 @@ gboolean enter_keypress(GtkWidget *widget, GdkEventKey *event, gpointer data) {
     return FALSE;
 }
 
+gboolean login_enter_keypress(GtkWidget *widget, GdkEventKey *event, gpointer data) {
+    if (event->keyval == GDK_KEY_Return) 
+    {
+        log_in();
+        return TRUE;
+    }
+    return FALSE;
+}
+
+gboolean signup_enter_keypress(GtkWidget *widget, GdkEventKey *event, gpointer data) {
+    if (event->keyval == GDK_KEY_Return) 
+    {
+        create_account();
+        return TRUE;
+    }
+    return FALSE;
+}
+
 gboolean enter_escape(GtkWidget *widget, GdkEventKey *event, gpointer data) {
     if (event->keyval == GDK_KEY_Escape) {
-        change_chat_by_id(0);
+        change_chat_by_id(START_PAGE);
         return TRUE;
     }
     return FALSE;
@@ -42,6 +60,7 @@ void scroll() {
     gtk_adjustment_set_page_size(adjustment, 0);
     double value = gtk_adjustment_get_upper(adjustment);
     gtk_adjustment_set_value(adjustment, value);
+    printf("\n SCROLLED WINDOW \n");
 }
 
 static void* play_music() {

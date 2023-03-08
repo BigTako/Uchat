@@ -50,9 +50,3 @@ int send_server_request(t_send_param *param, char * query)
             return -2;
     }
 }
-
-
-
-
-
-

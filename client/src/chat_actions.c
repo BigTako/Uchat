@@ -54,6 +54,7 @@ void change_chat_by_id(char * new_chat_id)
         gtk_widget_show(app->chat_entry_box);
         gtk_widget_show(app->chat_label_info);
         gtk_widget_show(app->chat_icon);
+        gtk_widget_show(app->status);
         if (threadID != 0)
         {
             g_source_remove(threadID);
@@ -68,6 +69,7 @@ void change_chat_by_id(char * new_chat_id)
         gtk_widget_hide(app->chat_entry_box);
         gtk_widget_hide(app->chat_label_info);
         gtk_widget_hide(app->chat_icon);
+        gtk_widget_hide(app->status);
         delete_all_history();
     }
     scroll();

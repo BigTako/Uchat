@@ -103,9 +103,10 @@ GtkWidget *open_main_window(void)
 
     gtk_widget_set_name(GTK_WIDGET(window), "chat");
 
-    GtkCssProvider *cssProvider = gtk_css_provider_new();
-	gtk_css_provider_load_from_path(cssProvider, "../resources/css/chat.css", NULL);
-	gtk_style_context_add_provider_for_screen(gdk_screen_get_default(), GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+    app->theme_combobox = GTK_WIDGET(gtk_builder_get_object(ui_builder, "theme_selector"));
+    app->chat_window = window;
+
+    load_css_from_file();
 
     app->username_label = GTK_WIDGET(gtk_builder_get_object(ui_builder, "username_label"));
     app->chat_icon = GTK_WIDGET(gtk_builder_get_object(ui_builder, "other_user_icon"));
@@ -180,13 +181,16 @@ GtkWidget *open_main_window(void)
 
     //change_chat_by_id(0);
 
+    change_chat_by_id(START_PAGE);
+
     gtk_widget_show(window);
 
     //signals
-    g_signal_connect(window, "key_press_event", G_CALLBACK (enter_keypress), NULL);
+    g_signal_connect(window, "key_press_event", G_CALLBACK (chat_enter_keypress), NULL);
     g_signal_connect(window, "key_press_event", G_CALLBACK (enter_escape), NULL);
     g_signal_connect(G_OBJECT(app->chat_list), "row-selected", G_CALLBACK(change_chat), "1");
     g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
+    g_signal_connect(G_OBJECT(app->chat_list), "button-press-event", G_CALLBACK(chat_actions_menu), "1");
     //scroll();
     return window;
 }

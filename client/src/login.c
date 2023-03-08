@@ -24,9 +24,7 @@ GtkWidget *show_login_form() {
     //имя для цсс
     gtk_widget_set_name(GTK_WIDGET(window), "login");
     //подключаю цсс
-    GtkCssProvider *cssProvider = gtk_css_provider_new();
-	gtk_css_provider_load_from_path(cssProvider, "../resources/css/registration.css", NULL);
-	gtk_style_context_add_provider_for_screen(gdk_screen_get_default(), GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+    load_css_from_file();
     
     gtk_builder_connect_signals(ui_builder, NULL);
 
@@ -42,6 +40,7 @@ GtkWidget *show_login_form() {
     // gtk_entry_set_text(GTK_ENTRY(app->password_entry), "hello"); можно будет потом сделать регистрацию через сосноль
     gtk_widget_show(window); //показываю окно
  
+    g_signal_connect(window, "key_press_event", G_CALLBACK (login_enter_keypress), NULL);
     g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL); //для кнопки закрыть окно
 
     return window;
@@ -65,9 +64,7 @@ GtkWidget *open_signup_window(void) {
     }
     gtk_widget_set_name(GTK_WIDGET(window), "signup");
 
-    GtkCssProvider *cssProvider = gtk_css_provider_new();
-	gtk_css_provider_load_from_path(cssProvider, "../resources/css/registration.css", NULL);
-	gtk_style_context_add_provider_for_screen(gdk_screen_get_default(), GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+    load_css_from_file();
     
     app->signup_window = window;
     app->signup_username_entry = GTK_WIDGET(gtk_builder_get_object(ui_builder, "username_entry"));
@@ -78,6 +75,7 @@ GtkWidget *open_signup_window(void) {
 
     gtk_widget_show(window);
 
+    g_signal_connect(window, "key_press_event", G_CALLBACK (signup_enter_keypress), NULL);
     g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
 
     return window;
