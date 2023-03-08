@@ -19,6 +19,7 @@ int main(int argc, char ** argv)
     int welcomeSocket = openListener(atoi(argv[1]));
 
     pthread_mutex_t mutex_R;
+    pthread_mutex_init(&mutex_R, NULL);
 
     int cmdEXIT = 0;
     int count_of_threads = 0;
