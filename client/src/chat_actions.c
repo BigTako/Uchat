@@ -17,7 +17,7 @@ void find_user() {
     if (u_recv(param, responce_buff, MESSAGE_MAX_LEN) > 0)
     {
         printf("[INFO] Received buff(%s)\n", responce_buff);
-        if (responce_buff[0] == MESSAGE_CODE[0])
+        if (responce_buff[0] == OK_CODE[0])
         {
             create_chat(responce_buff + 2);
             printf("[INFO] Chat successfuly created(%s)\n", username);
@@ -59,6 +59,7 @@ void change_chat_by_id(char * new_chat_id)
             g_source_remove(threadID);
         }   
         delete_all_history();
+        //apply_collocutor_info();
         collect_user_info("A");
         threadID = g_timeout_add(100, collect_user_info, (gpointer)"G");
     }
@@ -214,7 +215,7 @@ void create_message(char * message_query, bool to_end)
 
     message_struct->id = atoi(id_text);
     message_struct->message_text = gtk_label_get_text(GTK_LABEL(text));
-
+    if (is_user) message_struct->message_label = text;
     // if (is_user) g_signal_connect(message, "button-press-event", G_CALLBACK(my_message_menu), (gpointer)label_text);
     // else g_signal_connect(message, "button-press-event", G_CALLBACK(other_message_menu), (gpointer)label_text);
 

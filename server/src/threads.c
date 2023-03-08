@@ -21,7 +21,7 @@ bool s_to_c_info_exchange(t_thread_param *param, char ** table)
 		memset(query_buff, '\0', strlen(query_buff));
 		if (online == true) 
 		{
-			sprintf(query_buff, "%s%s%s", MESSAGE_CODE, QUERY_DELIM, (char *)table[i]);
+			sprintf(query_buff, "%s%s%s", OK_CODE, QUERY_DELIM, (char *)table[i]);
 			printf("Send: %s\n", query_buff);
 			u_send(param, query_buff, strlen(query_buff) + 1);
 			memset(query_buff, '\0', strlen(query_buff));
@@ -69,7 +69,9 @@ char *encode_login(char *code, t_thread_param *param, bool *online)
 						printf("[INFO] correct loging\n");
 						user = mx_strjoin(QUERY_DELIM, parts[1]);
 						*online = true;
+						format_and_execute(param->db, "UPDATE %s SET online='online' WHERE username='%s'", USERS_TN, user);
 						if (u_send(param, "Y", 1) <= 0) *online = false;
+
 					}
 					else
 					{
@@ -126,7 +128,7 @@ void encode(char * code, t_thread_param *param, bool *online, char *user)
 		E@chat_ID
 		X
 	*/
-	printf("Encode code string: %s\n", code);
+	//printf("Encode code string: %s\n", code);
 	char ** table = NULL;
 	char ** parts = mx_strsplit(code, QUERY_DELIM[0]);
 	char code_num = parts[0][0];
@@ -254,7 +256,7 @@ void encode(char * code, t_thread_param *param, bool *online, char *user)
 				{
 					//query: M@chat_id@chat_name@LM_from_username@LM_message_text@LM_message_status@chat_members
 					memset(query_buff, '\0', strlen(query_buff));
-					sprintf(query_buff, "%s%s%d%s%s%sYou%s...%sread%s", MESSAGE_CODE, 
+					sprintf(query_buff, "%s%s%d%s%s%sYou%s...%sread%s", OK_CODE, 
 																		QUERY_DELIM, 
 																		newchat_id, 
 																		QUERY_DELIM, parts[1], 
@@ -262,7 +264,7 @@ void encode(char * code, t_thread_param *param, bool *online, char *user)
 																		QUERY_DELIM, 
 																		QUERY_DELIM, 
 																		members_str);
-					//sprintf(query_buff, "%s%s%d%s", MESSAGE_CODE, QUERY_DELIM, newchat_id, members_str);
+					//sprintf(query_buff, "%s%s%d%s", OK_CODE, QUERY_DELIM, newchat_id, members_str);
 					printf("Sending responce(%s) to user\n", query_buff);
 					if (u_send(param, query_buff, strlen(query_buff) + 1) <= 0) *online = false;
 					//if (send(param->socket, query_buff, strlen(query_buff) + 1, 0) <= 0) *online = false;
@@ -385,9 +387,9 @@ void encode(char * code, t_thread_param *param, bool *online, char *user)
 								, \
 								c.chat_members \
 						FROM (SELECT *, (SELECT max(message_id) FROM %s m WHERE m.chat_id = c2.chat_id) AS MAX_MID FROM %s c2) c \ 
-						WHERE c.load_status = 'unloaded' AND c.chat_members NOT LIKE '%s%%'";
+						WHERE c.load_status = 'unloaded' AND c.chat_members NOT LIKE '%s%%' AND c.chat_members LIKE '%%%s%%'";
 
-			table = get_db_data_table(param->db, db_query, 4, DB_ROWS_MAX, MESSAGES_TN, MESSAGES_TN, CHATS_TN, user);
+			table = get_db_data_table(param->db, db_query, 4, DB_ROWS_MAX, MESSAGES_TN, MESSAGES_TN, CHATS_TN, user, user);
 			if (table && *table)
 			{
 				printf("Have something to work with\n");
@@ -405,7 +407,35 @@ void encode(char * code, t_thread_param *param, bool *online, char *user)
 			}
 			delete_table(&table);
 			break;
-		case EDIT_MESSAGE:
+		case GET_COLLOCUTOR_INFO: //K@chat_id
+			// we have an id of chat, we have to get username of collocutor, his online and avatar
+			if (!validate_query(code, 1, "Message sending query is wrong, incorrent delimiter count!\n"))
+      		{
+				db_query = "SELECT username, online, avatar \
+							FROM %s u \
+							INNER JOIN %s c \
+							WHERE c.chat_id=%s AND REPLACE(c.chat_members, '%s', '')=username";
+
+				printf(db_query, USERS_TN, CHATS_TN, parts[1], user);
+				table = get_db_data_table(param->db, db_query, 3, 1, USERS_TN, CHATS_TN, parts[1], user);
+				if (table && *table)
+				{
+					sprintf(error_buf, "%s%s%s", OK_CODE, QUERY_DELIM, table[0]);
+					if (u_send(param, error_buf, strlen(error_buf) + 1) <= 0) *online = false;
+				}
+				else
+				{
+					sprintf(error_buf, "%s%sNo data", NO_DATA_CODE, QUERY_DELIM);
+					if (u_send(param, error_buf, strlen(error_buf) + 1) <= 0) *online = false;
+				} 
+			}
+			else
+			{
+				sprintf(error_buf, "%s%sMessage sending query is wrong, incorrent delimiter count!", ERROR_CODE, QUERY_DELIM);
+				if (u_send(param, error_buf, strlen(error_buf) + 1) <= 0) *online = false;
+			}
+			break;
+		case EDIT_MESSAGE: //B@message_id@new_message_text
 			printf("[INFO] Want to edit a message\n"); 
 			if (!validate_query(code, 2, "Message edition query is wrong, incorrent delimiter count!\n"))
 			{
@@ -495,8 +525,7 @@ void* client_thread(void* vparam)
 		{
             online = false;
             //OFLINE
-			printf("have to go\n");
-            break;
+			break;
         }
         printf(">>>Got a message from unknow client: %s\n", buffer);
 		pthread_mutex_lock(param->mutex_R);
@@ -505,6 +534,7 @@ void* client_thread(void* vparam)
 		memset(buffer, '\0', MESSAGE_MAX_LEN);
     }
 	printf("DISCONNECTING User: %s\n", user);
+	format_and_execute(param->db, "UPDATE %s SET online='offline' WHERE username='%s'", USERS_TN, user);
 	free(user);
     close(param->socket);
 	int *count_of_threads = param->count_of_threads;

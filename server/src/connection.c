@@ -156,7 +156,7 @@ int u_recv(t_thread_param *param, void* buf, int len) {
     if (SSL_write(param->ssl, OK_CODE, 2) <= 0) {
         return -1;
     }
-    printf("[INFO] Successfully recv message.\n");
+    //printf("[INFO] Successfully recv message.\n");
     return actualLen;
 }
 

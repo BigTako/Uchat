@@ -1,5 +1,6 @@
 #include "../inc/header.h"
 
+
 void collect_user_info(void * info)
 {
     if (!info)
@@ -44,13 +45,42 @@ void collect_user_info(void * info)
     }
     else if (responce_buff[0] == ERROR_CODE[0])
         printf("[ERROR] %s\n", responce_buff + 2);
-    else if (responce_buff[0] == NO_DATA_CODE[0])
+    /*else if (responce_buff[0] == NO_DATA_CODE[0])
         printf("[INFO] %s\n", responce_buff + 2);
     else
-        printf("[RECV ERROR] Undefined query '%s'\n", responce_buff);
+        printf("[RECV ERROR] Undefined query '%s'\n", responce_buff);*/
     free(action);
 }
 
+void apply_collocutor_info()
+{
+    if (app->current_chat_id[0] == '0') // if chat isn't chosen
+    {
+        gtk_label_set_text(GTK_LABEL(app->chat_label_info), app->username_t);
+        gtk_label_set_text(app->status, "online");
+    }
+    else
+    {
+        char query[1000];
+        char responce[1000];
+        char ** parts = NULL;
+        sprintf(query, "%c%s%s", GET_COLLOCUTOR_INFO, QUERY_DELIM, app->current_chat_id);
+        u_send(param, query, strlen(query) + 1);
+        u_recv(param, responce, MESSAGE_MAX_LEN);
+        printf("Received a responce: %s\n", responce);
+        if (responce[0] == OK_CODE[0])
+        {
+            parts = mx_strsplit(responce + 2, QUERY_DELIM[0]);
+            gtk_label_set_text(GTK_LABEL(app->chat_label_info), parts[0]);
+            gtk_label_set_text(app->status, parts[1]);
+            mx_del_strarr(&parts);
+        }
+        else
+        {        
+            printf("[ERROR] Got something wrong\n");
+        }
+    }
+}
 
 GtkWidget *open_main_window(void) 
 {
@@ -116,17 +146,23 @@ GtkWidget *open_main_window(void)
     gtk_widget_set_name(GTK_WIDGET(app->welcome_message), "welcome_message");
     app->send_message_button = GTK_WIDGET(gtk_builder_get_object(ui_builder, "send_message_button"));
 
+    app->status = GTK_LABEL(gtk_builder_get_object(ui_builder, "other_user_status"));
+    gtk_widget_set_name(GTK_WIDGET(app->status), "status");
+    //gtk_label_set_text(app->status, "online");
+
     //gtk_entry_set_text(GTK_ENTRY(app->username_label), app->username);
     gtk_label_set_text(GTK_LABEL(app->username_label), app->username_t);
-
+    //gtk_label_set_text(GTK_LABEL(app->chat_label_info), app->username_t);
     //gtk_label_set_text(GTK_LABEL(app->chat_label_info), " ");
     //gtk_widget_hide(app->chat_icon);
 
     //GET ALL CURRENT CONVERSATIONS
     
     //threadID = g_timeout_add(100, collect_messages, data);
+    //apply_collocutor_info();
     collect_user_info("F");
     g_timeout_add(100, collect_user_info, "H");
+    g_timeout_add(100, apply_collocutor_info, NULL);
     //GET ALL CURRENT CONVERSATIONS
     //char action[] = {GET_CHATS_HISTORY, '\0'};
     //GET CHAT HISTORY IGNORING THE STATUS

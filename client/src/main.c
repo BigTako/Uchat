@@ -38,7 +38,7 @@ int main(int argc, char * argv[]) {
 
     gtk_main();
     
-
+    printf("Close client\n");
     return 0;
 }
 

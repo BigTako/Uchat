@@ -6,9 +6,11 @@ sqlite3 * db_init()
     sqlite3 * db = NULL;
 	sqlite3_open(DB_FILENAME, &db);
 	
-    format_and_execute(db, "CREATE TABLE IF NOT EXISTS %s(\
-                            username TEXT NOT NULL UNIQUE, \
-                            password TEXT NOT NULL)", USERS_TN);
+    format_and_execute(db, "CREATE TABLE IF NOT EXISTS %s ( \
+										 username TEXT NOT NULL, \
+										 password TEXT NOT NULL, \
+										 online TEXT DEFAULT 'offline' NOT NULL, \
+										 avatar INTEGER DEFAULT 0 NOT NULL)", USERS_TN);
 
     //creating table with conversations
     format_and_execute(db, "CREATE TABLE IF NOT EXISTS %s(\

@@ -34,6 +34,7 @@
 #define GET_NEW_CHATS 'H'
 #define GET_NEW_MESSAGES 'G'
 #define GET_CHATS_HISTORY 'A'
+#define GET_COLLOCUTOR_INFO 'K'
 
 //POST REQUESTS
 #define SEND_MESSAGE 'S'
@@ -41,6 +42,8 @@
 #define EDIT_MESSAGE 'B'
 #define DELETE_MESSAGE 'D'
 #define EXIT_CONVERSATION 'E'
+#define GO_ONLINE "O"
+#define GO_OFFLINE "P"
 
 //OTHERS
 #define LOGIN 'L'
@@ -48,7 +51,6 @@
 
 //CODES
 #define WAIT_FOR_CODE "W"
-#define MESSAGE_CODE "M"
 #define OK_CODE "Y"
 #define ERROR_CODE "N"
 #define NO_DATA_CODE "E"

@@ -13,15 +13,16 @@ app_t *app_init()
     app->password = NULL;
     app->active_message = malloc(1);
     app->current_chat_id = mx_strdup("0");
-    app->current_chat_id = 0;
-
-	return app;
+    app->edit_message = false;
+    return app;
 }
 
 gboolean enter_keypress(GtkWidget *widget, GdkEventKey *event, gpointer data) {
     if (event->keyval == GDK_KEY_Return) 
     {
-        if (gtk_widget_has_focus(app->chat_entry)) send_message();
+        //if (gtk_widget_has_focus(app->chat_entry)) send_message();
+        if (gtk_widget_has_focus(app->chat_entry) && app->edit_message) set_text();
+        if (gtk_widget_has_focus(app->chat_entry) && !app->edit_message) send_message();
         if (gtk_widget_has_focus(app->find_user_entry)) find_user();
         return TRUE;
     }

@@ -30,6 +30,7 @@ typedef unsigned char * code;
 #define GET_NEW_CHATS 'H'
 #define GET_NEW_MESSAGES 'G'
 #define GET_CHATS_HISTORY 'A'
+#define GET_COLLOCUTOR_INFO 'K'
 
 //POST REQUESTS
 #define SEND_MESSAGE 'S'
@@ -37,6 +38,8 @@ typedef unsigned char * code;
 #define EDIT_MESSAGE 'B'
 #define DELETE_MESSAGE 'D'
 #define EXIT_CONVERSATION 'E'
+#define GO_ONLINE "O"
+#define GO_OFFLINE "P"
 
 //OTHERS
 #define LOGIN 'L'
@@ -44,7 +47,6 @@ typedef unsigned char * code;
 
 //CODES
 #define WAIT_FOR_CODE "W"
-#define MESSAGE_CODE "M"
 #define OK_CODE "Y"
 #define ERROR_CODE "N"
 #define NO_DATA_CODE "E"
@@ -70,12 +72,8 @@ typedef struct s_message {
     int id;
     char *username;
     const char *message_text;
+    GtkWidget *message_label;
 } t_message;
-
-typedef struct s_collect_m_query
-{
-    char * query;
-} t_collect_m_query;
 
 //action functions
 void show_settings(void);
@@ -87,12 +85,16 @@ gboolean enter_escape(GtkWidget *widget, GdkEventKey *event, gpointer data);
 void change_chat_by_id(char * new_chat_id);
 void scroll();
 void change_chat(GtkListBox* self, GtkListBoxRow* row, gpointer data);
+void set_text();
+void edit_message(GtkWidget *widget, gpointer data);
+//gboolean chat_actions_menu(GtkWidget *widget, GdkEventButton *event, gpointer data);
 
 void collect_user_info(void * info);
 
 void delete_all_history();
 void clear_chat_list() ;
 void renew_chat_list();
+void apply_collocutor_info();
 
 gboolean my_message_menu(GtkWidget *widget, GdkEventButton *event, t_message *data);
 gboolean other_message_menu(GtkWidget *widget, GdkEventButton *event, t_message *data);
@@ -119,6 +121,7 @@ void collect_messages(void * info);
 
 typedef struct app_s
 {
+    GtkLabel *status;
     GtkWidget *login_window;
     GtkWidget *signup_window;
     GtkWidget *username_entry;
@@ -161,6 +164,8 @@ typedef struct app_s
     GtkWidget *active_widget;
     char *active_message;
     char * current_chat_id; // HARDCODED IN APP_INIT!!!!!!!!!!!!!!!!!!!!!!
+    //char * collocutor_username;
+    bool edit_message;
 }              app_t;
 
 app_t *app_init();

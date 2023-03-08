@@ -123,19 +123,19 @@ int u_send(t_send_param *param, void* buf, int len) {
     if (response_buff[0] == OK_CODE[0]) {
         //printf("[INFO] Successfully sent message.\n");
     }
-    else if (response_buff[0] == NO_DATA_CODE[0])
-    {
-        printf("[INFO] No data to receive\n");
-    }
     else if (response_buff[0] == ERROR_CODE[0])
     {
         printf("[ERROR] Got an error in urecv\n");
         return 0;
     }
+    /*else if (response_buff[0] == NO_DATA_CODE[0])
+    {
+        printf("[INFO] No data to receive\n");
+    }
     else {
         printf("[ERROR] Undefined package(%s).\n", response_buff);
         return -1;
-    }
+    }*/
     return len;
 }
 
