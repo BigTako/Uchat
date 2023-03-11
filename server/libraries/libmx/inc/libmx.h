@@ -75,6 +75,7 @@ char *mx_replace_substr(const char *str, const char *sub, const char *replace);
 int mx_read_line(char **lineptr, size_t buf_size, char delim, const int fd);
 char * mx_strstr_front(const char *haystack, const char *needle);
 int char_count(char * str, char c);
+char * tokenize(char * str, char delim, char * buf, int steps);
 
 //MEMORY PACK
 void *mx_memset(void *b, int c, size_t len);

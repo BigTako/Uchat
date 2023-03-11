@@ -55,8 +55,7 @@ char *encode_login(char *code, t_thread_param *param, bool *online)
 			{
 				db_query = "SELECT password FROM %s WHERE username='%s%s'";
 				table = get_db_data_table(param->db, db_query, 1, DB_ROWS_MAX, USERS_TN, QUERY_DELIM, parts[1]);
-				//printf("got password: %s, count of holders %d\n", table[0], HOLDERS(db_query));
-
+				
 				if (!table || !(*table)) // NO SUCH USERNAME IN DATABASE
 				{
 					printf("[ERROR] Invalid username or password\n");
@@ -142,6 +141,8 @@ void encode(char * code, t_thread_param *param, bool *online, char *user)
 	int newchat_id = 0;
 	char * another_user = NULL;
 	char error_buf[1000];
+	char text_buf[1000];
+	char * token = NULL;
 	switch(code_num)
 	{
 		case SEND_MESSAGE: //S@TEXT@TIME@chat_ID - send message
@@ -232,18 +233,18 @@ void encode(char * code, t_thread_param *param, bool *online, char *user)
 				db_query = "SELECT max(chat_id) FROM %s";
 				table = get_db_data_table(param->db, db_query, 1, 1, CHATS_TN);
 				
-				db_query = "INSERT INTO %s VALUES(%s + 1, '%s', '%s', 'unloaded')";
+				db_query = "INSERT INTO %s VALUES(%s + 1, '%s', '%s', '%s')";
 				if (!table || !*table) // table is empty
 				{
 					printf("[INFO] Table is empty, max conv_id is 0\n");
 					newchat_id = 1;
-					executing_status = format_and_execute(param->db, db_query, CHATS_TN, "0", parts[1], members_str);
+					executing_status = format_and_execute(param->db, db_query, CHATS_TN, "0", parts[1], members_str, UNLOADED_STATUS);
 				}
 				else
 				{	
 					printf("[INFO] Got max chats id: %s\n", table[0]);
 					newchat_id += atoi(table[0]) + 1;
-					executing_status = format_and_execute(param->db, db_query, CHATS_TN, table[0], parts[1], members_str);
+					executing_status = format_and_execute(param->db, db_query, CHATS_TN, table[0], parts[1], members_str, UNLOADED_STATUS);
 				}
 				
 				if (executing_status != 0)
@@ -256,10 +257,13 @@ void encode(char * code, t_thread_param *param, bool *online, char *user)
 				{
 					//query: M@chat_id@chat_name@LM_from_username@LM_message_text@LM_message_status@chat_members
 					memset(query_buff, '\0', strlen(query_buff));
-					sprintf(query_buff, "%s%s%d%s%s%sYou%s...%sread%s", OK_CODE, 
+					sprintf(query_buff, "%s%s%s%s%d%s%s%sYou%s...%sread%s", OK_CODE, 
+																		QUERY_DELIM,
+																		UNLOADED_STATUS,
 																		QUERY_DELIM, 
 																		newchat_id, 
-																		QUERY_DELIM, parts[1], 
+																		QUERY_DELIM, 
+																		parts[1], 
 																		QUERY_DELIM, 
 																		QUERY_DELIM, 
 																		QUERY_DELIM, 
@@ -283,17 +287,23 @@ void encode(char * code, t_thread_param *param, bool *online, char *user)
 			free(members_str);
 			break;
 		case GET_CHATS_HISTORY: 
-		
+			//TAKE ALL MESSAGES WHERE USER IS MEMBER OF CHAT(selected by chat_id) AND STATUS != 'DELETED'
+			//Returning query: message_status@m_id@m_sender_username@m_text@m_send_datetime@m_chat_id
 			db_query = "SELECT * \
-						FROM (SELECT m.message_id, m.from_username, m.message_text, m.send_datetime, m.chat_id \
+						FROM (SELECT m.status,\ 
+									 m.message_id,\
+									 m.from_username,\
+									 m.message_text,\
+									 m.send_datetime,\
+									 m.chat_id \
 							  FROM %s c \
 							  INNER JOIN %s m \
 							  ON c.chat_id = m.chat_id \
-							  WHERE chat_members LIKE '%%%s%%' AND m.chat_id=%s \
+							  WHERE m.status != '%s' AND m.status != '%s' AND m.chat_id=%s \
 							  ORDER BY m.message_id DESC) \
 						ORDER BY message_id";
 
-			table = get_db_data_table(param->db, db_query, 5, DB_ROWS_MAX, CHATS_TN, MESSAGES_TN, user, parts[1]);
+			table = get_db_data_table(param->db, db_query, 6, DB_ROWS_MAX, CHATS_TN, MESSAGES_TN, DELETED_STATUS, UNDELETED_STATUS, parts[1]);
 
 			//UPDATE status of messages have got
 			*online = s_to_c_info_exchange(param, table);
@@ -301,8 +311,15 @@ void encode(char * code, t_thread_param *param, bool *online, char *user)
 			{
 				for (int i = 0; table[i]; i++)
 				{
-					db_query = "UPDATE %s SET status='read' WHERE message_id=%s";
-					executing_status = format_and_execute(param->db, db_query, MESSAGES_TN, strtok(table[i], QUERY_DELIM));
+					db_query = "UPDATE %s SET status='%s' WHERE message_id=%s";
+					token = tokenize(table[i], QUERY_DELIM[0], text_buf, 2);
+					if (token)
+					{
+						printf("token: %s\n", token);
+						executing_status = format_and_execute(param->db, db_query, MESSAGES_TN, LOADED_STATUS, text_buf);
+						memset(text_buf, '\0', strlen(text_buf));
+					}
+					else executing_status = -1 ;
 					printf("Execution status = %d\n", executing_status);
 				}
 			}
@@ -318,29 +335,52 @@ void encode(char * code, t_thread_param *param, bool *online, char *user)
 			
 			break;
 		case GET_NEW_MESSAGES: // CONTINUALY GET MESSAGES WITH UNREAD STATUS
-			//M@message_id@from_username@message_text@send_datetime@chat_id
+			//TAKE ALL MESSAGES WHERE USER IS MEMBER OF CHAT(selected by chat_id) AND MESSAGES ARE UNLOADED OR UNDELETED
+			//Returning query: message_status@m_id@m_sender_username@m_text@m_send_datetime@m_chat_id
 			db_query = "SELECT * \
-						FROM (SELECT m.message_id, m.from_username, m.message_text, m.send_datetime, m.chat_id \
+						FROM (SELECT m.status,\
+									 m.message_id,\
+									 m.from_username,\
+									 m.message_text,\
+									 m.send_datetime,\
+									 m.chat_id \
 							  FROM %s c \
 							  INNER JOIN %s m \
 							  ON c.chat_id = m.chat_id \
-							  WHERE m.from_username != '%s' AND chat_members LIKE '%%%s%%' AND m.chat_id=%s AND m.status='unread'\
+							  WHERE m.from_username != '%s' AND m.chat_id=%s AND (m.status='%s' OR m.status='%s')\
 							  ORDER BY m.message_id DESC) \
 						ORDER BY message_id";
 			
-			table = get_db_data_table(param->db, db_query, 5,   DB_ROWS_MAX, 
+			table = get_db_data_table(param->db, db_query, 6,   DB_ROWS_MAX, 
 																CHATS_TN, 
 																MESSAGES_TN, 
 																user,
-																user,
-																parts[1]);
+																parts[1],
+																UNLOADED_STATUS,
+																UNDELETED_STATUS);
 			*online = s_to_c_info_exchange(param, table);
 			if (*online && table && *table)
 			{
 				for (int i = 0; table[i]; i++)
 				{
-					db_query = "UPDATE %s SET status='read' WHERE message_id=%s";
-					executing_status = format_and_execute(param->db, db_query, MESSAGES_TN, strtok(table[i], QUERY_DELIM));
+					db_query = "UPDATE %s SET status=(CASE status\
+															WHEN '%s' THEN '%s'\
+															WHEN '%s' THEN '%s'\
+													  END)\
+								WHERE message_id = %s";
+					
+					token = tokenize(table[i], QUERY_DELIM[0], text_buf, 2);
+					if (token)
+					{
+						printf("token: %s\n", token);
+						executing_status = format_and_execute(param->db, db_query, MESSAGES_TN, 
+																				   UNLOADED_STATUS, LOADED_STATUS,
+																				   UNDELETED_STATUS,DELETED_STATUS,
+																				   token);
+						memset(text_buf, '\0', strlen(text_buf));
+					}
+					else executing_status = -1;
+					printf("Execution status = %d\n", executing_status);
 				}
 			}
 			else
@@ -351,33 +391,60 @@ void encode(char * code, t_thread_param *param, bool *online, char *user)
 			delete_table(&table);
 			break;
 		case GET_ALL_CHATS:
-			db_query = "SELECT  c.chat_id, \
+			
+			db_query = "SELECT  c.status,\
+								c.chat_id, \
 								c.chat_name, \
-								CASE (SELECT max(message_id) FROM %s m WHERE m.chat_id=c.chat_id) IS NULL \
-									WHEN 1 THEN 'You'||' @ '||'...'||'@'||'...' \
-									ELSE (SELECT m3.from_username || '@' || m3.message_text || '@' || m3.status  \
-									FROM %s m3 WHERE m3.message_id=(SELECT max(message_id) FROM %s m2 WHERE m2.chat_id=c.chat_id)) \
-        						END MESSAGE_DATA \
-        						, \
-								c.chat_members \ 
-						FROM %s c \
-						WHERE chat_members LIKE '%%%s%%'";
+								CASE MAX_MID IS NULL \
+									WHEN 1 THEN 'You' || ' @ ' || '...' || '@' || '...' \
+									ELSE (SELECT m3.from_username || '@' || m3.message_text || '@' || m3.status \
+										  FROM %s m3 WHERE m3.message_id=MAX_MID) \
+								END MESSAGE_DATA \
+								, \
+								c.chat_members \
+						FROM (SELECT *, (SELECT max(message_id) \
+										 FROM %s m \
+										 WHERE m.chat_id = c2.chat_id) AS MAX_MID\
+							  FROM %s c2) c \ 
+						WHERE c.chat_members LIKE '%%%s%%' AND (c.status='%s' OR c.status='%s')";
 
-			table = get_db_data_table(param->db, db_query, 4, DB_ROWS_MAX, MESSAGES_TN, MESSAGES_TN, MESSAGES_TN, CHATS_TN, user);
+			table = get_db_data_table(param->db, db_query, 5, DB_ROWS_MAX, MESSAGES_TN, MESSAGES_TN, CHATS_TN, user, UNLOADED_STATUS, LOADED_STATUS);
+			
 			if (table && *table)
 			{
-				printf("Have something to work with\n");
 				*online = s_to_c_info_exchange(param, table);
+				for (int i = 0; table[i]; i++)
+				{
+					if (tokenize(table[i], QUERY_DELIM[0], text_buf, 2)) // chat_id					
+					{
+						db_query = "UPDATE %s SET status='%s' WHERE chat_id=%s";
+						if (format_and_execute(param->db, db_query, CHATS_TN, LOADED_STATUS, text_buf) != 0)
+						{
+							printf("[ERROR] INVALID FORMAT_AND_EXECUTE\n");
+							*online = false;
+							break;
+						}
+					}
+				}
 			}
 			else
 			{
-				sprintf(error_buf, "%s%sFailed to get new messages", ERROR_CODE, QUERY_DELIM);
+				sprintf(error_buf, "%s%sNo new chats", ERROR_CODE, QUERY_DELIM);
 				if (u_send(param, error_buf, strlen(error_buf) + 1) <= 0) *online = false;
 			}
 			delete_table(&table);
 			break;
 		case GET_NEW_CHATS:
-			db_query = "SELECT  c.chat_id, \
+			//TAKE THE CHATS WHERE USER IS MEMBER AND CHAT_STATUS == 'U' OR 'T'
+			//when we delete chat we delete ourselfs from members
+			// if chat is dialog(count of members is 2) so change chat status to UNDELETED
+			// if chat is group(count of member is 2) do not change status
+			// so when we want to upload new chats we can see two situations:
+			// 1. status=UNLOADED , so create chat with such info
+			// 2. status=UNDELETD, so delete the corresponding widget(with id in info)
+			//QUERY: chat_status@chat_name@LM_sender@LM_text@LM_status@chat_members
+			db_query = "SELECT  c.status, \
+								c.chat_id, \
 								c.chat_name, \
 								CASE MAX_MID IS NULL \
 									WHEN 1 THEN 'You' || ' @ ' || '...' || '@' || '...' \
@@ -387,17 +454,31 @@ void encode(char * code, t_thread_param *param, bool *online, char *user)
 								, \
 								c.chat_members \
 						FROM (SELECT *, (SELECT max(message_id) FROM %s m WHERE m.chat_id = c2.chat_id) AS MAX_MID FROM %s c2) c \ 
-						WHERE c.load_status = 'unloaded' AND c.chat_members NOT LIKE '%s%%' AND c.chat_members LIKE '%%%s%%'";
+						WHERE (c.status = '%s' OR c.status='%s') AND c.chat_members LIKE '%%%s%%' AND c.chat_members NOT LIKE '%s%%'";
 
-			table = get_db_data_table(param->db, db_query, 4, DB_ROWS_MAX, MESSAGES_TN, MESSAGES_TN, CHATS_TN, user, user);
+			table = get_db_data_table(param->db, db_query, 5, DB_ROWS_MAX, MESSAGES_TN, MESSAGES_TN, CHATS_TN, UNLOADED_STATUS, UNDELETED_STATUS, user, user);
 			if (table && *table)
 			{
 				printf("Have something to work with\n");
 				*online = s_to_c_info_exchange(param, table);
-				for (int i = 0; table[i]; i++)
+				db_query = "UPDATE %s SET status=(CASE status\
+														WHEN '%s' THEN '%s'\
+														WHEN '%s' THEN '%s'\
+												   END)\
+							WHERE chat_id = %s";
+
+				for(int i = 0; table[i]; i++)
 				{
-					db_query = "UPDATE %s SET load_status='loaded' WHERE chat_id=%s";
-					executing_status = format_and_execute(param->db, db_query, CHATS_TN, strtok(table[i], QUERY_DELIM));
+					if (tokenize(table[i], QUERY_DELIM[0], text_buf, 2))
+					{
+						printf("token: %s\n", text_buf);
+						executing_status = format_and_execute(param->db, db_query, CHATS_TN, 
+																				UNLOADED_STATUS, LOADED_STATUS,
+																				UNDELETED_STATUS,DELETED_STATUS,
+																				text_buf);
+						memset(text_buf, '\0', strlen(text_buf));
+					}
+					else executing_status = -1;
 				}
 			}
 			else
@@ -459,7 +540,7 @@ void encode(char * code, t_thread_param *param, bool *online, char *user)
 				}
 			}
 			break;
-		case EXIT_CONVERSATION:
+		case LEAVE_CHAT:
 			if (!validate_query(code, 1, "chat exit query is wrong, incorrent delimiter count!\n"))
 			{
 				db_query = "SELECT chat_members FROM %s WHERE chat_id=%s";

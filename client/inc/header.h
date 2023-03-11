@@ -43,6 +43,12 @@ typedef unsigned char * code;
 #define GO_ONLINE "O"
 #define GO_OFFLINE "P"
 
+//STATUS CODES
+#define UNLOADED_STATUS "U"
+#define LOADED_STATUS "L"
+#define UNDELETED_STATUS "T"
+#define DELETED_STATUS "D"
+
 //OTHERS
 #define LOGIN 'L'
 #define SIGNUP 'R'
@@ -82,7 +88,7 @@ void log_in(void);
 void create_account(void);
 void show_settings(void);
 void send_message();
-void create_message(char * message_query, bool to_end);
+void create_message_widget(char * message_query, bool to_end);
 void find_user();
 gboolean chat_enter_keypress(GtkWidget *widget, GdkEventKey *event, gpointer data);
 gboolean login_enter_keypress(GtkWidget *widget, GdkEventKey *event, gpointer data);
@@ -132,6 +138,9 @@ char * restore_input(char * str);
 //working with chats
 void create_chat(char * chat_info_query);
 void collect_messages(void * info);
+
+void process_message_info(char * message_info);
+void process_chat_info(char * chat_info);
 
 typedef struct app_s
 {

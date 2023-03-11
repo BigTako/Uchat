@@ -20,7 +20,7 @@ SRC		= 	mx_binary_search.c mx_bubble_sort.c mx_count_substr.c mx_count_words.c m
 			mx_sort_list.c mx_sqrt.c mx_str_reverse.c mx_strcat.c mx_strcmp.c mx_strcpy.c mx_strdel.c \
 			mx_strdup.c mx_strjoin.c mx_strlen.c mx_strncmp.c mx_strncpy.c mx_strndup.c mx_strnew.c \
 			mx_strsplit.c mx_strstr.c mx_strtrim.c mx_swap_char.c mx_printerr.c list_utils.c \
-			mx_math.c mx_digits_count.c str_utils.c mx_null_arr_len.c mx_strstr_front.c mx_strtrim_spec.c mx_str_from_arr.c char_count.c
+			mx_math.c mx_digits_count.c str_utils.c mx_null_arr_len.c mx_strstr_front.c mx_strtrim_spec.c mx_str_from_arr.c char_count.c tokenize.c
 
 SRCS	=	$(addprefix $(SRCD)/, $(SRC))
 OBJS	=	$(addprefix $(OBJD)/, $(SRC:%.c=%.o))

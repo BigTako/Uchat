@@ -17,7 +17,7 @@ sqlite3 * db_init()
                             chat_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, \
                             chat_name TEXT NOT NULL,\
                             chat_members TEXT NOT NULL,\
-							load_status TEXT NOT NULL DEFAULT 'unloaded')", CHATS_TN);
+							status TEXT NOT NULL DEFAULT 'U')", CHATS_TN);
 
     //creating table with messages
 	format_and_execute(db, "CREATE TABLE IF NOT EXISTS %s(\
@@ -26,7 +26,7 @@ sqlite3 * db_init()
                             message_text TEXT NOT NULL, \
                             send_datetime INTEGER NOT NULL, \
                             chat_id INTEGER NOT NULL, \
-                            status TEXT NOT NULL DEFAULT 'unread')", MESSAGES_TN);
+                            status TEXT NOT NULL DEFAULT 'U')", MESSAGES_TN);
     return db;
 }
 

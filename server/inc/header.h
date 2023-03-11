@@ -41,9 +41,13 @@
 #define CREATE_CHAT 'C'
 #define EDIT_MESSAGE 'B'
 #define DELETE_MESSAGE 'D'
-#define EXIT_CONVERSATION 'E'
-#define GO_ONLINE "O"
-#define GO_OFFLINE "P"
+#define LEAVE_CHAT 'E'
+
+//STATUS CODES
+#define UNLOADED_STATUS "U"
+#define LOADED_STATUS "L"
+#define UNDELETED_STATUS "T"
+#define DELETED_STATUS "D"
 
 //OTHERS
 #define LOGIN 'L'
