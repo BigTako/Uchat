@@ -14,6 +14,7 @@ app_t *app_init()
     app->active_message = malloc(1);
     app->current_chat_id = mx_strdup("0");
     app->edit_message = false;
+    app->user_avatar = NULL;
     return app;
 }
 

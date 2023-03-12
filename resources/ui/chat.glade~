@@ -1207,7 +1207,7 @@
                         <property name="can-focus">True</property>
                         <property name="receives-default">True</property>
                         <property name="image">image4</property>
-                        <signal name="clicked" handler="edit_name" swapped="no"/>
+                        <signal name="clicked" handler="edit_name_func" swapped="no"/>
                       </object>
                       <packing>
                         <property name="expand">False</property>

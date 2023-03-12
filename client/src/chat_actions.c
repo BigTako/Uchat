@@ -50,9 +50,16 @@ void change_chat_by_id(char * new_chat_id)
 
     if (new_chat_id[0] != '0') 
     {
+        char *icon_path = NULL;
+
         gtk_widget_hide(app->welcome_message);
         gtk_widget_show(app->chat_entry_box);
         gtk_widget_show(app->chat_label_info);
+
+        //!!!вместо 10 номер аватарки собеседника!!!
+        asprintf(&icon_path, "../resources/icons/user_icons/%d.png", 10);
+        gtk_image_set_from_file(GTK_IMAGE(app->chat_icon), icon_path);
+
         gtk_widget_show(app->chat_icon);
         gtk_widget_show(app->status);
         if (threadID != 0)
@@ -137,7 +144,7 @@ void create_message(char * message_query, bool to_end)
     GtkWidget *message, *icon, *username, *text, *datetime, *sticker;
     GtkBuilder *builder = gtk_builder_new ();
     GError* error = NULL;
-    char *window_path = NULL, *icon_path = "../resources/icons/user_icon.png";
+    char *window_path = NULL, *icon_path = NULL;
     char *timestr = NULL;
     char *title = NULL;
     char ** parts = mx_strsplit(message_query, QUERY_DELIM[0]);
@@ -189,6 +196,9 @@ void create_message(char * message_query, bool to_end)
     gtk_widget_set_name(GTK_WIDGET(text), "message_text");
 
     if(!is_user) {
+        //!!!вместо 10 номер аватарки собеседника!!!
+        asprintf(&icon_path, "../resources/icons/user_icons/%d.png", 10);
+
         gtk_label_set_text(GTK_LABEL(username), title);
         gtk_image_set_from_file(GTK_IMAGE(icon), icon_path);
     } 
@@ -246,6 +256,7 @@ void create_chat(char * chat_info_query)
 {
     //короче добавляются чаты в лист, но я хз конешно как переключать их
     GtkWidget *chat, *icon, *title, *status, *id;
+    char *icon_path = NULL;
     GtkBuilder *builder = gtk_builder_new ();
     GError* error = NULL;
     char ** parts = mx_strsplit(chat_info_query, QUERY_DELIM[0]);
@@ -276,7 +287,11 @@ void create_chat(char * chat_info_query)
         parts + 5 - chat members
     */
 
-    gtk_image_set_from_file(GTK_IMAGE(icon), "../resources/icons/message_icon.png");
+    //set unique avatar
+    //!!!вместо 12 номер аватарки собеседника!!!
+    asprintf(&icon_path, "../resources/icons/user_icons/%d.png", 12);
+    gtk_image_set_from_file(GTK_IMAGE(icon), icon_path);
+
     if (!strcmp(parts[1], "?"))
     {
         if (!strcmp(app->username_t, parts[5]))

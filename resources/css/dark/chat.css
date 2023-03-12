@@ -4,7 +4,12 @@
     font-family: sans-serif;
 }
 
-#chat button:nth-child(2) {
+/* #chat button {
+    background: red;
+    color: #ffffff;
+  } */
+
+/* #chat button:nth-child(2) {
     border: none;
     border-color: transparent;
     background: #394141;
@@ -16,7 +21,7 @@
 
 #chat button:nth-child(2):hover {
     box-shadow: none;
-}
+} */
 
 #chat #back_button {
     border: none;
@@ -71,7 +76,7 @@
 }
 
 #chat #welcome_message {
-    background: #414b4b93;
+    background: #414b4b;
     color: #eef0f0;
     border-radius: 30px;
     padding: 15px;

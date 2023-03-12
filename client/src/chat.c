@@ -108,6 +108,10 @@ GtkWidget *open_main_window(void)
 
     load_css_from_file();
 
+    app->user_icon = GTK_WIDGET(gtk_builder_get_object(ui_builder, "user_icon"));
+    app->settings_current_icon = GTK_WIDGET(gtk_builder_get_object(ui_builder, "settings_current_icon"));
+    app->new_name_entry = GTK_WIDGET(gtk_builder_get_object(ui_builder, "new_name"));
+
     app->username_label = GTK_WIDGET(gtk_builder_get_object(ui_builder, "username_label"));
     app->chat_icon = GTK_WIDGET(gtk_builder_get_object(ui_builder, "other_user_icon"));
     app->chat_label_info = GTK_WIDGET(gtk_builder_get_object(ui_builder, "other_user_name"));

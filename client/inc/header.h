@@ -169,6 +169,8 @@ typedef struct app_s
     GtkWidget *chat_entry;
     GtkWidget *find_user_entry;
     GtkWidget *theme_combobox;
+    GtkWidget *settings_current_icon;
+    GtkWidget *new_name_entry;
     //widgets for right mouse click
     GtkWidget *my_options;
     GtkWidget *other_options;
@@ -177,6 +179,8 @@ typedef struct app_s
     char *username;
     char *password;
     const char *username_t;
+
+    char *user_avatar;
 
     GtkWidget *active_widget;
     char *active_message;
