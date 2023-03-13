@@ -76,10 +76,11 @@ typedef struct s_thread_param
     int socket;
     SSL_CTX *ctx;
     SSL *ssl;
-    int *cmdEXIT;
     pthread_mutex_t *mutex_R;
-    int *count_of_threads;
 } t_thread_param;
+
+extern int cmdEXIT;
+extern int count_of_threads;
 
 //DATABASE UTILS
 sqlite3 * db_init();

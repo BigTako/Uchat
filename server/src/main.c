@@ -1,6 +1,9 @@
 #include "../inc/header.h"
 #include <errno.h>
 
+int cmdEXIT;
+int count_of_threads;
+
 int main(int argc, char ** argv) 
 {
     if (argv[1] == NULL) 
@@ -17,17 +20,18 @@ int main(int argc, char ** argv)
     ctx = InitServerCTX();        /* initialize SSL */
     LoadCertificates(ctx, CETRIFS_FILENAME, CETRIFS_FILENAME);
     int welcomeSocket = openListener(atoi(argv[1]));
-
+    struct timeval tv;
+    tv.tv_sec = 1;
+    tv.tv_usec = 0;
+    setsockopt(welcomeSocket, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof(tv));
     pthread_mutex_t mutex_R;
     pthread_mutex_init(&mutex_R, NULL);
 
-    int cmdEXIT = 0;
-    int count_of_threads = 0;
+    cmdEXIT = 0;
+    count_of_threads = 0;
     //creating of exit_thread to correct exit
     pthread_t e_thread;
     t_thread_param* param = (t_thread_param*) malloc(sizeof(t_thread_param));
-    param->cmdEXIT = &cmdEXIT;
-    param->count_of_threads = &count_of_threads;
     int status = pthread_create(&e_thread, NULL, exit_thread, param);
     if (status != 0) 
     {
@@ -38,15 +42,32 @@ int main(int argc, char ** argv)
     while (cmdEXIT == 0) {
         struct sockaddr_in addr;
         socklen_t len = sizeof(addr);
-        int client = accept(welcomeSocket, (struct sockaddr *)&addr, &len);
-        while (client == -1 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
-			if(cmdEXIT > 0) {
-				break;
-			}
-			client = accept(welcomeSocket, (struct sockaddr *)&addr, &len);
-		}
+
+        int client = -1;
+        while (cmdEXIT == 0) {
+            struct timeval tv;
+            tv.tv_sec = 1; // таймаут у секундах
+            tv.tv_usec = 0;
+
+            fd_set rfds;
+            FD_ZERO(&rfds);
+            FD_SET(welcomeSocket, &rfds);
+
+            int ret = select(welcomeSocket + 1, &rfds, NULL, NULL, &tv);
+            if (ret == -1) {
+                perror("select");
+                exit(EXIT_FAILURE);
+            } else if (ret == 0) {
+                fflush(stdout);
+                continue;
+            }
+            client = accept(welcomeSocket, (struct sockaddr *)&addr, &len);
+            if (client == -1) {
+                continue;
+            }
+            break;
+        }
         if (client == -1) {
-            printf("[ERROR]\n");
             continue;
         }
         t_thread_param* param = (t_thread_param*) malloc(sizeof(t_thread_param));
@@ -60,8 +81,6 @@ int main(int argc, char ** argv)
             continue;
         }
         printf("Connection: %s:%d\n",inet_ntoa(addr.sin_addr), ntohs(addr.sin_port));
-        param->cmdEXIT = &cmdEXIT;
-        param->count_of_threads = &count_of_threads;
         param->socket = client;
         param->mutex_R = &mutex_R;
         param->db = db;
@@ -79,13 +98,13 @@ int main(int argc, char ** argv)
     //    printf("main error: can't join thread");
     //    exit(1);
     //}
-    while(count_of_threads > 0);
+    while(count_of_threads > 0) {
+        //printf("count_of_threads %d\n", count_of_threads);
+    }
     sqlite3_close(db);
     close(welcomeSocket);
     SSL_CTX_free(ctx);
     printf("bye\n");
     return 0;
 }
-
-
 

@@ -171,8 +171,8 @@ void encode(char * code, t_thread_param *param, bool *online, char *user)
 void* client_thread(void* vparam) 
 {
     t_thread_param *param = (t_thread_param*) vparam;
-	*(param->count_of_threads)++;
-    printf("---Start-recving-from-new-client---thread-N-%d---\n", *param->count_of_threads);
+	count_of_threads++;
+    printf("---Start-recving-from-new-client---thread-N-%d---\n", count_of_threads);
     bool online = true;
     char *user = NULL;
     char buffer[MESSAGE_MAX_LEN]; //!!!
@@ -225,16 +225,17 @@ void* client_thread(void* vparam)
 	pthread_mutex_unlock(param->mutex_R);
 	
 	free(user);
+	SSL_shutdown(param->ssl); // закінчення SSL-з'єднання
+    SSL_free(param->ssl);
     close(param->socket);
-	int *count_of_threads = param->count_of_threads;
     free(param);
-	*count_of_threads--;
+	count_of_threads--;
     pthread_exit(0);
 }
 
 void* exit_thread(void* vparam) {
 	t_thread_param *param = (t_thread_param*) vparam;
-	//*param->count_of_threads++;
+	count_of_threads++;
 	printf("Print \"exit\" to terminal to exit)\n");
 	struct pollfd mypoll = { STDIN_FILENO, POLLIN|POLLPRI , 0};
     char string[10];
@@ -242,14 +243,13 @@ void* exit_thread(void* vparam) {
 		if( poll(&mypoll, 1, 10) ) {
         	scanf(" %[^\n]s", string);
         	if (mx_strcmp_ic(string, "exit")==0) {
-            	*(param->cmdEXIT) = 1;
+            	cmdEXIT = 1;
 				break;
         	}
     	}
 	}
-	//int *count_of_threads = param->count_of_threads;
 	free(param);
-	//*count_of_threads--;
+	count_of_threads--;
     pthread_exit(0);
 }
 

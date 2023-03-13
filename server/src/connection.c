@@ -130,9 +130,31 @@ int skip_bytes(t_thread_param *param, int num_bytes_to_skip) {
 }
 
 int u_recv(t_thread_param *param, void* buf, int len) {
+    if (cmdEXIT) {
+        return -1;
+    }
     int actualLen;
-    if (SSL_read(param->ssl, &actualLen, sizeof(actualLen)) <= 0) 
-    {
+    while (cmdEXIT == 0) {
+        struct timeval tv;
+        tv.tv_sec = 1; // таймаут у секундах
+        tv.tv_usec = 0;
+
+        fd_set rfds;
+        FD_ZERO(&rfds);
+        FD_SET(param->socket, &rfds);
+
+        int ret = select(param->socket + 1, &rfds, NULL, NULL, &tv);
+        if (ret == -1) {
+            perror("select");
+            exit(EXIT_FAILURE);
+        } else if (ret == 0) {
+            fflush(stdout);
+            continue;
+        }
+        break;
+    }
+    int status = SSL_read(param->ssl, &actualLen, sizeof(actualLen));
+    if (status == -1) {
         return -1;
     }
     actualLen = ntohl(actualLen);
@@ -161,6 +183,9 @@ int u_recv(t_thread_param *param, void* buf, int len) {
 }
 
 int u_send(t_thread_param *param, void* buf, int len) {
+    if (cmdEXIT) {
+        return -1;
+    }
     int len_n = htonl(len);
     if (SSL_write(param->ssl, &len_n, sizeof(len_n)) <= 0) {
         return -1;
