@@ -85,13 +85,14 @@ void log_in(void) {
     const char *username = gtk_entry_get_text(GTK_ENTRY(app->username_entry));
     const char *password = gtk_entry_get_text(GTK_ENTRY(app->password_entry));
 
-    app->username_t = username;
-
     int login_error = check_login_data_for_errors(username, password);
 
     switch (login_error)
     {
     case 0:
+        app->username_t = username;
+        app->password_t = password;
+        param->online_status = CONNECTED;
         //функция для логирования и входа в чат
         open_main_window();
         break;

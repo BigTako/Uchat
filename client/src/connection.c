@@ -80,28 +80,38 @@ int skip_bytes(t_send_param *param, int num_bytes_to_skip) {
 }
 
 int u_recv(t_send_param *param, void* buf, int len) {
+    if (param->online_status != CONNECTED) {
+        if(param->online_status != NO_LOGIN) {
+            u_reconect();
+            return -1;
+        }
+    }
     int actualLen;
     if (SSL_read(param->ssl, &actualLen, sizeof(actualLen)) <= 0) {
+        param->online_status = LOST_CONNECT;
         return -1;
     }
     actualLen = ntohl(actualLen);
     if(actualLen > len)
     {
         printf("WARNING: you received not all message\n");
-        if (SSL_read(param->ssl, buf, len) <= 0) 
-        {
+        if (SSL_read(param->ssl, buf, len) <= 0) {
+            param->online_status = LOST_CONNECT;
             return -1;
         }
         if (skip_bytes(param, actualLen - len) < 0) {
+            param->online_status = LOST_CONNECT;
             return -1;
         }
     }
     else {
         if (SSL_read(param->ssl, buf, actualLen) <= 0) {
+            param->online_status = LOST_CONNECT;
             return -1;
         }
     }
     if (SSL_write(param->ssl, OK_CODE, 2) <= 0) {
+        param->online_status = LOST_CONNECT;
         return -1;
     }
     //printf("[INFO] Successfully recv message.\n");
@@ -109,15 +119,25 @@ int u_recv(t_send_param *param, void* buf, int len) {
 }
 
 int u_send(t_send_param *param, void* buf, int len) {
+    if (param->online_status != CONNECTED) {
+        if(!(param->online_status == NO_LOGIN && 
+           (((char*)buf)[0] == LOGIN || ((char*)buf)[0] == SIGNUP))) {
+            u_reconect();
+            return -1;
+        }
+    }
     int len_n = htonl(len);
     if (SSL_write(param->ssl, &len_n, sizeof(len_n)) <= 0) {
+        param->online_status = LOST_CONNECT;
         return -1;
     }
     if (SSL_write(param->ssl, buf, len) <= 0) {
+        param->online_status = LOST_CONNECT;
         return -1;
     }
     char response_buff[2];
     if (SSL_read(param->ssl, response_buff, 2) <= 0) {
+        param->online_status = LOST_CONNECT;
         return -1;
     }
     if (response_buff[0] == OK_CODE[0]) {
@@ -139,6 +159,54 @@ int u_send(t_send_param *param, void* buf, int len) {
     return len;
 }
 
+void u_reconect() {
+    fflush(stdout);
+    printf("online status %d\n", param->online_status);
+    if (param->online_status == CONNECTED) {
+        return;
+    }
+    if (param->online_status == NO_LOGIN) {
+        if(app->username_t != NULL && app->password_t != NULL) {
+            //printf("AUTO_LOGIN\n");
+            char action[] = {LOGIN, '\0'};
+            char * server_query = create_query_delim_separated(3, action, app->username_t, app->password_t); // have to store a hash password
+            int online = send_server_request(param, server_query);
+            printf("AUTO_LOGIN_%d\n", online);
+            fflush(stdout);
+            free(server_query);
+            if (online == 1) {
+                printf("CONNECTED\n");
+                param->online_status = CONNECTED;
+                return;
+            }
+            if (online == -1) {
+                param->online_status = LOST_CONNECT;
+                return;
+            }
+            printf("ERROR in reconect\n");
+        }
+        return;
+    }
+    if (param->online_status == NO_CONNECTED) {
+        if (connect_to_server(param) >= 0) {
+            if(ssl_connect(param) == 0) {
+                param->online_status = NO_LOGIN;
+            }
+            else {
+                param->online_status = LOST_CONNECT;
+            }
+        }
+        return;
+    }
+    if (param->online_status == LOST_CONNECT) {
+        printf("DISCONNECTED\n");
+        SSL_shutdown(param->ssl); // закінчення SSL-з'єднання
+        SSL_free(param->ssl);
+        close(param->socket);
+        param->online_status = NO_CONNECTED;
+        return;
+    }
+}
 
 /*int main(int argc, char * argv[])
 {

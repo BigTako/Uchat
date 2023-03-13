@@ -64,6 +64,11 @@ typedef unsigned char * code;
 #define KEY_LENGHT 4096
 typedef unsigned char * code;
 
+#define CONNECTED 0
+#define NO_LOGIN -1
+#define NO_CONNECTED -2
+#define LOST_CONNECT -3
+
 
 typedef struct s_send_param
 {
@@ -72,6 +77,7 @@ typedef struct s_send_param
     char *server_port;
     SSL_CTX *ctx;
     SSL *ssl;
+    int online_status;
     int * cmdEXIT;
 } t_send_param;
 
@@ -185,6 +191,7 @@ typedef struct app_s
     char *username;
     char *password;
     const char *username_t;
+    const char *password_t;
 
     GtkWidget *active_widget;
     char *active_message;
@@ -205,6 +212,7 @@ SSL_CTX* initCTX(void);
 void ShowCerts(SSL *ssl);
 int u_recv(t_send_param *param, void* buf, int len);
 int u_send(t_send_param *param, void* buf, int len);
+void u_reconect();
 
 //request utils
 char * create_query_delim_separated(int count, ...);

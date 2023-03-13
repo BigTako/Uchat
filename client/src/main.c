@@ -27,13 +27,11 @@ int main(int argc, char * argv[]) {
 
     SSL_library_init();
     param->ctx = initCTX();
-    printf("Connecting");
-    while (connect_to_server(param) < 0);
-    ssl_connect(param);
-    printf("\nSUCCES\n");
+    
+    param->online_status = NO_CONNECTED;
     
     gtk_init(&argc, &argv);
-
+    g_timeout_add(100, u_reconect, NULL);
     show_login_form();
 
     gtk_main();
