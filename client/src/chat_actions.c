@@ -290,7 +290,7 @@ void change_chat_by_id(char * new_chat_id)
         }   
         delete_all_history();
         //apply_collocutor_info();
-        collect_user_info("A");// GET_CHATS_HISTORY
+        collect_user_info("A");// GET_CHAT_HISTORY
         threadID = g_timeout_add(100, collect_user_info, (gpointer)"G"); // GET_NEW_MESSAGES
     }
     else {

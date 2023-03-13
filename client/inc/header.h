@@ -39,9 +39,8 @@ typedef unsigned char * code;
 #define CREATE_CHAT 'C'
 #define EDIT_MESSAGE 'B'
 #define DELETE_MESSAGE 'D'
-#define EXIT_CONVERSATION 'E'
-#define GO_ONLINE "O"
-#define GO_OFFLINE "P"
+#define LEAVE_CHAT 'E'
+#define EXIT_APP 'Q'
 
 //STATUS CODES
 #define UNLOADED_STATUS "U"

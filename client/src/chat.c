@@ -1,6 +1,10 @@
 #include "../inc/header.h"
 
-
+//lets make a hypothesis we added new field 'current_members'
+// user is 100% is member of chat, he whents online , he adds his username to all the current_members fields in chats he is member of
+// when he wents offline, he removes his username from all the current_members fields in in chats table
+// when the chat is deleted
+// if chat is dialog -> user deletes 
 void collect_user_info(void * info)
 {
     if (!info)

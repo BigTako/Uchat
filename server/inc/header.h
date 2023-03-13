@@ -14,7 +14,7 @@
 #include <poll.h>
 #include <sys/types.h>
 #include <resolv.h>
-
+#include "queries.h"
 #include "../libraries/openssl/openssl/ssl.h"
 #include "../libraries/openssl/openssl/err.h"
 
@@ -33,7 +33,7 @@
 #define GET_ALL_CHATS 'F'
 #define GET_NEW_CHATS 'H'
 #define GET_NEW_MESSAGES 'G'
-#define GET_CHATS_HISTORY 'A'
+#define GET_CHAT_HISTORY 'A'
 #define GET_COLLOCUTOR_INFO 'K'
 
 //POST REQUESTS
@@ -42,6 +42,7 @@
 #define EDIT_MESSAGE 'B'
 #define DELETE_MESSAGE 'D'
 #define LEAVE_CHAT 'E'
+#define EXIT_APP 'Q'
 
 //STATUS CODES
 #define UNLOADED_STATUS "U"
@@ -111,5 +112,18 @@ void ShowCerts(SSL* ssl);
 int u_recv(t_thread_param *param, void* buf, int len);
 int u_send(t_thread_param *param, void* buf, int len);
 
+//NETWORK INTERRATICTION
+bool s_to_c_info_exchange(t_thread_param *param, char ** table);
+
+//ECODE FUNCTIONS(REQUESTS PROCESSING)
+bool db_login(t_thread_param * param, char ** parts, char ** user);
+bool db_signup(t_thread_param * param, char ** parts);
+void leave_chat(t_thread_param * param, char * user, char * chat_id);
+bool update_data_status(t_thread_param * param, char ** table, char action);
+bool user_exists(t_thread_param * param, char * user);
+bool create_new_message_record(t_thread_param * param, char * username, char ** parts);
+bool create_db_chat_record(t_thread_param *param, char * chat_name, char * members);
+bool create_new_chat_record(t_thread_param * param, char * user, char * members_str, char ** parts);
+bool get_collocutor_info(t_thread_param * param, char * chat_id, char * user);
 #endif
 
