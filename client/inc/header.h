@@ -28,10 +28,8 @@ typedef unsigned char * code;
 #define START_PAGE "0"
 
 //GET REQUESTS
-#define GET_ALL_CHATS 'F'
-#define GET_NEW_CHATS 'H'
-#define GET_NEW_MESSAGES 'G'
-#define GET_CHATS_HISTORY 'A'
+#define GET_CHATS "V"
+#define GET_MESSAGES "T"
 #define GET_COLLOCUTOR_INFO 'K'
 
 //POST REQUESTS
@@ -41,11 +39,11 @@ typedef unsigned char * code;
 #define DELETE_MESSAGE 'D'
 #define LEAVE_CHAT 'E'
 #define EXIT_APP 'Q'
+#define RESET_MESSAGES_STATUS "G"
 
 //STATUS CODES
-#define UNLOADED_STATUS "U"
-#define LOADED_STATUS "L"
-#define UNDELETED_STATUS "T"
+#define ACTIVE_STATUS "A"
+#define EDITED_STATUS "E"
 #define DELETED_STATUS "D"
 
 //OTHERS

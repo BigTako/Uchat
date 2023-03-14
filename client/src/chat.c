@@ -33,11 +33,12 @@ void collect_user_info(void * info)
                 memset(responce_buff, '\0', strlen(responce_buff));
                 if (u_recv(param, responce_buff, MESSAGE_MAX_LEN) > 0)
                 {
-                    if (action[0] == GET_ALL_CHATS || action[0] == GET_NEW_CHATS)
+                    printf("Received: %s\n", responce_buff);
+                    if (action[0] == GET_CHATS[0])
                     {
                         process_chat_info(responce_buff + 2);
                     } 
-                    else if (action[0] == GET_CHATS_HISTORY || action[0] == GET_NEW_MESSAGES) 
+                    else if (action[0] == GET_MESSAGES[0]) 
                     {
                         process_message_info(responce_buff + 2);
                     }
@@ -58,6 +59,7 @@ void collect_user_info(void * info)
         printf("[RECV ERROR] Undefined query '%s'\n", responce_buff);*/
     free(action);
 }
+
 
 void apply_collocutor_info()
 {
@@ -169,9 +171,8 @@ GtkWidget *open_main_window(void)
     //threadID = g_timeout_add(100, collect_messages, data);
     //apply_collocutor_info();
     
-    collect_user_info("F"); // GET_ALL_CHATS
-    g_timeout_add(100, collect_user_info, "H"); // GET_NEW_CHATS
-    g_timeout_add(100, apply_collocutor_info, NULL);
+    g_timeout_add(300, collect_user_info, "V"); // GET_CHATS
+    g_timeout_add(300, apply_collocutor_info, NULL);
     //GET ALL CURRENT CONVERSATIONS
     //char action[] = {GET_CHATS_HISTORY, '\0'};
     //GET CHAT HISTORY IGNORING THE STATUS

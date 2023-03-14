@@ -71,61 +71,57 @@ void encode(char * code, t_thread_param *param, bool *online, char *user)
 	char error_buf[MESSAGE_MAX_LEN];
 	switch(parts[0][0])
 	{
-		case SEND_MESSAGE: //S@TEXT@TIME@chat_ID - send message
-			if (!validate_query(code, 3, "Wrong delim count\n"))
-      		{
-				*online = create_new_message_record(param, user, parts); 
-			}
-			else
-			{
-				sprintf(error_buf, "%s%sWrong delim count", ERROR_CODE, QUERY_DELIM);
-				if (u_send(param, error_buf, strlen(error_buf) + 1) <= 0) *online = false;
-			}
-			break;
 		case CREATE_CHAT: //C@NAME@USERNAME1@USERNAME2@... - create new chat 
 			members_str = create_query_delim_separated(2, user, code + strlen(parts[0]) + strlen(parts[1]) + 2);
 			*online = create_new_chat_record(param, user, members_str, parts);
 			free(members_str);
 			break;
-		case GET_CHAT_HISTORY: // A@chat_id - get history of chat by chat_id
-			table = get_db_data_table( param->db, GET_CHAT_HISTORY_QUERY, 6, DB_ROWS_MAX,CHATS_TN,
-																						 MESSAGES_TN,
-																						 DELETED_STATUS,
-																						 UNDELETED_STATUS,
-																						 parts[1]);
-			*online = update_data_status(param, table, GET_CHAT_HISTORY);
+		case GET_CHATS:
+			table = get_db_data_table( param->db, GET_CHATS_QUERY, 5, DB_ROWS_MAX,	MESSAGES_TN,
+																					MESSAGES_TN,
+																					CHATS_TN,
+																					user,
+																					user);
+			*online = update_data_status(param, table, user, parts[0][0]);
 			delete_table(&table);
 			break;
-		case GET_NEW_MESSAGES: //G@chat_id - get new messages received while app is running in chat(chat_id) 
-			table = get_db_data_table(param->db, GET_NEW_MESSAGES_QUERY, 6, DB_ROWS_MAX,CHATS_TN, 
+		case LEAVE_CHAT: // E@chat_id - leave a chat with chat id
+			if (!validate_query(code, 1, "Wrong delim count\n"))
+			{
+				leave_chat(param, user, parts[1]);
+			}
+			break;
+		case SEND_MESSAGE: //S@TEXT@TIME@chat_ID - send message
+			if (!validate_query(code, 3, "Wrong delim count\n"))
+      		{
+				format_and_execute(param->db, CREATE_MESSAGE_QUERY, MESSAGES_TN, user, parts[1], parts[2], parts[3]); 
+			}
+			break;
+		case GET_MESSAGES:
+			table = get_db_data_table( param->db, GET_MESSAGES_QUERY, 6, DB_ROWS_MAX,	CHATS_TN,
 																						MESSAGES_TN,
-																						user,
 																						parts[1],
-																						UNLOADED_STATUS,
-																						UNDELETED_STATUS);
-			*online = update_data_status(param, table, GET_NEW_MESSAGES);
+																						user);
+			*online = update_data_status(param, table, user, parts[0][0]);
 			delete_table(&table);
 			break;
-		case GET_ALL_CHATS: //F - get all chats user is member of
-			table = get_db_data_table(param->db, GET_ALL_CHATS_QUERY, 5, DB_ROWS_MAX,MESSAGES_TN,
-																					 MESSAGES_TN,
-																					 CHATS_TN,
-																					 user,
-																					 UNLOADED_STATUS,
-																					 LOADED_STATUS);
-			*online = update_data_status(param, table, GET_ALL_CHATS);
-			delete_table(&table);
+		case RESET_MESSAGES_STATUS: //G@chat_id
+			if (!validate_query(code, 1, "Wrong delim count\n"))
+      		{
+				format_and_execute(param->db, RESET_CHAT_MESSAGES_LOADING_STATUS, MESSAGES_TN, user, parts[1]);
+			}
 			break;
-		case GET_NEW_CHATS: //H - get new chats(created by another users while app is running ) where user is member
-			table = get_db_data_table(param->db, GET_NEW_CHATS_QUERY, 5, DB_ROWS_MAX,MESSAGES_TN,
-																					 MESSAGES_TN,
-																					 CHATS_TN,
-																					 UNLOADED_STATUS,
-																					 UNDELETED_STATUS,
-																					 user,
-																					 user);
-			*online = update_data_status(param, table, GET_NEW_CHATS);
-			delete_table(&table);
+		case EDIT_MESSAGE: //B@message_id@new_message_text
+			if (!validate_query(code, 2, "Wrong delim count\n"))
+			{
+				format_and_execute(param->db, EDIT_MESSAGE_QUERY, MESSAGES_TN, parts[2], EDITED_STATUS, parts[1]);
+			}
+			break;
+		case DELETE_MESSAGE: // D@message_id - set status=UNDELETED to record in table 'messages' with given message_id
+			if (!validate_query(code, 1, "Wrong delim count\n"))
+			{
+				format_and_execute(param->db, DELETE_MESSAGE_QUERY, MESSAGES_TN, DELETED_STATUS, parts[1]);
+			}
 			break;
 		case GET_COLLOCUTOR_INFO: //K@chat_id
 			if (!validate_query(code, 1, "Wrong delim count\n"))
@@ -134,35 +130,15 @@ void encode(char * code, t_thread_param *param, bool *online, char *user)
 			}
 			else
 			{
-				sprintf(error_buf, "%s%sWrong delim count\n", ERROR_CODE, QUERY_DELIM);
 				if (u_send(param, error_buf, strlen(error_buf) + 1) <= 0) *online = false;
 			}
 			break;
-		case EDIT_MESSAGE: //B@message_id@new_message_text
-			if (!validate_query(code, 2, "Wrong delim count\n"))
-			{
-				format_and_execute(param->db, EDIT_MESSAGE_QUERY, MESSAGES_TN, parts[2], parts[1]);
-			}
-			break;
-		case DELETE_MESSAGE: // D@message_id - set status=UNDELETED to record in table 'messages' with given message_id
-			if (!validate_query(code, 1, "Wrong delim count\n"))
-			{
-				format_and_execute(param->db, DELETE_MESSAGE_QUERY, MESSAGES_TN, UNDELETED_STATUS, parts[1]);
-			}
-			break;
-		case LEAVE_CHAT: // E@chat_id - leave a chat with chat id
-			if (!validate_query(code, 1, "Wrong delim count\n"))
-			{
-				leave_chat(param, user, parts[1]);
-			}
-			break;
-		case EXIT_APP: // clean up everything in tables messages and chats with status ='DELETED'
-			format_and_execute(param->db, CLEANUP_DELETED_MESSAGES_QUERY, 	MESSAGES_TN, 
-																			DELETED_STATUS, 
-																			user);
-			format_and_execute(param->db, CLEANUP_DELETED_CHATS_QUERY, CHATS_TN, 
-																	   DELETED_STATUS,
-																	   user);
+		case EXIT_APP:
+			format_and_execute(param->db, GO_OFFLINE_QUERY, USERS_TN, user);
+			format_and_execute(param->db, RESET_LOADING_STATUS, CHATS_TN, user, user, ACTIVE_STATUS);
+			format_and_execute(param->db, RESET_LOADING_STATUS, MESSAGES_TN, user, user, ACTIVE_STATUS);
+			format_and_execute(param->db, CLEANUP_DELETED_MESSAGES_QUERY, MESSAGES_TN, DELETED_STATUS, user);
+			format_and_execute(param->db, CLEANUP_DELETED_CHATS_QUERY, CHATS_TN, DELETED_STATUS, user);
 			break;
 	}
 	mx_del_strarr(&parts);
@@ -214,10 +190,6 @@ void* client_thread(void* vparam)
 		memset(buffer, '\0', MESSAGE_MAX_LEN);
     }
 	printf("DISCONNECTING User: %s\n", user);
-	
-	pthread_mutex_lock(param->mutex_R);
-	format_and_execute(param->db, GO_OFFLINE_QUERY, USERS_TN, user);
-	pthread_mutex_unlock(param->mutex_R);
 
 	pthread_mutex_lock(param->mutex_R);
 	buffer[0] = EXIT_APP;

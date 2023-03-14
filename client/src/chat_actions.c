@@ -179,52 +179,48 @@ void create_chat_widget(char * chat_info_query)
 void process_message_info(char * message_info)
 {
     //m_status@m_id@m_sender_username@m_text@m_send_datetime@m_chat_id
-    //1. want to create a widget of unloaded message
-    //2. want to create a widget of loaded message(action is SEND_MESSAGE)
-    //3. want to apply a new message info to loaded message by id(action is GET_NEW_MESSAGES)
-    //4. want to delete a widget a message with status UNDELETED_STATUS(action is DELETE_MESSAGE)
-    
-    char text_buf[10];
+    char text_buf[1000];
     char m_status = *(tokenize(message_info, QUERY_DELIM[0], text_buf, 1));
-    if (m_status == UNLOADED_STATUS[0] || m_status == LOADED_STATUS[0])
+    if (m_status == ACTIVE_STATUS[0])
     {
         create_message_widget(message_info + 2, 0);
     }
-    else if (m_status == UNDELETED_STATUS[0])
+    else if (m_status == DELETED_STATUS[0])
     {
+        printf("want to delete message widget with id(%s)\n", tokenize(message_info, QUERY_DELIM[0], text_buf, 2));
         /*
-            delete message widget by specific ID
+            delete widget of chat here
             ID = tokenize(message_info, QUERY_DELIM[0], text_buf, 2);
         */
-        printf("[INFO] SUCCESSFULY DELETED MESSAGE WIDGET WITH ID\n");
     }
-    else
+    else if (m_status == EDITED_STATUS[0])
     {
-        printf("[ERROR] Undefined message status %c\n", m_status);
+        printf("want to edit message widget with id (%s)\n", tokenize(message_info, QUERY_DELIM[0], text_buf, 2));
+        /*
+            update message widget labels by it's ID
+            ID = tokenize(message_info, QUERY_DELIM[0], text_buf, 2);
+            NEW_MESSAGE_CONTENT = tokenize(message_info, QUERY_DELIM, text_buf, 4);
+        */
     }
-
 }
+
 
 void process_chat_info(char * chat_info)
 {
     //chat_status@chat_name@LM_sender@LM_text@LM_status@chat_members
     char text_buf[10];
     char c_status = *(tokenize(chat_info, QUERY_DELIM[0], text_buf, 1));
-    if (c_status == UNLOADED_STATUS[0] || c_status == LOADED_STATUS[0])
+    if (c_status == ACTIVE_STATUS[0])
     {
         create_chat_widget(chat_info + 2);
     }
-    else if (c_status == UNDELETED_STATUS)
+    else if (c_status == DELETED_STATUS[0])
     {
+        printf("Want to delete a chat with id %s\n", tokenize(chat_info, QUERY_DELIM[0], text_buf, 2));
         /*
-            delete message widget by specific ID
-            ID = tokenize(message_info, QUERY_DELIM[0], text_buf, 2);
+            delete widget of chat here
+            ID = tokenize(chat_info, QUERY_DELIM[0], text_buf, 2); 
         */
-        printf("[INFO] SUCCESSFULY DELETED CHAT WIDGET WITH ID\n");
-    }
-    else
-    {
-        printf("[ERROR] Undefined chat status %c\n", c_status);
     }
 }
 
@@ -245,16 +241,13 @@ void find_user() {
         printf("[INFO] Received buff(%s)\n", responce_buff);
         if (responce_buff[0] == OK_CODE[0])
         {
-            process_chat_info(responce_buff + 2);
-            //create_chat_widget(responce_buff + 2);
+            //process_chat_info(responce_buff + 2);
             printf("[INFO] Chat successfuly created(%s)\n", username);
         }
         else if (responce_buff[0] == RECORD_EXISTS_CODE[0])
         {
-            //info_parts = mx_strsplit(responce_buff + 4, QUERY_DELIM[0]);
             printf("Chat id to transfter to: %s\n", responce_buff + 2);
             change_chat_by_id(responce_buff + 2);
-            //mx_del_strarr(&info_parts);
         }
         else if (responce_buff[0] == ERROR_CODE[0])
         {
@@ -273,7 +266,7 @@ void change_chat(GtkListBox* self, GtkListBoxRow* row, gpointer data)
 void change_chat_by_id(char * new_chat_id) 
 {
     if (!new_chat_id) return;
-    
+    char query_buff[1000]; 
     free(app->current_chat_id);
     app->current_chat_id = mx_strdup(new_chat_id);
 
@@ -289,9 +282,10 @@ void change_chat_by_id(char * new_chat_id)
             g_source_remove(threadID);
         }   
         delete_all_history();
+        sprintf(query_buff, "%s%s%s", RESET_MESSAGES_STATUS, QUERY_DELIM, app->current_chat_id);
+        u_send(param, query_buff, strlen(query_buff) + 1);
         //apply_collocutor_info();
-        collect_user_info("A");// GET_CHAT_HISTORY
-        threadID = g_timeout_add(100, collect_user_info, (gpointer)"G"); // GET_NEW_MESSAGES
+        threadID = g_timeout_add(100, collect_user_info, (gpointer)"T");
     }
     else {
         gtk_widget_show(app->welcome_message);
@@ -342,19 +336,9 @@ void send_message()
     printf("Created server query: %s\n", server_query);
     
     u_send(param, server_query, strlen(server_query) + 1);
-    u_recv(param, responce_buff, 5100);
-    
+    gtk_entry_set_text(GTK_ENTRY(app->chat_entry), "");
+    scroll();
     free(server_query);
-    message_query = create_query_delim_separated(6, UNLOADED_STATUS, responce_buff, app->username_t, message, cur_time, app->current_chat_id);
-
-    if (strlen(gtk_entry_get_text(GTK_ENTRY(app->chat_entry))) != 0) 
-    {
-        //m_status@m_id@m_sender_username@m_text@m_send_datetime@m_chat_id
-        process_message_info(message_query);
-        gtk_entry_set_text(GTK_ENTRY(app->chat_entry), "");
-        scroll();
-    }
-    free(message_query);
     free(cur_time);
 }
 

@@ -17,7 +17,8 @@ sqlite3 * db_init()
                             chat_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, \
                             chat_name TEXT NOT NULL,\
                             chat_members TEXT NOT NULL,\
-							status TEXT NOT NULL DEFAULT '%s')", CHATS_TN, UNLOADED_STATUS);
+							loaded_by TEXT NOT NULL DEFAULT '',\
+							status TEXT NOT NULL DEFAULT '%s')", CHATS_TN, ACTIVE_STATUS);
 
     //creating table with messages
 	format_and_execute(db, "CREATE TABLE IF NOT EXISTS %s(\
@@ -26,9 +27,11 @@ sqlite3 * db_init()
                             message_text TEXT NOT NULL, \
                             send_datetime INTEGER NOT NULL, \
                             chat_id INTEGER NOT NULL, \
-                            status TEXT NOT NULL DEFAULT '%s')", MESSAGES_TN, UNLOADED_STATUS);
+							loaded_by TEXT NOT NULL DEFAULT '',\
+                            status TEXT NOT NULL DEFAULT '%s')", MESSAGES_TN, ACTIVE_STATUS);
     return db;
 }
+
 
 t_list * get_db_data_list(sqlite3 * db, char * selection_query, int cols_count)
 {

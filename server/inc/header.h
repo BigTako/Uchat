@@ -30,10 +30,8 @@
 #define QUERY_DELIM "@"
 
 //GET REQUESTS
-#define GET_ALL_CHATS 'F'
-#define GET_NEW_CHATS 'H'
-#define GET_NEW_MESSAGES 'G'
-#define GET_CHAT_HISTORY 'A'
+#define GET_CHATS 'V'
+#define GET_MESSAGES 'T'
 #define GET_COLLOCUTOR_INFO 'K'
 
 //POST REQUESTS
@@ -43,11 +41,11 @@
 #define DELETE_MESSAGE 'D'
 #define LEAVE_CHAT 'E'
 #define EXIT_APP 'Q'
+#define RESET_MESSAGES_STATUS 'G'
 
 //STATUS CODES
-#define UNLOADED_STATUS "U"
-#define LOADED_STATUS "L"
-#define UNDELETED_STATUS "T"
+#define ACTIVE_STATUS "A"
+#define EDITED_STATUS "E"
 #define DELETED_STATUS "D"
 
 //OTHERS
@@ -120,7 +118,7 @@ bool s_to_c_info_exchange(t_thread_param *param, char ** table);
 bool db_login(t_thread_param * param, char ** parts, char ** user);
 bool db_signup(t_thread_param * param, char ** parts);
 void leave_chat(t_thread_param * param, char * user, char * chat_id);
-bool update_data_status(t_thread_param * param, char ** table, char action);
+bool update_data_status(t_thread_param * param, char ** table, char * user, char action);
 bool user_exists(t_thread_param * param, char * user);
 bool create_new_message_record(t_thread_param * param, char * username, char ** parts);
 bool create_db_chat_record(t_thread_param *param, char * chat_name, char * members);

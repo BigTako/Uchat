@@ -223,17 +223,18 @@ void create_chat_options_popover() {
     g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
 }
 
-void delete_chat() {
+void delete_chat() 
+{
     char query_buff[1000];
     sprintf(query_buff, "%c%s%s", LEAVE_CHAT, QUERY_DELIM, gtk_widget_get_name(GTK_WIDGET(row_to_delete)));
     printf("query: %s\n", query_buff);
-
+    u_send(param, query_buff, strlen(query_buff) + 1);
+    
     gtk_widget_hide(GTK_WIDGET(row_to_delete));
     gtk_widget_hide(app->chat_options);
     delete_popup_open = false;
     delete_all_history();
     change_chat_by_id(START_PAGE);
 
-    u_send(param, query_buff, strlen(query_buff) + 1);
     //gtk_container_remove(GTK_CONTAINER(listbox_delete), );
 }
