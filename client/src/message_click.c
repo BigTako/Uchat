@@ -10,7 +10,13 @@ static GtkListBoxRow *row_to_delete;
 
 gboolean my_message_menu(GtkWidget *widget, GdkEventButton *event, t_message *data) {
     if (event->type == GDK_BUTTON_PRESS && event->button == 3) {
+
+        // GtkWidget *selected_message = get_message_by_id(41);
+        // gtk_widget_hide(selected_message);
         //char *str = data->message_text;
+
+        //edit_message_by_id(41, "lol");
+
         g_print("Button clicked with user data: %s    ID: %d\n", data->message_text, data->id);
         selected_id = data->id;
         label_to_change = data->message_label;
@@ -102,6 +108,8 @@ void copy_text(GtkWidget *widget, gpointer data) {
 
 void delete_message(GtkWidget *widget, gpointer data) 
 {
+    //например если нужно будет удалить сообщение с айдишником 228, то GtkWidget *mes_to_delete = get_message_by_id(228);
+    //gtk_widget_hide(mes_to_delete);
     gtk_widget_hide(app->active_widget);
     app->active_widget = NULL;
     if (!isOther) gtk_widget_hide(app->my_options);
@@ -125,6 +133,9 @@ void edit_message(GtkWidget *widget, gpointer data)
         printf("[INFO] Successfuly edited message with id(%d)\n", selected_id);
     */
     gtk_widget_grab_focus(app->chat_entry);
+
+    //если нужно достать и изменить текст у конкретного сообщения то, GtkWidget *mes = get_message_by_id(228);
+    //
     if (app->active_message != NULL) 
     { 
         app->active_widget = NULL;
@@ -171,13 +182,18 @@ void set_text()
 
 gboolean chat_actions_menu(GtkWidget *widget, GdkEventButton *event, gpointer data) {
     if (event->button == GDK_BUTTON_SECONDARY) { 
+        //GtkWidget *selected_chat = get_chat_by_id(2);
+        //gtk_widget_hide(selected_chat);
+
         GtkListBox *listbox = GTK_LIST_BOX(widget);
         GtkListBoxRow *selected_row = gtk_list_box_get_selected_row(listbox);
         if (selected_row != NULL) {
             gint row_number = gtk_list_box_row_get_index(selected_row);
             row_to_delete = selected_row;
-            //const char *name = gtk_widget_get_name(GTK_WIDGET(selected_row));
-            //g_print("\n\nSelected row number: %d %s\n\n", row_number, name);
+
+            const char *name = gtk_widget_get_name(GTK_WIDGET(selected_row));
+            g_print("\n\nSelected row number: %d %s\n\n", row_number, name);
+            
             if (delete_popup_open) {
                 gtk_widget_hide(app->chat_options);
                 delete_popup_open = false;
@@ -224,6 +240,8 @@ void create_chat_options_popover() {
 }
 
 void delete_chat() {
+    //например если нужно будет удалить чат с айдишником 228, то GtkWidget *chat_to_delete = get_chat_by_id(228);
+    //gtk_widget_hide(chat_to_delete);
     gtk_widget_hide(GTK_WIDGET(row_to_delete));
     gtk_widget_hide(app->chat_options);
     delete_popup_open = false;

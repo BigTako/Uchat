@@ -238,6 +238,7 @@ void create_message(char * message_query, bool to_end)
     //message_data->message_text = NULL;
 
     //play_music();
+    gtk_widget_set_name(message, id_text);
 
     if(to_end)
     {

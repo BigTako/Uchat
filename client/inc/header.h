@@ -77,6 +77,10 @@ typedef struct s_message {
     GtkWidget *message_label;
 } t_message;
 
+GtkWidget *get_message_by_id(int id);
+GtkWidget *get_chat_by_id(int id);
+void edit_message_by_id(int id, char *text);
+
 //action functions
 void log_in(void);
 void create_account(void);
