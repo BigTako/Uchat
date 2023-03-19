@@ -1,0 +1,30 @@
+#popup {
+    background: #8f9e9d;
+    font-family: sans-serif;
+    border-radius: 12px;
+    border: 1px solid #5d6c6b;
+}
+
+#popup label {
+    color: #eef0f0;
+    font-size: 16px;
+}
+
+#popup button {
+    background: #8f9e9d;
+    color: #eef0f0;
+    border: none;
+    transition: all 0.3s;
+}
+
+#popup button:hover {
+    background: #5d6c6b;
+    color: #d9dede;
+    box-shadow: none;
+}
+
+#popup button:active {
+    background: #5d6c6b;
+    border: none;
+    color: #d9dede;
+}

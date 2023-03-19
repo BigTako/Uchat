@@ -1,0 +1,100 @@
+#login {
+    background: #394141;
+    font-size: 15px;
+    color: #eef0f0;
+}
+
+#login label {
+    color: #eef0f0;
+}
+
+#login entry {
+    background: #4c5858;
+    color: #eef0f0;
+    border: 0px;
+    border-radius: 15px;
+    transition: all 0.3s;
+}
+
+#login entry:focus {
+    border: 2px solid #d9dede;
+    border-radius: 13px;
+    outline-style: none;
+    box-shadow: none;
+    border-color: transparent;
+
+}
+
+#login button:nth-child(6) {
+    background: #8f9e9d;
+    color: #eef0f0;
+    border: none;
+    border-radius: 15px;
+}
+
+#login button:nth-child(6):hover {
+    background: #738483;
+    border: none;
+    color: #d9dede;
+    box-shadow: none;
+}
+
+#login button:nth-child(6):active {
+    background: #5d6c6b;
+    border: none;
+    color: #d9dede;
+}
+
+#login button:nth-child(7) {
+    color: #eef0f0;
+}
+
+#signup {
+    background: #394141;
+    font-size: 15px;
+    color: #eef0f0;
+}
+
+#signup label {
+    color: #eef0f0;
+}
+
+#signup entry {
+    color: #eef0f0;
+    background: #4c5858;
+    border: 0px;
+    border-radius: 15px;
+    transition: all 0.3s;
+}
+
+#signup entry:focus {
+    border: 2px solid #d9dede;
+    border-radius: 13px;
+    outline-style: none;
+    box-shadow: none;
+    border-color: transparent;
+}
+
+#signup button:nth-child(8) {
+    background: #8f9e9d;
+    color: #eef0f0;
+    border: none;
+    border-radius: 15px;
+}
+
+#signup button:nth-child(8):hover {
+    background: #738483;
+    border: none;
+    color: #d0c7fe;
+    box-shadow: none;
+}
+
+#signup button:nth-child(8):active {
+    background: #5d6c6b;
+    border: none;
+    color: #d0c7fe;
+}
+
+#signup button:nth-child(9) {
+    color: #eef0f0;
+}

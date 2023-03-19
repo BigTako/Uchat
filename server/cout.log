@@ -1,0 +1,59 @@
+Print "exit" to terminal to exit)
+Connection: 127.0.0.1:54226
+---Start-recving-from-new-client---thread-N-2---
+WAIT
+WAIT
+WAIT
+Connection: 127.0.0.1:54228
+---Start-recving-from-new-client---thread-N-3---
+WAIT
+WAIT
+members str: @2@1
+[INFO] Successfuly sent 1 packages
+action: 1
+[INFO] Successfuly sent 1 packages
+action: 1
+[INFO] Successfuly sent 1 packages
+action: 1
+[INFO] Successfuly sent 1 packages
+action: 1
+[INFO] Successfuly sent 1 packages
+action: 2
+[INFO] Successfuly sent 1 packages
+action: 2
+[ERROR] NOT NULL constraint failed: messages.chat_id
+[INFO] Successfuly sent 1 packages
+action: 2
+[INFO] Successfuly sent 1 packages
+action: 2
+[INFO] Successfuly sent 1 packages
+action: 1
+[INFO] Successfuly sent 1 packages
+action: 1
+WARNING: you received not all message
+DISCONNECTING User: @2
+DISCONNECTING User: @1
+Connection: 127.0.0.1:54275
+---Start-recving-from-new-client---thread-N-2---
+WAIT
+[INFO] Successfuly sent 1 packages
+action: 1
+Connection: 127.0.0.1:54276
+---Start-recving-from-new-client---thread-N-3---
+WAIT
+[INFO] Successfuly sent 1 packages
+action: 1
+Print "exit" to terminal to exit)
+Connection: 127.0.0.1:55780
+---Start-recving-from-new-client---thread-N-2---
+WAIT
+Connection: 127.0.0.1:55781
+---Start-recving-from-new-client---thread-N-3---
+WAIT
+members str: @2@1\
+members str: @2@1
+[INFO] Successfuly sent 1 packages
+action: 2
+members str: @1@2
+[INFO] Successfuly sent 1 packages
+action: 2
