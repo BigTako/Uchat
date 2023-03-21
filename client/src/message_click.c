@@ -104,7 +104,9 @@ void delete_message(GtkWidget *widget, gpointer data)
     else gtk_widget_hide(app->other_options);
     char server_query[1000];
     sprintf(server_query, "%c%s%d", DELETE_MESSAGE, QUERY_DELIM, selected_id);
-    u_send(param, server_query, strlen(server_query) + 1);
+    if(/**/u_send(param, server_query, strlen(server_query) + 1) <= 0) {
+        return;
+    }
     printf("[INFO] Successfuly deleted message with id(%d)\n", selected_id);
 }
 
@@ -134,20 +136,21 @@ void edit_message(GtkWidget *widget, gpointer data)
 
 void set_text() 
 {
-    gtk_label_set_text(GTK_LABEL(label_to_change), gtk_entry_get_text(GTK_ENTRY(app->chat_entry)));
+    char * new_message_content = mx_strdup(gtk_entry_get_text(GTK_ENTRY(app->chat_entry)));
+    //gtk_label_set_text(GTK_LABEL(label_to_change), gtk_entry_get_text(GTK_ENTRY(app->chat_entry)));
     gtk_entry_set_text(GTK_ENTRY(app->chat_entry), "");
 
-    char * new_message_content = gtk_label_get_text(GTK_LABEL(label_to_change));
     printf("Want to change content to %s, selected id is %d\n", new_message_content, selected_id);
     char query_buff[1000];
     
     sprintf(query_buff, "%c%s%d%s%s", EDIT_MESSAGE, QUERY_DELIM, selected_id, QUERY_DELIM, new_message_content);
-    u_send(param, query_buff, strlen(query_buff) + 1);
+    /**/u_send(param, query_buff, strlen(query_buff) + 1);
 
     g_signal_handlers_disconnect_by_func(app->send_message_button, (gpointer)set_text, NULL);
     g_signal_connect(app->send_message_button, "clicked", G_CALLBACK(send_message), NULL);
 
     app->edit_message = false;
+    free(new_message_content);
 }
 
 gboolean chat_actions_menu(GtkWidget *widget, GdkEventButton *event, gpointer data) {
@@ -205,9 +208,10 @@ void delete_chat()
     char query_buff[1000];
     sprintf(query_buff, "%c%s%s", LEAVE_CHAT, QUERY_DELIM, gtk_widget_get_name(GTK_WIDGET(row_to_delete)));
     printf("query: %s\n", query_buff);
-    u_send(param, query_buff, strlen(query_buff) + 1);
+    if(/**/u_send(param, query_buff, strlen(query_buff) + 1) > 0) {
+        delete_all_history();
+        gtk_widget_hide(app->chat_options);
+        change_chat_by_id(START_PAGE);
+    };
     delete_popup_open = false;
-    delete_all_history();
-    gtk_widget_hide(app->chat_options);
-    change_chat_by_id(START_PAGE);
 }

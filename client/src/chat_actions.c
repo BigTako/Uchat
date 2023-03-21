@@ -304,9 +304,9 @@ void find_user() {
     sprintf(request_buff, "%c%s%s%s%s%s%s", CREATE_CHAT, QUERY_DELIM, "?", QUERY_DELIM, "?", QUERY_DELIM, username);
     printf("server query: %s\n", request_buff);
         
-    u_send(param, request_buff, strlen(request_buff) + 1); // send a request to server
+    if(/**/u_send(param, request_buff, strlen(request_buff) + 1) <= 0) return; // send a request to server
 
-    if (u_recv(param, responce_buff, MESSAGE_MAX_LEN) > 0)
+    if (/**/u_recv(param, responce_buff, MESSAGE_MAX_LEN) > 0)
     {
         printf("[INFO] Received buff(%s)\n", responce_buff);
         if (responce_buff[0] == OK_CODE[0])
@@ -337,10 +337,10 @@ void change_chat_by_id(char * new_chat_id)
 {
     if (!new_chat_id) return;
     char query_buff[1000]; 
-    free(app->current_chat_id);
-    app->current_chat_id = mx_strdup(new_chat_id);
-    mx_clear_list(&(app->chat_messages_texts), NULL);
-    app->chat_messages_texts = NULL;
+    // free(app->current_chat_id);
+    // app->current_chat_id = mx_strdup(new_chat_id);
+    // mx_clear_list(&(app->chat_messages_texts), NULL);
+    // app->chat_messages_texts = NULL;
 
     if (new_chat_id[0] != '0') 
     {
@@ -351,14 +351,19 @@ void change_chat_by_id(char * new_chat_id)
 
         gtk_widget_show(app->chat_icon);
         gtk_widget_show(app->status);
-        if (threadID != 0)
-        {
-            g_source_remove(threadID);
-        }   
-        delete_all_history();
-        sprintf(query_buff, "%s%s%s", RESET_MESSAGES_STATUS, QUERY_DELIM, app->current_chat_id);
-        u_send(param, query_buff, strlen(query_buff) + 1);
-        threadID = g_timeout_add(100, collect_user_info, (gpointer)"T");
+        sprintf(query_buff, "%s%s%s", RESET_MESSAGES_STATUS, QUERY_DELIM, new_chat_id);
+        if(/**/u_send(param, query_buff, strlen(query_buff) + 1) > 0) {
+            free(app->current_chat_id);
+            app->current_chat_id = mx_strdup(new_chat_id);
+            mx_clear_list(&(app->chat_messages_texts), NULL);
+            app->chat_messages_texts = NULL;
+            if (threadID != 0)
+            {
+                g_source_remove(threadID);
+            }
+            delete_all_history();
+            threadID = g_timeout_add(100, collect_user_info, (gpointer)"T");
+        }
     }
     else 
     {
@@ -410,9 +415,10 @@ void send_message()
     
     printf("Created server query: %s\n", server_query);
     
-    u_send(param, server_query, strlen(server_query) + 1);
-    gtk_entry_set_text(GTK_ENTRY(app->chat_entry), "");
-    scroll();
+    if(/**/u_send(param, server_query, strlen(server_query) + 1) > 0) {
+        gtk_entry_set_text(GTK_ENTRY(app->chat_entry), "");
+        scroll();
+    }
     free(server_query);
     free(cur_time);
 }

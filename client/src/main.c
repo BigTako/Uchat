@@ -42,7 +42,7 @@ int main(int argc, char * argv[]) {
     param->online_status = NO_CONNECTED;
     
     gtk_init(&argc, &argv);
-    g_timeout_add(100, u_reconect, NULL);
+    g_timeout_add(1000, u_reconect, NULL);
     show_login_form();
 
     gtk_main();

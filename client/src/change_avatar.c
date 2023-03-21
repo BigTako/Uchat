@@ -15,7 +15,7 @@ void change_avatar(GtkWidget *widget, gpointer data)
     char query_buff[1000];
     const gchar *id = gtk_widget_get_name(widget);
     sprintf(query_buff, "%s%s%s", UPDATE_USER_INFO, QUERY_DELIM, id);
-	u_send(param, query_buff, strlen(query_buff) + 1);
+	/**/u_send(param, query_buff, strlen(query_buff) + 1);
 }
 
 

@@ -14,9 +14,14 @@ void collect_user_info(void * info)
     char responce_buff[MESSAGE_MAX_LEN + 100];
     int records_count = 0;
     bool online = true;
-    
-    if (u_send(param, query, strlen(query) + 1) <= 0) online=false;
-    if (u_recv(param, responce_buff, MESSAGE_MAX_LEN) <= 0) online=false;
+    if (/**/u_send(param, query, strlen(query) + 1) <= 0) {
+        free(action);
+        return;
+    }
+    if (/**/u_recv(param, responce_buff, MESSAGE_MAX_LEN) <= 0) {
+        free(action);
+        return;
+    }
     printf("Received a buf: %s\n", responce_buff);
     if (responce_buff[0] == WAIT_FOR_CODE[0])
     {
@@ -27,7 +32,7 @@ void collect_user_info(void * info)
             if (online) 
             {
                 memset(responce_buff, '\0', strlen(responce_buff));
-                if (u_recv(param, responce_buff, MESSAGE_MAX_LEN) > 0)
+                if (/**/u_recv(param, responce_buff, MESSAGE_MAX_LEN) > 0)
                 {
                     if (action[0] == GET_CHATS[0])
                     {
@@ -66,8 +71,12 @@ void apply_collocutor_info()
         char * icon_path = NULL;
         char ** parts = NULL;
         sprintf(query, "%c%s%s", GET_COLLOCUTOR_INFO, QUERY_DELIM, app->current_chat_id);
-        u_send(param, query, strlen(query) + 1);
-        u_recv(param, responce, MESSAGE_MAX_LEN);
+        if (/**/u_send(param, query, strlen(query) + 1) <= 0) {
+            return;
+        }
+        if (/**/u_recv(param, responce, MESSAGE_MAX_LEN) <= 0) {
+            return;
+        }
         //printf("Received a responce: %s\n", responce);
         //Y@username@online@avatar
         if (responce[0] == OK_CODE[0])
@@ -93,8 +102,12 @@ void apply_user_info()
     char responce_buff[1000];
     char query_buff[1000];
     sprintf(query_buff, "%s%s%s", GET_USER_INFO, QUERY_DELIM, app->username_t);
-    u_send(param, query_buff, strlen(query_buff) + 1);
-    u_recv(param, responce_buff, MESSAGE_MAX_LEN);
+    if (/**/u_send(param, query_buff, strlen(query_buff) + 1) <= 0) {
+        return;
+    }
+    if (/**/u_recv(param, responce_buff, MESSAGE_MAX_LEN) <= 0) {
+        return;
+    }
 
     if (responce_buff[0] == OK_CODE[0])
     {

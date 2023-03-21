@@ -30,12 +30,12 @@ char * create_query_delim_separated(int count, ...)
 
 int send_server_request(t_send_param *param, char * query)
 {
-    if (u_send(param, query, strlen(query) + 1) <= 0) {
+    if (/**/u_send(param, query, strlen(query) + 1) <= 0) {
         perror(strerror(errno));
         return -1;
     }
     char a[1];
-    if (u_recv(param, a, 1) <= 0) {
+    if (/**/u_recv(param, a, 1) <= 0) {
         return -1;
     }
     switch (a[0])
