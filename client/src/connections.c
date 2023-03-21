@@ -174,6 +174,7 @@ void u_reconect() {
             fflush(stdout);
             free(server_query);
             if (online == 1) {
+                //ТУТ ТРЕБА ОЧИСТИТИ ВСІ ПОВІДОМЛЕННЯ І ЧАТИ
                 printf("CONNECTED\n");
                 param->online_status = CONNECTED;
                 return;

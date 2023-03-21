@@ -216,7 +216,6 @@ void* client_thread(void* vparam)
 	SSL_shutdown(param->ssl); // закінчення SSL-з'єднання
     SSL_free(param->ssl);
     close(param->socket);
-	pthread_mutex_destroy(param->mutex_R);
     free(param);
 	count_of_threads--;
     pthread_exit(0);

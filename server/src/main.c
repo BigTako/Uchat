@@ -129,7 +129,7 @@ int main(int argc, char ** argv)
     while(count_of_threads > 0) {
         //printf("count_of_threads %d\n", count_of_threads);
     }
-
+    pthread_mutex_destroy(&mutex_R);
     sqlite3_close(db);
     close(welcomeSocket);
     SSL_CTX_free(ctx);
