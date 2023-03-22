@@ -198,6 +198,8 @@ GtkWidget *open_main_window(void)
     //GET CHAT HISTORY IGNORING THE STATUS
     //collect_messages(action);
     //GET CHAT HISTORY IGNORING THE STATUS
+
+    app->reconnect_GIF = gdk_pixbuf_animation_new_from_file ("..resources/images/reconnect.gif", NULL);
     
     //GET NEW MESSAGES
     //action[0] = GET_NEW_MESSAGES;

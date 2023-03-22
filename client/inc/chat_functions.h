@@ -3,6 +3,7 @@
 
 #include "header.h"
 
+void show_reconnect();
 
 //backend functions
 GtkWidget *get_message_by_id(char * id);

@@ -78,7 +78,7 @@ void create_message_widget(char * message_query, bool to_end)
 
     time_t current_time = (time_t)atoi(parts[4]);
     struct tm *time_info;
-    char time_string[9]; // HH:MM\0
+    char time_string[9]; 
 
     time_info = localtime(&current_time);
 
@@ -125,10 +125,6 @@ void create_message_widget(char * message_query, bool to_end)
     if (is_user) g_signal_connect(message, "button-press-event", G_CALLBACK(my_message_menu), message_struct);
     else g_signal_connect(message, "button-press-event", G_CALLBACK(other_message_menu), message_struct);
 
-    //message_data->id = NULL;
-    //message_data->message_text = NULL;
-
-    //play_music();
     
     gtk_widget_set_name(message, parts[0]);
     if(to_end)
@@ -147,7 +143,6 @@ void create_message_widget(char * message_query, bool to_end)
 
 void create_chat_widget(char * chat_info_query) 
 {
-    //короче добавляются чаты в лист, но я хз конешно как переключать их
     GtkWidget *chat, *icon, *title, *status, *id;
     GtkBuilder *builder = gtk_builder_new ();
     GError* error = NULL;
@@ -335,7 +330,7 @@ void change_chat(GtkListBox* self, GtkListBoxRow* row, gpointer data)
 
 void change_chat_by_id(char * new_chat_id) 
 {
-    if (!new_chat_id) return;
+    if (!new_chat_id || param->online_status != 0) return;
     char query_buff[1000]; 
     // free(app->current_chat_id);
     // app->current_chat_id = mx_strdup(new_chat_id);

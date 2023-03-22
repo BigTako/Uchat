@@ -1,7 +1,7 @@
 #include "../inc/header.h"
 
 void change_theme(GtkComboBoxText *box, gpointer user_data) {
-    gchar *active_id = gtk_combo_box_get_active_id(box);
+    const char *active_id = gtk_combo_box_get_active_id(box);
     delete_all_history();
     change_chat_by_id(START_PAGE);
     gtk_widget_queue_draw(app->chat_window);

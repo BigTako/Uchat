@@ -11,16 +11,15 @@ int connect_to_server(t_send_param *param)
     
 }
 int ssl_connect(t_send_param *param) {
-    param->ssl = SSL_new(param->ctx);      /* create new SSL connection state */
-    SSL_set_fd(param->ssl, param->socket);    /* attach the socket descriptor */
-    if ( SSL_connect(param->ssl) == -1 ) { /* perform the connection */
+    param->ssl = SSL_new(param->ctx);      
+    SSL_set_fd(param->ssl, param->socket);    
+    if ( SSL_connect(param->ssl) == -1 ) { 
         ERR_print_errors_fp(stderr);
         return 1;
     }
     else
     {
         printf("\n\nConnected with %s encryption\n", SSL_get_cipher(param->ssl));
-        //ShowCerts(ssl);        /* get any certs */
     }
     return 0;
 }
@@ -29,10 +28,10 @@ SSL_CTX* initCTX(void)
 {
     SSL_METHOD *method;
     SSL_CTX *ctx;
-    OpenSSL_add_all_algorithms();  /* Load cryptos, et.al. */
-    SSL_load_error_strings();   /* Bring in and register error messages */
-    method = TLSv1_2_client_method();  /* Create new client-method instance */
-    ctx = SSL_CTX_new(method);   // Create new context SSL_CTX_free()!!!
+    OpenSSL_add_all_algorithms(); 
+    SSL_load_error_strings();   
+    method = TLSv1_2_client_method();  
+    ctx = SSL_CTX_new(method);   
     if ( ctx == NULL )
     {
         ERR_print_errors_fp(stderr);
@@ -45,17 +44,17 @@ void ShowCerts(SSL *ssl)
 {
     X509 *cert;
     char *line;
-    cert = SSL_get_peer_certificate(ssl); /* get the server's certificate */
+    cert = SSL_get_peer_certificate(ssl); 
     if ( cert != NULL )
     {
         printf("Server certificates:\n");
         line = X509_NAME_oneline(X509_get_subject_name(cert), 0, 0);
         printf("Subject: %s\n", line);
-        free(line);       /* free the malloc'ed string */
+        free(line);       
         line = X509_NAME_oneline(X509_get_issuer_name(cert), 0, 0);
         printf("Issuer: %s\n", line);
-        free(line);       /* free the malloc'ed string */
-        X509_free(cert);     /* free the malloc'ed certificate copy */
+        free(line);       
+        X509_free(cert);    
     }
     else
         printf("Info: No client certificates configured.\n");
@@ -147,14 +146,6 @@ int u_send(t_send_param *param, void* buf, int len) {
         printf("[ERROR] Got an error in urecv\n");
         return 0;
     }
-    /*else if (response_buff[0] == NO_DATA_CODE[0])
-    {
-        printf("[INFO] No data to receive\n");
-    }
-    else {
-        printf("[ERROR] Undefined package(%s).\n", response_buff);
-        return -1;
-    }*/
     return len;
 }
 
@@ -166,7 +157,6 @@ void u_reconect() {
     }
     if (param->online_status == NO_LOGIN) {
         if(app->username_t != NULL && app->password_t != NULL) {
-            //printf("AUTO_LOGIN\n");
             char action[] = {LOGIN, '\0'};
             char * server_query = create_query_delim_separated(3, action, app->username_t, app->password_t); // have to store a hash password
             int online = send_server_request(param, server_query);
@@ -174,7 +164,8 @@ void u_reconect() {
             fflush(stdout);
             free(server_query);
             if (online == 1) {
-                //ТУТ ТРЕБА ОЧИСТИТИ ВСІ ПОВІДОМЛЕННЯ І ЧАТИ
+                clear_chat_list();
+                delete_all_history();
                 printf("CONNECTED\n");
                 param->online_status = CONNECTED;
                 return;
@@ -200,10 +191,18 @@ void u_reconect() {
     }
     if (param->online_status == LOST_CONNECT) {
         printf("DISCONNECTED\n");
+        show_reconnect();
         SSL_shutdown(param->ssl); // закінчення SSL-з'єднання
         SSL_free(param->ssl);
         close(param->socket);
         param->online_status = NO_CONNECTED;
         return;
     }
+}
+
+void show_reconnect() {
+    gtk_image_set_from_file(app->chat_icon, "../resources/images/reconnect.gif");
+    gtk_label_set_text(app->status, "Reconnecting...");
+    gtk_label_set_text(app->chat_label_info, "");
+    open_error_window("Lost connection to the server, trying to reconnect...");
 }

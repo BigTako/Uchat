@@ -68,6 +68,8 @@ typedef struct app_s
     GtkWidget *other_options;
     GtkWidget *chat_options;
 
+    GdkPixbufAnimation* reconnect_GIF; 
+
     char *username;
     char *password;
     const char *username_t;
