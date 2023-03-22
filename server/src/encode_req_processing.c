@@ -129,7 +129,7 @@ bool create_db_chat_record(t_thread_param *param, char * chat_name, char * chat_
 		newchat_id += atoi(table[0]) + 1;
 	}
 	
-	if (format_and_execute(param->db, SEND_MESSAGE_QUERY, HOLDERS(SEND_MESSAGE_QUERY), CHATS_TN, newchat_id, chat_name, chat_avatar, members, ACTIVE_STATUS) != 0)
+	if (format_and_execute(param->db, CREATE_CHAT_QUERY, HOLDERS(CREATE_CHAT_QUERY), CHATS_TN, newchat_id, chat_name, chat_avatar, members, ACTIVE_STATUS) != 0)
 	{
 		if (u_send(param, ERROR_CODE, 2) <= 0) online = false;
 	}
@@ -169,8 +169,8 @@ bool create_new_chat_record(t_thread_param * param, char * user, char * members_
 			}
 			else
 			{
-				db_query = "SELECT chat_id FROM %s WHERE chat_members LIKE '%%%s%%' AND chat_members LIKE '%%%s%%'";
-				table = get_db_data_table(param->db, db_query, 1, 1, HOLDERS(db_query), CHATS_TN, user, another_user);
+				db_query = "SELECT chat_id FROM %s WHERE chat_members LIKE '%%%s%%' AND chat_members LIKE '%%%s%%'  AND status!='%s'";
+				table = get_db_data_table(param->db, db_query, 1, 1, HOLDERS(db_query), CHATS_TN, user, another_user, DELETED_STATUS);
 				if (table && *table) // chat exists
 				{
 					sprintf(query_buff, "%s%s%s", RECORD_EXISTS_CODE, QUERY_DELIM, table[0]);

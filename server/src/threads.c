@@ -199,7 +199,7 @@ void* client_thread(void* vparam)
             //OFLINE
 			break;
         }
-        printf(">>>Got a message from known client: %s\n", buffer);
+        //printf(">>>Got a message from known client: %s\n", buffer);
 		pthread_mutex_lock(param->mutex_R);
 		encode(buffer, param, &online, user);
 		pthread_mutex_unlock(param->mutex_R);

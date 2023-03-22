@@ -34,7 +34,7 @@
 #define CREATE_MESSAGE_QUERY "INSERT INTO %s(from_username, message_text, send_datetime, chat_id) VALUES('%s', '%s', %s, %s)"
 #define EDIT_MESSAGE_QUERY "UPDATE %s SET message_text='%s', loaded_by='', status='%s' WHERE message_id=%s"
 #define DELETE_MESSAGE_QUERY "UPDATE %s SET loaded_by='', status='%s' WHERE message_id=%s"
-#define SEND_MESSAGE_QUERY "INSERT INTO %s VALUES(%d, '%s', '%s', '%s', '', '%s')"
+#define CREATE_CHAT_QUERY "INSERT INTO %s VALUES(%d, '%s', '%s', '%s', '', '%s')"
 
 //clean up queries
 #define CLEANUP_DELETED_MESSAGES_QUERY "DELETE FROM %s WHERE status='%s' AND from_username='%s'"
