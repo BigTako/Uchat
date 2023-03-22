@@ -328,7 +328,7 @@ void change_chat(GtkListBox* self, GtkListBoxRow* row, gpointer data)
 }
 
 
-void change_chat_by_id(char * new_chat_id) 
+void change_chat_by_id(const char * new_chat_id) 
 {
     if (!new_chat_id || param->online_status != 0) return;
     char query_buff[1000]; 
@@ -345,7 +345,7 @@ void change_chat_by_id(char * new_chat_id)
         gtk_widget_show(app->chat_label_info);
 
         gtk_widget_show(app->chat_icon);
-        gtk_widget_show(app->status);
+        gtk_widget_show(GTK_WIDGET(app->status));
         sprintf(query_buff, "%s%s%s", RESET_MESSAGES_STATUS, QUERY_DELIM, new_chat_id);
         if(/**/u_send(param, query_buff, strlen(query_buff) + 1) > 0) {
             free(app->current_chat_id);
@@ -366,7 +366,7 @@ void change_chat_by_id(char * new_chat_id)
         gtk_widget_hide(app->chat_entry_box);
         gtk_widget_hide(app->chat_label_info);
         gtk_widget_hide(app->chat_icon);
-        gtk_widget_hide(app->status);
+        gtk_widget_hide(GTK_WIDGET(app->status));
         delete_all_history();
     }
     scroll();
@@ -398,7 +398,7 @@ void clear_chat_list()
 void send_message() 
 {
     if (app->edit_message) return;
-    const char *message = correct_input(gtk_entry_get_text(GTK_ENTRY(app->chat_entry)));
+    const char *message = gtk_entry_get_text(GTK_ENTRY(app->chat_entry));
     //S@TEXT@TIME@CONVERSATION_ID - send message
     //m_status@m_id@m_sender_username@m_text@m_send_datetime@m_chat_id
     printf("Got a message from input fiend: %s\n", message);

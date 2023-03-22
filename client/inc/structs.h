@@ -76,7 +76,7 @@ typedef struct app_s
     const char *password_t;
     char *user_avatar;
     GtkWidget *active_widget;
-    char *active_message;
+    const char *active_message;
     char * current_chat_id; // HARDCODED IN APP_INIT!!!!!!!!!!!!!!!!!!!!!!
     bool edit_message;
     t_list * chat_messages_texts;

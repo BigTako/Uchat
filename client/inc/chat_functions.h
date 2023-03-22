@@ -26,7 +26,7 @@ gboolean chat_enter_keypress(GtkWidget *widget, GdkEventKey *event, gpointer dat
 gboolean login_enter_keypress(GtkWidget *widget, GdkEventKey *event, gpointer data);
 gboolean signup_enter_keypress(GtkWidget *widget, GdkEventKey *event, gpointer data);
 gboolean enter_escape(GtkWidget *widget, GdkEventKey *event, gpointer data);
-void change_chat_by_id(char * new_chat_id);
+void change_chat_by_id(const char * new_chat_id);
 void scroll();
 void change_chat(GtkListBox* self, GtkListBoxRow* row, gpointer data);
 void set_text();
