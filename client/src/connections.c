@@ -26,11 +26,11 @@ int ssl_connect(t_send_param *param) {
 
 SSL_CTX* initCTX(void)
 {
-    SSL_METHOD *method;
+    const SSL_METHOD *method;
     SSL_CTX *ctx;
     OpenSSL_add_all_algorithms(); 
     SSL_load_error_strings();   
-    method = TLSv1_2_client_method();  
+    method = TLS_client_method();  
     ctx = SSL_CTX_new(method);   
     if ( ctx == NULL )
     {

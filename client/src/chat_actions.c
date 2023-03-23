@@ -358,7 +358,7 @@ void change_chat_by_id(const char * new_chat_id)
                 g_source_remove(threadID);
             }
             delete_all_history();
-            threadID = g_timeout_add(100, collect_user_info, (gpointer)"T");
+            threadID = g_timeout_add(100, (GSourceFunc)collect_user_info, (gpointer)"T");
         }
     }
     else 

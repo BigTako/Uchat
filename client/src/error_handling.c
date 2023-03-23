@@ -85,7 +85,7 @@ int check_signup_data_for_errors(const char *username, const char *password, con
     }
     if (strcmp(password, c_password) != 0) return 4;
     char action[] = {SIGNUP, '\0'};
-    char * server_query = create_query_delim_separated(3, action, username, sha256_string(password)); // have to store a hash password
+    char * server_query = create_query_delim_separated(3, action, username, sha256_string((char *)password)); // have to store a hash password
     
     int online = send_server_request(param, server_query);
     free(server_query);

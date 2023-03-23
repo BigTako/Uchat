@@ -208,7 +208,7 @@ void delete_chat()
     char query_buff[1000];
     sprintf(query_buff, "%c%s%s", LEAVE_CHAT, QUERY_DELIM, gtk_widget_get_name(GTK_WIDGET(row_to_delete)));
     printf("query: %s\n", query_buff);
-    if(/**/u_send(param, query_buff, strlen(query_buff) + 1) > 0) {
+    if(u_send(param, query_buff, strlen(query_buff) + 1) > 0) {
         delete_all_history();
         gtk_widget_hide(app->chat_options);
         change_chat_by_id(START_PAGE);

@@ -77,7 +77,7 @@ GtkWidget *open_signup_window(void) {
 
 void log_in(void) {
     const char *username = gtk_entry_get_text(GTK_ENTRY(app->username_entry));
-    const char *password = sha256_string(gtk_entry_get_text(GTK_ENTRY(app->password_entry)));
+    const char *password = sha256_string((char *)(gtk_entry_get_text(GTK_ENTRY(app->password_entry))));
     int login_error = check_login_data_for_errors(username, password);
 
     switch (login_error)

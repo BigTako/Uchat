@@ -193,9 +193,9 @@ GtkWidget *open_main_window(void)
     gtk_widget_set_name(GTK_WIDGET(app->status), "status");
     gtk_label_set_text(GTK_LABEL(app->username_label), app->username_t);
 
-    g_timeout_add(500, apply_user_info, NULL); // GET_USER INFO
-    g_timeout_add(300, collect_user_info, "V"); // GET_CHATS
-    g_timeout_add(500, apply_collocutor_info, NULL);
+    g_timeout_add(500, (GSourceFunc)apply_user_info, NULL); // GET_USER INFO
+    g_timeout_add(300, (GSourceFunc)collect_user_info, "V"); // GET_CHATS
+    g_timeout_add(500, (GSourceFunc)apply_collocutor_info, NULL);
     //GET ALL CURRENT CONVERSATIONS
     //char action[] = {GET_CHATS_HISTORY, '\0'};
     //GET CHAT HISTORY IGNORING THE STATUS
