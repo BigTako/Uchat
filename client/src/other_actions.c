@@ -15,6 +15,7 @@ app_t *app_init()
     app->edit_message = false;
     app->user_avatar = mx_strdup("0");
     app->chat_messages_texts = NULL;
+    current_window = 0;
     return app;
 }
 

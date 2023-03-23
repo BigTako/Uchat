@@ -127,6 +127,8 @@ GtkWidget *open_main_window(void)
     GtkBuilder * ui_builder;
     GError * err = NULL;
 
+    current_window = 2;
+
     ui_builder = gtk_builder_new();
     if(!gtk_builder_add_from_file(ui_builder, "../resources/ui/chat.glade", &err)) {
         g_critical ("Couldn't download the UI file : %s", err->message);
@@ -185,6 +187,7 @@ GtkWidget *open_main_window(void)
     app->welcome_message = GTK_WIDGET(gtk_builder_get_object(ui_builder, "welcome_message"));
     gtk_widget_set_name(GTK_WIDGET(app->welcome_message), "welcome_message");
     app->send_message_button = GTK_WIDGET(gtk_builder_get_object(ui_builder, "send_message_button"));
+    gtk_widget_set_name(GTK_WIDGET(app->chat_scroller), "send_message_button");
 
     app->status = GTK_LABEL(gtk_builder_get_object(ui_builder, "other_user_status"));
     gtk_widget_set_name(GTK_WIDGET(app->status), "status");

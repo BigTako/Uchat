@@ -3,6 +3,7 @@
 app_t *app;
 t_send_param *param;
 t_message *message_data;
+int current_window;
 
 int main(int argc, char * argv[]) {
     

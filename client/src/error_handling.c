@@ -23,6 +23,18 @@ GtkWidget *open_error_window(char *error_message) {
     app->error_label = GTK_WIDGET(gtk_builder_get_object(ui_builder, "error_label"));
     app->error_button = GTK_WIDGET(gtk_builder_get_object(ui_builder, "error_button"));
 
+    switch(current_window) {
+        case 0:
+            gtk_window_set_transient_for(GTK_WINDOW(app->error_window), GTK_WINDOW(app->login_window));
+            break;
+        case 1:
+            gtk_window_set_transient_for(GTK_WINDOW(app->error_window), GTK_WINDOW(app->signup_window));
+            break;
+        case 2:
+            gtk_window_set_transient_for(GTK_WINDOW(app->error_window), GTK_WINDOW(app->chat_window));
+            break;
+    }
+
     gtk_builder_connect_signals(ui_builder, NULL);
 
     gtk_label_set_text(GTK_LABEL(app->error_label), error_message);

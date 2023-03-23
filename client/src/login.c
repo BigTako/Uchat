@@ -10,6 +10,8 @@ GtkWidget *show_login_form() {
     GtkBuilder * ui_builder;
     GError * err = NULL;
 
+    current_window = 0;
+
     ui_builder = gtk_builder_new();
     if(!gtk_builder_add_from_file(ui_builder, "../resources/ui/login.glade", &err)) {
         g_critical ("Couldn't download the UI file : %s", err->message);
@@ -41,6 +43,8 @@ GtkWidget *open_signup_window(void) {
     GtkWidget *window;
     GtkBuilder * ui_builder;
     GError * err = NULL;
+
+    current_window = 1;
 
     ui_builder = gtk_builder_new();
     if(!gtk_builder_add_from_file(ui_builder, "../resources/ui/signup.glade", &err)) {

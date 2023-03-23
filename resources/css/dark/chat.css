@@ -4,12 +4,7 @@
     font-family: sans-serif;
 }
 
-/* #chat button {
-    background: red;
-    color: #ffffff;
-  } */
-
-#chat button:nth-child(2) {
+#chat #send_message_button {
     border: none;
     border-color: transparent;
     background: #394141;
@@ -19,7 +14,7 @@
     transition: all 0.3s;
 }
 
-#chat button:nth-child(2):hover {
+#chat #send_message_button:hover {
     box-shadow: none;
 }
 
@@ -90,7 +85,6 @@
 
 #chat #chat_list {
     background: #414b4b;
-    /* border-right: 1px solid #414b4b; */
 }
 
 #chat #messages_container > button {

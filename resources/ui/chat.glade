@@ -1086,6 +1086,7 @@
                     <property name="halign">center</property>
                     <property name="valign">center</property>
                     <property name="label" translatable="yes">Settings</property>
+                    <property name="margin-right">40</property>
                     <property name="justify">center</property>
                     <property name="selectable">True</property>
                     <property name="mnemonic-widget">chats_sidebar</property>

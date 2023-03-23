@@ -86,5 +86,6 @@ app_t *app_init();
 extern app_t *app;
 extern t_send_param *param;
 extern t_message *message_data;
+extern int current_window;
 
 #endif

@@ -4,7 +4,7 @@
     font-family: sans-serif;
 }
 
-#chat button:nth-child(2) {
+#chat #send_message_button {
     border: none;
     border-color: transparent;
     background: #c88906;
@@ -14,7 +14,7 @@
     transition: all 0.3s;
 }
 
-#chat button:nth-child(2):hover {
+#chat #send_message_button:hover {
     box-shadow: none;
 }
 
