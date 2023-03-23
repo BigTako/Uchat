@@ -286,6 +286,7 @@ void process_chat_info(char * chat_info)
         chat_id = tokenize(chat_info, QUERY_DELIM[0], text_buf, 2);
         printf("Want to delete a chat with id %s\n", chat_id);
         gtk_widget_hide(GTK_WIDGET(get_chat_by_id(chat_id)));
+        if (strcmp(app->current_chat_id, chat_id) == 0) change_chat_by_id(START_PAGE);
     }
 }
 
