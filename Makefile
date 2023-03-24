@@ -1,31 +1,49 @@
-OBJDIR = obj
-SRCDIR = src
-SERVER_DIR = server
-CLIENT_DIR = client
-SERVER = userver
-CLIENT = uclient
+# OBJDIR = obj
+# SRCDIR = src
+# SERVER_DIR = server
+# CLIENT_DIR = client
+# SERVER = userver
+# CLIENT = uclient
 
-SRC = $(SRCDIR)/*.c
-OBJS = $(OBJDIR)/*.o
+# SRC = $(SRCDIR)/*.c
+# OBJS = $(OBJDIR)/*.o
 
-all: $(SERVER) $(CLIENT)
+# all: $(SERVER) $(CLIENT)
 
-$(SERVER):
-	make -sC $(SERVER_DIR)
+# $(SERVER):
+# 	make -sC $(SERVER_DIR)
 
-$(CLIENT):
-	make -sC $(CLIENT_DIR)
+# $(CLIENT):
+# 	make -sC $(CLIENT_DIR)
 
-clean:
-	rm -f $(OBJS)
-	rm -df $(OBJDIR) 
+# clean:
+# 	rm -f $(OBJS)
+# 	rm -df $(OBJDIR) 
+
+# uninstall:
+# 	make -sC $(SERVER_DIR) $@
+# 	make -sC $(CLIENT_DIR) $@
+# 	make clean
+# 	rm -f $(UCHAT)
+
+# reinstall:
+# 	make uninstall
+# 	make all
+
+.PHONY: all install uninstall reinstall
+
+all: install
+
+install:
+	@$(MAKE) -C client/
+	@$(MAKE) -C server/
+	@cp client/uchat ./
+	@cp server/uchat_server ./
 
 uninstall:
-	make -sC $(SERVER_DIR) $@
-	make -sC $(CLIENT_DIR) $@
-	make clean
-	rm -f $(UCHAT)
+	@$(MAKE) -C server/ uninstall
+	@$(MAKE) -C client/ uninstall
+	@rm uchat
+	@rm uchat_server
 
-reinstall:
-	make uninstall
-	make all
+reinstall: uninstall install

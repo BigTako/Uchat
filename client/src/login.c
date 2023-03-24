@@ -113,11 +113,11 @@ void create_account(void) {
     switch (signup_error)
     {
         case 0:
-            mx_printstr("create account with data: ");
-            mx_printstr(username);
-            mx_printchar('\t');
-            mx_printstr(password);
-            mx_printchar('\n');
+            // mx_printstr("create account with data: ");
+            // mx_printstr(username);
+            // mx_printchar('\t');
+            // mx_printstr(password);
+            // mx_printchar('\n');
             open_login_window();
             break;
         case 1:
@@ -133,7 +133,7 @@ void create_account(void) {
             open_error_window("Signup error: The passwords must match.");
             break;
         case 5:
-            open_error_window("Register error: Cant connect to the server.");
+            open_error_window("Signup error: Cannot connect to the server.");
             break;
     }
 }

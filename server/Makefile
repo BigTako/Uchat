@@ -5,7 +5,7 @@ CFLAGS = -std=c11 -Wall -Wextra -Wpedantic -Werror -pthread -g
 
 OBJDIR = obj
 SRCDIR = src
-UCHAT = userver
+UCHAT = uchat_server
 
 SRC = $(foreach dir, $(SRCDIR), $(wildcard $(dir)/*.c))
 OBJS = $(OBJDIR)/*.o

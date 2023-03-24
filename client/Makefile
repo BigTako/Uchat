@@ -1,4 +1,4 @@
-NAME	=	uclient
+NAME	=	uchat
 
 CFLG	=	-std=c11 $(addprefix -W, all extra pedantic) -g -Wno-unused-command-line-argument -Wno-unused-variable \
     -Wno-unused-function -Wno-unused-parameter
@@ -28,10 +28,10 @@ all: clean install
 install: $(LMX_A) $(NAME)
 
 $(NAME): $(OBJ_FILES)
-	@clang $(CFLG) $(OBJ_FILES) -L$(LMX_DIR) -lmx -o $@ $(CLIENT_COMPILE_GLOBAL) $(LIB_FLAGS)
+	@clang $(CFLG) $(OBJ_FILES) -L$(LMX_DIR) -lmx -o $@ $(CLIENT_COMPILE_GLOBAL) $(LIB_FLAGS) 
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c $(INC_FILES)
-	@clang $(CFLG) -c $< -o  $@ -I$(INC_DIR) -I$(LMX_INC) $(CLIENT_COMPILE_GLOBAL) $(LIB_FLAGS)
+	@clang $(CFLG) -c $< -o  $@ -I$(INC_DIR) -I$(LMX_INC) $(CLIENT_COMPILE_GLOBAL) $(LIB_FLAGS) 
 
 $(OBJ_FILES): | $(OBJ_DIR)
 
@@ -40,6 +40,9 @@ $(OBJ_DIR):
 
 $(LMX_A):
 	@make -sC $(LMX_DIR)
+
+# install_lib:
+# 	sh libs/gtk/install_gtk.sh
 	
 clean:
 	@rm -rf $(OBJ_DIR)
