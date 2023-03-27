@@ -24,7 +24,7 @@ bool s_to_c_info_exchange(t_thread_param *param, char ** table)
 			memset(query_buff, '\0', strlen(query_buff));
 		}
 	}
-    printf("[INFO] Successfuly sent %d packages\n", count_of_chats);
+    //printf("[INFO] Successfuly sent %d packages\n", count_of_chats);
 	return online;
 }
 
@@ -164,13 +164,13 @@ void* client_thread(void* vparam)
 {
     t_thread_param *param = (t_thread_param*) vparam;
 	count_of_threads++;
-    printf("---Start-recving-from-new-client---thread-N-%d---\n", count_of_threads);
+    //printf("---Start-recving-from-new-client---thread-N-%d---\n", count_of_threads);
     bool online = true;
     char *user = NULL;
     char buffer[MESSAGE_MAX_LEN]; //!!!
     while (user == NULL) 
 	{
-		printf("WAIT\n");
+		//printf("WAIT\n");
 		if (u_recv(param, buffer, MESSAGE_MAX_LEN) <= 0) {
             online = false;
             break;
@@ -205,7 +205,7 @@ void* client_thread(void* vparam)
 		pthread_mutex_unlock(param->mutex_R);
 		memset(buffer, '\0', MESSAGE_MAX_LEN);
     }
-	printf("DISCONNECTING User: %s\n", user);
+	//printf("DISCONNECTING User: %s\n", user);
 
 	pthread_mutex_lock(param->mutex_R);
 	buffer[0] = EXIT_APP;
@@ -224,7 +224,7 @@ void* client_thread(void* vparam)
 void* exit_thread(void* vparam) {
 	t_thread_param *param = (t_thread_param*) vparam;
 	count_of_threads++;
-	printf("Print \"exit\" to terminal to exit)\n");
+	//printf("Print \"exit\" to terminal to exit)\n");
 	struct pollfd mypoll = { STDIN_FILENO, POLLIN|POLLPRI , 0};
     char string[10];
 	while(1) 

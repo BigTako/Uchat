@@ -83,8 +83,7 @@ bool update_data_status(t_thread_param * param, char ** table, char * user, char
     {
       if (tokenize(table[i], QUERY_DELIM[0], text_buf, 2)) // message or chat id
       {
-		printf("action: %s\n", text_buf);
-        switch(action)
+		switch(action)
         {
 			case GET_CHATS:
 				format_and_execute(param->db, UPDATE_CHAT_STATUS_QUERY, HOLDERS(UPDATE_CHAT_STATUS_QUERY),CHATS_TN, user, text_buf);

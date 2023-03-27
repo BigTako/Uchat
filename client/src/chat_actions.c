@@ -36,8 +36,8 @@ void create_message_widget(char * message_query, bool to_end)
     char *timestr = NULL;
     char *title = NULL;
     char ** parts = mx_strsplit(message_query, QUERY_DELIM[0]);
-    printf("Got a message query: %s\n", message_query);
-    printf("ID of message: %s\n", parts[0]);
+    //printf("Got a message query: %s\n", message_query);
+    //printf("ID of message: %s\n", parts[0]);
     bool is_user = !strcmp(app->username_t, parts[1]);
 
 
@@ -148,7 +148,7 @@ void create_chat_widget(char * chat_info_query)
     GError* error = NULL;
     char *icon_path = NULL;
     char responce_buff[1000];
-    printf("Got chat info query: %s\n", chat_info_query);
+    //printf("Got chat info query: %s\n", chat_info_query);
     char ** parts = mx_strsplit(chat_info_query, QUERY_DELIM[0]);
 
     if (!gtk_builder_add_from_file (builder, "../resources/ui/chat_list.glade", &error)) {
@@ -226,7 +226,7 @@ t_chat_message * find_by_message_id(t_list * list, char * m_id)
 void process_message_info(char * message_info)
 {
     //m_status@m_id@m_sender_username@m_text@m_send_datetime@m_chat_id
-    printf("Got message info: %s\n", message_info);
+    //printf("Got message info: %s\n", message_info);
     char text_buf[1000];
     char ** parts = mx_strsplit(message_info, QUERY_DELIM[0]);
     /*
@@ -248,7 +248,7 @@ void process_message_info(char * message_info)
     }
     else if (parts[0][0] == DELETED_STATUS[0])
     {
-        printf("want to delete message widget with id(%s)\n", parts[1]);
+        //printf("want to delete message widget with id(%s)\n", parts[1]);
         deleted_message_widget = get_message_by_id(parts[1]); 
         gtk_widget_hide(GTK_WIDGET(deleted_message_widget));
     }
@@ -257,14 +257,14 @@ void process_message_info(char * message_info)
         message = find_by_message_id(app->chat_messages_texts, parts[1]);
         if (message)
         {
-            printf("Edit message: ID=(%s), current_text=(%s), change to (%s)\n", message->id, gtk_label_get_text(GTK_LABEL(message->text)), parts[4]);
+            //printf("Edit message: ID=(%s), current_text=(%s), change to (%s)\n", message->id, gtk_label_get_text(GTK_LABEL(message->text)), parts[4]);
             gtk_label_set_text(GTK_LABEL(message->text), parts[4]);
         }
         else
         {
-            printf("No such message\n");
+            //printf("No such message\n");
             create_message_widget(message_info + 2, 0);    
-            printf("No such message\n");
+            //printf("No such message\n");
         }
     }
     mx_del_strarr(&parts);
@@ -284,7 +284,7 @@ void process_chat_info(char * chat_info)
     else if (c_status == DELETED_STATUS[0])
     {
         chat_id = tokenize(chat_info, QUERY_DELIM[0], text_buf, 2);
-        printf("Want to delete a chat with id %s\n", chat_id);
+        //printf("Want to delete a chat with id %s\n", chat_id);
         gtk_widget_hide(GTK_WIDGET(get_chat_by_id(chat_id)));
         if (strcmp(app->current_chat_id, chat_id) == 0) change_chat_by_id(START_PAGE);
     }
@@ -298,17 +298,17 @@ void find_user() {
 
     char ** info_parts = NULL;
     sprintf(request_buff, "%c%s%s%s%s%s%s", CREATE_CHAT, QUERY_DELIM, "?", QUERY_DELIM, "?", QUERY_DELIM, username);
-    printf("server query: %s\n", request_buff);
+    //printf("server query: %s\n", request_buff);
         
-    if(/**/u_send(param, request_buff, strlen(request_buff) + 1) <= 0) return; // send a request to server
+    if(u_send(param, request_buff, strlen(request_buff) + 1) <= 0) return; // send a request to server
 
-    if (/**/u_recv(param, responce_buff, MESSAGE_MAX_LEN) > 0)
+    if (u_recv(param, responce_buff, MESSAGE_MAX_LEN) > 0)
     {
-        printf("[INFO] Received buff(%s)\n", responce_buff);
+        //printf("[INFO] Received buff(%s)\n", responce_buff);
         if (responce_buff[0] == OK_CODE[0])
         {
-            //process_chat_info(responce_buff + 2);
-            printf("[INFO] Chat successfuly created(%s)\n", username);
+            process_chat_info(responce_buff + 2);
+            //printf("[INFO] Chat successfuly created(%s)\n", username);
         }
         else if (responce_buff[0] == RECORD_EXISTS_CODE[0])
         {
@@ -402,14 +402,14 @@ void send_message()
     const char *message = gtk_entry_get_text(GTK_ENTRY(app->chat_entry));
     //S@TEXT@TIME@CONVERSATION_ID - send message
     //m_status@m_id@m_sender_username@m_text@m_send_datetime@m_chat_id
-    printf("Got a message from input fiend: %s\n", message);
+    //printf("Got a message from input fiend: %s\n", message);
     char action[2] = {SEND_MESSAGE, '\0'};
     char * cur_time = mx_itoa((time(NULL)));
     char * server_query = create_query_delim_separated(4, action, message, cur_time, app->current_chat_id);
     char * message_query = NULL;
     char responce_buff[5100];
     
-    printf("Created server query: %s\n", server_query);
+    //printf("Created server query: %s\n", server_query);
     
     if(/**/u_send(param, server_query, strlen(server_query) + 1) > 0) {
         gtk_entry_set_text(GTK_ENTRY(app->chat_entry), "");

@@ -22,7 +22,7 @@ void collect_user_info(void * info)
         free(action);
         return;
     }
-    printf("Received a buf: %s\n", responce_buff);
+    //printf("Received a buf: %s\n", responce_buff);
     if (responce_buff[0] == WAIT_FOR_CODE[0])
     {
         records_count = atoi(responce_buff + 2);
@@ -51,8 +51,8 @@ void collect_user_info(void * info)
 	    }
         //printf("[INFO] Successfuly received %d packages\n", records_count);
     }
-    else if (responce_buff[0] == ERROR_CODE[0])
-        printf("[ERROR] %s\n", responce_buff + 2);
+    /*else if (responce_buff[0] == ERROR_CODE[0])
+        printf("[ERROR] %s\n", responce_buff + 2);*/
     free(action);
 }
 
@@ -92,7 +92,7 @@ void apply_collocutor_info()
         }
         else
         {        
-            printf("[ERROR] Got something wrong\n");
+            //printf("[ERROR] Got something wrong\n");
         }
     }
 }

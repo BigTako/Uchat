@@ -61,7 +61,7 @@ void scroll() {
     gtk_adjustment_set_page_size(adjustment, 0);
     double value = gtk_adjustment_get_upper(adjustment);
     gtk_adjustment_set_value(adjustment, value);
-    printf("\n SCROLLED WINDOW \n");
+    //printf("\n SCROLLED WINDOW \n");
 }
 
 char * correct_input(char * str)

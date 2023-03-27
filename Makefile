@@ -35,8 +35,10 @@
 all: install
 
 install:
-	@$(MAKE) -C client/
-	@$(MAKE) -C server/
+	echo "[INFO] installing client\n"
+	@$(MAKE) reinstall -C client/
+	echo "[INFO] installing server\n"
+	@$(MAKE) reinstall -C server/
 	@cp client/uchat ./
 	@cp server/uchat_server ./
 

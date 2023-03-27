@@ -5,14 +5,14 @@ GtkWidget *get_message_by_id(char * id)
     GtkContainer *box_container = GTK_CONTAINER(app->messages_container);
     GList *children, *iter;
     children = gtk_container_get_children(box_container);
-    printf("Entering the cycyle\n");
+    //printf("Entering the cycyle\n");
     for(iter = children; iter != NULL; iter = iter->next) 
     {
         const char *name = gtk_widget_get_name(GTK_WIDGET(iter->data));
-        printf("Got a name: %s\n", name);
+        //printf("Got a name: %s\n", name);
         if (strcmp(id, name) == 0) 
         {
-            printf("[INFO] Such widget was found\n");
+            //printf("[INFO] Such widget was found\n");
             return iter->data;
         }
     }

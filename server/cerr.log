@@ -1,0 +1,7 @@
+members str: @1@2
+members str: @2@1
+[ERROR] NOT NULL constraint failed: messages.chat_id
+WARNING: you received not all message
+WARNING: you received not all message
+members str: @2@1
+WARNING: you received not all message

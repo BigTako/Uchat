@@ -19,7 +19,7 @@ int ssl_connect(t_send_param *param) {
     }
     else
     {
-        printf("\n\nConnected with %s encryption\n", SSL_get_cipher(param->ssl));
+        //printf("\n\nConnected with %s encryption\n", SSL_get_cipher(param->ssl));
     }
     return 0;
 }
@@ -38,26 +38,6 @@ SSL_CTX* initCTX(void)
         abort();
     }
     return ctx;
-}
-
-void ShowCerts(SSL *ssl)
-{
-    X509 *cert;
-    char *line;
-    cert = SSL_get_peer_certificate(ssl); 
-    if ( cert != NULL )
-    {
-        printf("Server certificates:\n");
-        line = X509_NAME_oneline(X509_get_subject_name(cert), 0, 0);
-        printf("Subject: %s\n", line);
-        free(line);       
-        line = X509_NAME_oneline(X509_get_issuer_name(cert), 0, 0);
-        printf("Issuer: %s\n", line);
-        free(line);       
-        X509_free(cert);    
-    }
-    else
-        printf("Info: No client certificates configured.\n");
 }
 
 int skip_bytes(t_send_param *param, int num_bytes_to_skip) {
@@ -93,7 +73,7 @@ int u_recv(t_send_param *param, void* buf, int len) {
     actualLen = ntohl(actualLen);
     if(actualLen > len)
     {
-        printf("WARNING: you received not all message\n");
+        //printf("WARNING: you received not all message\n");
         if (SSL_read(param->ssl, buf, len) <= 0) {
             param->online_status = LOST_CONNECT;
             return -1;
@@ -141,17 +121,12 @@ int u_send(t_send_param *param, void* buf, int len) {
     if (response_buff[0] == OK_CODE[0]) {
         //printf("[INFO] Successfully sent message.\n");
     }
-    else if (response_buff[0] == ERROR_CODE[0])
-    {
-        printf("[ERROR] Got an error in urecv\n");
-        return 0;
-    }
     return len;
 }
 
 void u_reconect() {
     fflush(stdout);
-    printf("online status %d\n", param->online_status);
+    //printf("online status %d\n", param->online_status);
     if (param->online_status == CONNECTED) {
         return;
     }
@@ -160,13 +135,13 @@ void u_reconect() {
             char action[] = {LOGIN, '\0'};
             char * server_query = create_query_delim_separated(3, action, app->username_t, app->password_t); // have to store a hash password
             int online = send_server_request(param, server_query);
-            printf("AUTO_LOGIN_%d\n", online);
+            //printf("AUTO_LOGIN_%d\n", online);
             fflush(stdout);
             free(server_query);
             if (online == 1) {
                 clear_chat_list();
                 delete_all_history();
-                printf("CONNECTED\n");
+                //printf("CONNECTED\n");
                 param->online_status = CONNECTED;
                 return;
             }
@@ -174,7 +149,7 @@ void u_reconect() {
                 param->online_status = LOST_CONNECT;
                 return;
             }
-            printf("ERROR in reconect\n");
+            //printf("ERROR in reconect\n");
         }
         return;
     }
@@ -190,7 +165,7 @@ void u_reconect() {
         return;
     }
     if (param->online_status == LOST_CONNECT) {
-        printf("DISCONNECTED\n");
+        //printf("DISCONNECTED\n");
         show_reconnect();
         SSL_shutdown(param->ssl); // закінчення SSL-з'єднання
         SSL_free(param->ssl);

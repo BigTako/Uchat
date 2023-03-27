@@ -30,20 +30,20 @@ int main(int argc, char ** argv)
 	}
     //SQL DATABASE TABLES INITIALISATION
     
-    //daemonize_process();
+    daemonize_process();
     
     //OPEN LOGGING FILE AND REDIRECT OUTPUT TO THERE
     // int out = open("cout.log", O_RDWR | O_CREAT | O_APPEND, 0600);
     // if (-1 == out) { perror("cout.log"); return 255; }
 
-    // int err = open("cerr.log", O_RDWR|O_CREAT|O_APPEND, 0600);
-    // if (-1 == err) { perror("cerr.log"); return 255; }
+    int err = open("cerr.log", O_RDWR|O_CREAT|O_APPEND, 0600);
+    if (-1 == err) { perror("cerr.log"); return 255; }
 
-    // int save_out = dup(fileno(stdout));
-    // int save_err = dup(fileno(stderr));
+    int save_out = dup(fileno(stdout));
+    int save_err = dup(fileno(stderr));
 
-    // if (-1 == dup2(out, fileno(stdout))) { perror("cannot redirect stdout"); return 255; }
-    // if (-1 == dup2(err, fileno(stderr))) { perror("cannot redirect stderr"); return 255; }
+    if (-1 == dup2(err, fileno(stdout))) { perror("cannot redirect stdout"); return 255; }
+    if (-1 == dup2(err, fileno(stderr))) { perror("cannot redirect stderr"); return 255; }
     
     //OPEN LOGGING FILE AND REDIRECT OUTPUT TO THERE
     sqlite3 * db = db_init();
@@ -113,7 +113,7 @@ int main(int argc, char ** argv)
             ERR_print_errors_fp(stderr);
             continue;
         }
-        printf("Connection: %s:%d\n",inet_ntoa(addr.sin_addr), ntohs(addr.sin_port));
+        //printf("Connection: %s:%d\n",inet_ntoa(addr.sin_addr), ntohs(addr.sin_port));
         param->socket = client;
         param->mutex_R = &mutex_R;
         param->db = db;
@@ -121,7 +121,6 @@ int main(int argc, char ** argv)
         int status = pthread_create(&thread, NULL, client_thread, param);
         if (status != 0) {
            printf("main error: can't create thread");
-           
            exit(1);
         }
 
@@ -135,14 +134,14 @@ int main(int argc, char ** argv)
     SSL_CTX_free(ctx);
     
     // CLOSE LOGGER AND REDIRECT OUTPUT BACK
-    // fflush(stdout); close(out);
-    // fflush(stderr); close(err);
+    fflush(stdout); close(err);
+    fflush(stderr); close(err);
 
-    // dup2(save_out, fileno(stdout));
-    // dup2(save_err, fileno(stderr));
+    dup2(save_out, fileno(stdout));
+    dup2(save_err, fileno(stderr));
 
-    // close(save_out);
-    // close(save_err);
+    close(save_out);
+    close(save_err);
 
     return 0;
 }

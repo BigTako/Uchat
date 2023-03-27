@@ -1,0 +1,19 @@
+21Chat id to transfter to: 1
+Button clicked with user data: h1    ID: 7
+Chat id to transfter to: 1
+
+(uchat:5493): Gtk-CRITICAL **: 08:38:03.170: gtk_widget_hide: assertion 'GTK_IS_WIDGET (widget)' failed
+
+(uchat:5493): Gtk-CRITICAL **: 08:38:03.170: gtk_widget_hide: assertion 'GTK_IS_WIDGET (widget)' failed
+
+(uchat:5493): Gtk-CRITICAL **: 08:38:03.171: gtk_widget_hide: assertion 'GTK_IS_WIDGET (widget)' failed
+
+(uchat:5493): Gtk-CRITICAL **: 08:38:03.171: gtk_widget_hide: assertion 'GTK_IS_WIDGET (widget)' failed
+
+(uchat:5493): Gtk-CRITICAL **: 08:38:03.171: gtk_widget_hide: assertion 'GTK_IS_WIDGET (widget)' failed
+
+(uchat:5493): Gtk-CRITICAL **: 08:38:03.171: gtk_widget_hide: assertion 'GTK_IS_WIDGET (widget)' failed
+
+(uchat:5493): Gtk-CRITICAL **: 08:38:03.171: gtk_widget_hide: assertion 'GTK_IS_WIDGET (widget)' failed
+
+(uchat:5493): Gtk-CRITICAL **: 08:38:03.172: gtk_widget_hide: assertion 'GTK_IS_WIDGET (widget)' failed
