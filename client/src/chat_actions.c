@@ -46,13 +46,13 @@ void create_message_widget(char * message_query, bool to_end)
 
     if (is_user)
     {
-        if (!gtk_builder_add_from_file (builder, "../resources/ui/my_message.glade", &error)) {
+        if (!gtk_builder_add_from_file (builder, "resources/ui/my_message.glade", &error)) {
             g_critical ("Couldn't load file: %s", window_path);
         }
     }
     else
     {
-        if (!gtk_builder_add_from_file (builder, "../resources/ui/other_message.glade", &error)) {
+        if (!gtk_builder_add_from_file (builder, "resources/ui/other_message.glade", &error)) {
             g_critical ("Couldn't load file: %s", window_path);
         }
     }
@@ -151,7 +151,7 @@ void create_chat_widget(char * chat_info_query)
     //printf("Got chat info query: %s\n", chat_info_query);
     char ** parts = mx_strsplit(chat_info_query, QUERY_DELIM[0]);
 
-    if (!gtk_builder_add_from_file (builder, "../resources/ui/chat_list.glade", &error)) {
+    if (!gtk_builder_add_from_file (builder, "resources/ui/chat_list.glade", &error)) {
         g_critical ("Couldn't load file: message_other.ui");
     }
 

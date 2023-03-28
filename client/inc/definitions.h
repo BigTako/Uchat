@@ -50,6 +50,6 @@ typedef unsigned char * code;
 #define NO_CONNECTED -2
 #define LOST_CONNECT -3
 
-#define AVATAR_PATH "../resources/icons/user_icons/%s.png"
+#define AVATAR_PATH "resources/icons/user_icons/%s.png"
 
 #endif

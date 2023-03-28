@@ -6,7 +6,7 @@ GtkWidget *open_error_window(char *error_message) {
     GError *err = NULL;
 
     ui_builder = gtk_builder_new();
-    if(!gtk_builder_add_from_file(ui_builder, "../resources/ui/error.glade", &err)) {
+    if(!gtk_builder_add_from_file(ui_builder, "resources/ui/error.glade", &err)) {
         g_critical ("Couldn't download the UI file : %s", err->message);
         g_error_free (err);
     }

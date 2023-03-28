@@ -39,8 +39,8 @@ install:
 	@$(MAKE) reinstall -C client/
 	echo "[INFO] installing server\n"
 	@$(MAKE) reinstall -C server/
-	@cp client/uchat ./
-	@cp server/uchat_server ./
+	#@cp client/uchat ./
+	#@cp server/uchat_server ./
 
 uninstall:
 	@$(MAKE) -C server/ uninstall

@@ -56,13 +56,13 @@ void create_options_popover(GtkWidget *widget, bool isMy) {
 
     ui_builder = gtk_builder_new();
     if (isMy) {
-        if(!gtk_builder_add_from_file(ui_builder, "../resources/ui/my_options_popup.glade", &err)) {
+        if(!gtk_builder_add_from_file(ui_builder, "resources/ui/my_options_popup.glade", &err)) {
             g_critical ("Couldn't download the UI file : %s", err->message);
             g_error_free (err);
         }
     }
     else {
-        if(!gtk_builder_add_from_file(ui_builder, "../resources/ui/other_options_popup.glade", &err)) {
+        if(!gtk_builder_add_from_file(ui_builder, "resources/ui/other_options_popup.glade", &err)) {
             g_critical ("Couldn't download the UI file : %s", err->message);
             g_error_free (err);
         }
@@ -181,7 +181,7 @@ void create_chat_options_popover() {
     GError *err = NULL;
 
     ui_builder = gtk_builder_new();
-    if(!gtk_builder_add_from_file(ui_builder, "../resources/ui/chat_list_popup.glade", &err)) {
+    if(!gtk_builder_add_from_file(ui_builder, "resources/ui/chat_list_popup.glade", &err)) {
         g_critical ("Couldn't download the UI file : %s", err->message);
         g_error_free (err);
     }

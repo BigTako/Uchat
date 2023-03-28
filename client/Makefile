@@ -1,4 +1,4 @@
-NAME	=	uchat
+NAME	=	../uchat
 
 CFLG	=	-std=c11 $(addprefix -W, all extra pedantic) -g -Wno-unused-command-line-argument -Wno-unused-variable \
     -Wno-unused-function -Wno-unused-parameter

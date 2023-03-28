@@ -130,7 +130,7 @@ GtkWidget *open_main_window(void)
     current_window = 2;
 
     ui_builder = gtk_builder_new();
-    if(!gtk_builder_add_from_file(ui_builder, "../resources/ui/chat.glade", &err)) {
+    if(!gtk_builder_add_from_file(ui_builder, "resources/ui/chat.glade", &err)) {
         g_critical ("Couldn't download the UI file : %s", err->message);
         g_error_free (err);
     }

@@ -176,7 +176,7 @@ void u_reconect() {
 }
 
 void show_reconnect() {
-    gtk_image_set_from_file(GTK_IMAGE(app->chat_icon), "../resources/images/reconnect.gif");
+    gtk_image_set_from_file(GTK_IMAGE(app->chat_icon), "resources/images/reconnect.gif");
     gtk_label_set_text(GTK_LABEL(app->status), "Reconnecting...");
     gtk_label_set_text(GTK_LABEL(app->chat_label_info), "");
     open_error_window("Lost connection to the server, trying to reconnect...");

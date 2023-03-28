@@ -1,0 +1,15 @@
+4787457536:error:02001002:system library:fopen:No such file or directory:crypto/bio/bss_file.c:288:fopen('mycert.pem','r')
+4787457536:error:20074002:BIO routines:file_ctrl:system lib:crypto/bio/bss_file.c:290:
+4787457536:error:140AD002:SSL routines:SSL_CTX_use_certificate_file:system lib:ssl/ssl_rsa.c:390:
+
+** (uchat:3973): CRITICAL **: 04:11:42.486: Couldn't download the UI file : Failed to open file “../resources/ui/login.glade”: No such file or directory
+
+** (uchat:3973): CRITICAL **: 04:11:42.486: Window widget error
+
+(uchat:3973): Gtk-CRITICAL **: 04:11:42.486: gtk_widget_set_name: assertion 'GTK_IS_WIDGET (widget)' failed
+4602924544:error:02001002:system library:fopen:No such file or directory:crypto/bio/bss_file.c:288:fopen('mycert.pem','r')
+4602924544:error:20074002:BIO routines:file_ctrl:system lib:crypto/bio/bss_file.c:290:
+4602924544:error:140AD002:SSL routines:SSL_CTX_use_certificate_file:system lib:ssl/ssl_rsa.c:390:
+4618800640:error:02001002:system library:fopen:No such file or directory:crypto/bio/bss_file.c:288:fopen('mycert.pem','r')
+4618800640:error:20074002:BIO routines:file_ctrl:system lib:crypto/bio/bss_file.c:290:
+4618800640:error:140AD002:SSL routines:SSL_CTX_use_certificate_file:system lib:ssl/ssl_rsa.c:390:
