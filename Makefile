@@ -4,6 +4,7 @@ SERVER_DIR = server
 CLIENT_DIR = client
 SERVER = uchat_server
 CLIENT = uchat
+DATABASE = database.db
 
 LIBMX_DIR = libraries/libmx
 LIBMX = $(LIBMX_DIR)/libmx.a
@@ -28,6 +29,13 @@ $(CLIENT):
 clean:
 	rm -f $(OBJS)
 	rm -df $(OBJDIR) 
+	rm -rf $(SERVER)
+	rm -rf $(CLIENT)
+	rm -rf server/$(DATABASE)
+	rm -rf server/cout.log
+	rm -rf client/cout.log
+
+
 
 uninstall:
 	make -sC $(SERVER_DIR) $@

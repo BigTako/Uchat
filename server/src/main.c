@@ -1,23 +1,5 @@
 #include "../inc/header.h"
 
-/*void logger_write(int where, char * what)
-{
-    time_t current_time = time(NULL);
-    struct tm *time_info;
-    char time_string[9]; // HH:MM\0
-    time_info = localtime(&current_time);
-
-    strftime(time_string, sizeof(time_string), "%H:%M", time_info);
-    
-    switch(where)
-    {
-        case 1: //strout
-            printf("[INFO] [%s] <--> %s\n", what);
-            break;
-        case 2:
-            printf("[ERROR] [%s] <--> %s\n", what);
-    }  
-}*/
 int cmdEXIT;
 int count_of_threads;
 
@@ -33,17 +15,17 @@ int main(int argc, char ** argv)
     //daemonize_process();
     
     //OPEN LOGGING FILE AND REDIRECT OUTPUT TO THERE
-    // int out = open("cout.log", O_RDWR | O_CREAT | O_APPEND, 0600);
-    // if (-1 == out) { perror("cout.log"); return 255; }
+    int out = open("server/cout.log", O_RDWR | O_CREAT | O_APPEND, 0600);
+    if (-1 == out) { perror("cout.log"); return 255; }
 
     // int err = open("cerr.log", O_RDWR|O_CREAT|O_APPEND, 0600);
     // if (-1 == err) { perror("cerr.log"); return 255; }
 
-    // int save_out = dup(fileno(stdout));
-    // int save_err = dup(fileno(stderr));
+    int save_out = dup(fileno(stdout));
+    int save_err = dup(fileno(stderr));
 
-    // if (-1 == dup2(out, fileno(stdout))) { perror("cannot redirect stdout"); return 255; }
-    // if (-1 == dup2(err, fileno(stderr))) { perror("cannot redirect stderr"); return 255; }
+    if (-1 == dup2(out, fileno(stdout))) { perror("cannot redirect stdout"); return 255; }
+    if (-1 == dup2(out, fileno(stderr))) { perror("cannot redirect stderr"); return 255; }
     
     //OPEN LOGGING FILE AND REDIRECT OUTPUT TO THERE
     sqlite3 * db = db_init();
@@ -135,14 +117,14 @@ int main(int argc, char ** argv)
     SSL_CTX_free(ctx);
     
     // CLOSE LOGGER AND REDIRECT OUTPUT BACK
-    // fflush(stdout); close(out);
-    // fflush(stderr); close(err);
+    fflush(stdout); close(out);
+    fflush(stderr); close(out);
 
-    // dup2(save_out, fileno(stdout));
-    // dup2(save_err, fileno(stderr));
+    dup2(save_out, fileno(stdout));
+    dup2(save_err, fileno(stderr));
 
-    // close(save_out);
-    // close(save_err);
+    close(save_out);
+    close(save_err);
 
     return 0;
 }

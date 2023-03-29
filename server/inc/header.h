@@ -67,7 +67,7 @@
 #define USERS_TN "users"
 #define MESSAGES_TN "messages"
 #define CHATS_TN "chats"
-#define DB_FILENAME "database.db"
+#define DB_FILENAME "server/database.db"
 #define CETRIFS_FILENAME "server/mycert.pem"
 
 typedef unsigned char * code;

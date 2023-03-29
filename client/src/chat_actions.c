@@ -36,8 +36,8 @@ void create_message_widget(char * message_query, bool to_end)
     char *timestr = NULL;
     char *title = NULL;
     char ** parts = mx_strsplit(message_query, QUERY_DELIM[0]);
-    printf("Got a message query: %s\n", message_query);
-    printf("ID of message: %s\n", parts[0]);
+    //printf("Got a message query: %s\n", message_query);
+    //printf("ID of message: %s\n", parts[0]);
     bool is_user = !strcmp(app->username_t, parts[1]);
 
 
@@ -144,7 +144,7 @@ void create_chat_widget(char * chat_info_query)
     GError* error = NULL;
     char *icon_path = NULL;
     char responce_buff[1000];
-    printf("Got chat info query: %s\n", chat_info_query);
+    //printf("Got chat info query: %s\n", chat_info_query);
     char ** parts = mx_strsplit(chat_info_query, QUERY_DELIM[0]);
 
     if (!gtk_builder_add_from_file (builder, CHAT_LIST_UI_PATH, &error)) {
@@ -222,7 +222,7 @@ t_chat_message * find_by_message_id(t_list * list, char * m_id)
 void process_message_info(char * message_info)
 {
     //m_status@m_id@m_sender_username@m_text@m_send_datetime@m_chat_id
-    printf("Got message info: %s\n", message_info);
+    //printf("Got message info: %s\n", message_info);
     char text_buf[1000];
     char ** parts = mx_strsplit(message_info, QUERY_DELIM[0]);
     /*
@@ -258,7 +258,6 @@ void process_message_info(char * message_info)
         }
         else
         {
-            printf("No such message\n");
             create_message_widget(message_info + 2, 0);    
             printf("No such message\n");
         }
@@ -296,11 +295,10 @@ void find_user() {
     sprintf(request_buff, "%c%s%s%s%s%s%s", CREATE_CHAT, QUERY_DELIM, "?", QUERY_DELIM, "?", QUERY_DELIM, username);
     printf("server query: %s\n", request_buff);
         
-    if(/**/u_send(param, request_buff, strlen(request_buff) + 1) <= 0) return; // send a request to server
+    if(u_send(param, request_buff, strlen(request_buff) + 1) <= 0) return; // send a request to server
 
     if (/**/u_recv(param, responce_buff, MESSAGE_MAX_LEN) > 0)
     {
-        printf("[INFO] Received buff(%s)\n", responce_buff);
         if (responce_buff[0] == OK_CODE[0])
         {
             //process_chat_info(responce_buff + 2);
@@ -308,7 +306,7 @@ void find_user() {
         }
         else if (responce_buff[0] == RECORD_EXISTS_CODE[0])
         {
-            printf("Chat id to transfter to: %s\n", responce_buff + 2);
+            //printf("Chat id to transfter to: %s\n", responce_buff + 2);
             change_chat_by_id(responce_buff + 2);
         }
         else if (responce_buff[0] == ERROR_CODE[0])
@@ -354,7 +352,7 @@ void change_chat_by_id(const char * new_chat_id)
                 g_source_remove(threadID);
             }
             delete_all_history();
-            threadID = g_timeout_add(100, (GSourceFunc)collect_user_info, (gpointer)"T");
+            threadID = g_timeout_add(200, (GSourceFunc)collect_user_info, (gpointer)"T");
         }
     }
     else 

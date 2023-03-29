@@ -13,17 +13,17 @@ int main(int argc, char * argv[]) {
         return 0;
     }
     
-    // int out = open("cout.log", O_RDWR | O_CREAT | O_APPEND, 0600);
-    // if (-1 == out) { perror("cout.log"); return 255; }
+    int out = open("client/cout.log", O_RDWR | O_CREAT | O_APPEND, 0600);
+    if (-1 == out) { perror("cout.log"); return 255; }
 
     // int err = open("cerr.log", O_RDWR|O_CREAT|O_APPEND, 0600);
     // if (-1 == err) { perror("cerr.log"); return 255; }
 
-    // int save_out = dup(fileno(stdout));
-    // int save_err = dup(fileno(stderr));
+    int save_out = dup(fileno(stdout));
+    int save_err = dup(fileno(stderr));
 
-    // if (-1 == dup2(out, fileno(stdout))) { perror("cannot redirect stdout"); return 255; }
-    // if (-1 == dup2(err, fileno(stderr))) { perror("cannot redirect stderr"); return 255; }
+    if (-1 == dup2(out, fileno(stdout))) { perror("cannot redirect stdout"); return 255; }
+    if (-1 == dup2(out, fileno(stderr))) { perror("cannot redirect stderr"); return 255; }
 
     app = app_init();
    
@@ -48,14 +48,14 @@ int main(int argc, char * argv[]) {
 
     gtk_main();
     
-    // fflush(stdout); close(out);
-    // fflush(stderr); close(err);
+    fflush(stdout); close(out);
+    fflush(stderr);
 
-    // dup2(save_out, fileno(stdout));
-    // dup2(save_err, fileno(stderr));
+    dup2(save_out, fileno(stdout));
+    dup2(save_err, fileno(stderr));
 
-    // close(save_out);
-    // close(save_err);
+    close(save_out);
+    close(save_err);
 
     printf("SHUTTED DOWN\n");
     return 0;
