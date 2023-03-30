@@ -29,7 +29,7 @@ void create_message_widget(char * message_query, bool to_end)
         parts[4] - send_datetime
         parts[5] - chat_id
     */
-    GtkWidget *message, *icon, *username, *text, *datetime, *sticker;
+    GtkWidget *message, *icon, *username, *text, *datetime;
     GtkBuilder *builder = gtk_builder_new ();
     GError* error = NULL;
     char *window_path = NULL, *icon_path = NULL;
@@ -297,7 +297,7 @@ void find_user() {
         
     if(u_send(param, request_buff, strlen(request_buff) + 1) <= 0) return; // send a request to server
 
-    if (/**/u_recv(param, responce_buff, MESSAGE_MAX_LEN) > 0)
+    if (u_recv(param, responce_buff, MESSAGE_MAX_LEN) > 0)
     {
         if (responce_buff[0] == OK_CODE[0])
         {

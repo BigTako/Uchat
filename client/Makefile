@@ -1,7 +1,8 @@
 CC = clang
 # CFLAGS = -std=gnu11 -pthread -g 
 # -Wall -Wextra -Werror -Wpedantic
-CFLAGS = -std=c11 -Wall -Wextra -Wpedantic -pthread
+CFLAGS = -std=c11 -Wall -Wextra -Wpedantic -pthread -Wno-unused-command-line-argument -Wno-unused-variable \
+    -Wno-unused-function -Wno-unused-parameter
 
 OBJDIR = obj
 SRCDIR = src
