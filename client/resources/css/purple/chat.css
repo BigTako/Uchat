@@ -62,7 +62,7 @@
     border-right: 1px solid #7d38ff;
 }
 
-#chat viewport{
+#chat #chat_scroller viewport {
     background: #3a1078;
     outline-style: none;
     box-shadow: none;

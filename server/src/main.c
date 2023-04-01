@@ -12,7 +12,7 @@ int main(int argc, char ** argv)
 	}
     //SQL DATABASE TABLES INITIALISATION
     
-    //daemonize_process();
+    daemonize_process();
     
     //OPEN LOGGING FILE AND REDIRECT OUTPUT TO THERE
     int out = open("server/cout.log", O_RDWR | O_CREAT | O_APPEND, 0600);

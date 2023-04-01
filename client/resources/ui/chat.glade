@@ -908,7 +908,7 @@
                 <property name="min-content-height">500</property>
                 <property name="propagate-natural-height">True</property>
                 <child>
-                  <object class="GtkViewport" id="messages_viewport">
+                  <object class="GtkViewport" id="chat_viewport">
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="shadow-type">none</property>

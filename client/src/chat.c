@@ -187,7 +187,8 @@ GtkWidget *open_main_window(void)
     app->welcome_message = GTK_WIDGET(gtk_builder_get_object(ui_builder, "welcome_message"));
     gtk_widget_set_name(GTK_WIDGET(app->welcome_message), "welcome_message");
     app->send_message_button = GTK_WIDGET(gtk_builder_get_object(ui_builder, "send_message_button"));
-    gtk_widget_set_name(GTK_WIDGET(app->chat_scroller), "send_message_button");
+    gtk_widget_set_name(GTK_WIDGET(app->send_message_button), "send_message_button");
+    gtk_widget_set_name(GTK_WIDGET(gtk_builder_get_object(ui_builder, "chat_viewport")), "send_message_button");
 
     app->status = GTK_LABEL(gtk_builder_get_object(ui_builder, "other_user_status"));
     gtk_widget_set_name(GTK_WIDGET(app->status), "status");
@@ -196,20 +197,8 @@ GtkWidget *open_main_window(void)
     g_timeout_add(500, (GSourceFunc)apply_user_info, NULL); // GET_USER INFO
     g_timeout_add(300, (GSourceFunc)collect_user_info, "V"); // GET_CHATS
     g_timeout_add(500, (GSourceFunc)apply_collocutor_info, NULL);
-    //GET ALL CURRENT CONVERSATIONS
-    //char action[] = {GET_CHATS_HISTORY, '\0'};
-    //GET CHAT HISTORY IGNORING THE STATUS
-    //collect_messages(action);
-    //GET CHAT HISTORY IGNORING THE STATUS
 
     app->reconnect_GIF = gdk_pixbuf_animation_new_from_file (RECONNECT_GIF_PATH, NULL);
-    
-    //GET NEW MESSAGES
-    //action[0] = GET_NEW_MESSAGES;
-    //guint threadID = g_timeout_add(100, collect_messages, (gpointer)"G");
-    //GET NEW MESSAGES
-    //START GETTING NEW MESSAGES CYCLE
-    //START GETTING NEW MESSAGES CYCLE
 
     gtk_builder_connect_signals(ui_builder, NULL);
 

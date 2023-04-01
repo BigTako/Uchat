@@ -16,6 +16,11 @@
 
 #chat #send_message_button:hover {
     box-shadow: none;
+    border-color: transparent;
+    background: #394141;
+    color: #eef0f0;
+    outline-style: none;
+    transition: all 0.3s;
 }
 
 #chat #back_button {
@@ -62,7 +67,7 @@
     border-right: 1px solid #2f3144;
 }
 
-#chat viewport{
+#chat #chat_scroller viewport {
     background: #414b4b;
     outline-style: none;
     box-shadow: none;
